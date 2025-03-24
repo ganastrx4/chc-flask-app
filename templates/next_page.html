@@ -79,19 +79,15 @@
         <canvas id="priceChart"></canvas>
     </div>
 
-    
-        <p>¡Obtén NUEVO TOKEN WDD GRATIS!</p>
-        <!-- Botón nuevo para Reclamarchun -->
-<div class="d-flex justify-content-center align-items-center mt-3">
-    <a href="/reclamarchun" class="btn btn-warning btn-lg">Ver la página de WDD</a>
-
+    <p>¡Obtén NUEVO TOKEN WDD GRATIS!</p>
+    <div class="d-flex justify-content-center align-items-center mt-3">
+        <a href="/wdd" class="btn btn-warning btn-lg">Ver la página de WDD</a>
     </div>
 
     <script>
         let priceChart;
-        let timeframe = "1m";  // Temporalidad inicial
+        let timeframe = "1m";  
 
-        // Obtener el precio en tiempo real
         function fetchPrice() {
             $.getJSON("https://api.binance.com/api/v3/ticker/price?symbol=WLDUSDT", function(data) {
                 let price = parseFloat(data.price).toFixed(4);
@@ -99,9 +95,8 @@
             });
         }
 
-        // Obtener datos históricos de la API de Binance
         function fetchChartData(tf) {
-            timeframe = tf; // Actualiza la temporalidad seleccionada
+            timeframe = tf; 
             $("#loadingMsg").text("Cargando datos...");
 
             $.getJSON(`https://api.binance.com/api/v3/klines?symbol=WLDUSDT&interval=${timeframe}&limit=10`, function(data) {
@@ -116,11 +111,10 @@
                 });
 
                 updateChart(labels, prices);
-                $("#loadingMsg").text(""); // Oculta el mensaje de carga
+                $("#loadingMsg").text(""); 
             });
         }
 
-        // Actualizar gráfico con nuevos datos
         function updateChart(labels, prices) {
             if (!priceChart) {
                 let ctx = document.getElementById('priceChart').getContext('2d');
@@ -164,46 +158,32 @@
             }
         }
 
-        // Actualizar el precio cada 5 segundos
         setInterval(fetchPrice, 5000);
-        fetchPrice(); // Primera carga de precio
-
-        // Cargar datos iniciales de la gráfica
+        fetchPrice(); 
         fetchChartData("1m");
     </script>
 
-    WLD GRATIS <div class="separator" style="clear: both; text-align: center;">
-        <a href="https://join.worldcoin.org/1JL2CKB" imageanchor="1" rel="nofollow" style="margin-left: 1em; margin-right: 1em;" target="_blank">
-            <img border="0" data-original-height="126" data-original-width="229" height="126" src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjP0RyUPYn_GyC5Z6BV3D9k8KGsxu-3VBNK-Ns0_iH7rUeV-_Zp0P4c2i9SOZGYPQphRhs2U-AaLO24acTySo8qqQU1bZGvZAUUy0p3pwAky2oYVEVHccROi50EWIv5K8IVomnEat89BdSGWWo3j7S0ktr9KKmATgYezuc6O8ojKUh62rXSaBzO05yVFZ6L/s1600/wld.JPG" width="229" />
-        </a>
-    </div><br />
-    <div class="d-flex justify-content-center align-items-center mt-4">
-    <div class="me-3">
+    <div class="separator" style="clear: both; text-align: center;">
         <a href="https://join.worldcoin.org/1JL2CKB" target="_blank">
-            <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjP0RyUPYn_GyC5Z6BV3D9k8KGsxu-3VBNK-Ns0_iH7rUeV-_Zp0P4c2i9SOZGYPQphRhs2U-AaLO24acTySo8qqQU1bZGvZAUUy0p3pwAky2oYVEVHccROi50EWIv5K8IVomnEat89BdSGWWo3j7S0ktr9KKmATgYezuc6O8ojKUh62rXSaBzO05yVFZ6L/s1600/wld.JPG" 
-                alt="WLD GRATIS" width="180" class="rounded shadow">
+            <img border="0" src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjP0RyUPYn_GyC5Z6BV3D9k8KGsxu-3VBNK-Ns0_iH7rUeV-_Zp0P4c2i9SOZGYPQphRhs2U-AaLO24acTySo8qqQU1bZGvZAUUy0p3pwAky2oYVEVHccROi50EWIv5K8IVomnEat89BdSGWWo3j7S0ktr9KKmATgYezuc6O8ojKUh62rXSaBzO05yVFZ6L/s1600/wld.JPG" width="229" />
         </a>
     </div>
-    <div>
-        <a href="/buscador.html" class="btn btn-success btn-lg">🔍 Ver precios de CRIPTOMONEDAS</a>
-    </div>
-</div>
-<div class="d-flex justify-content-center align-items-center mt-4">
-    <div class="me-3">
-        <a href="https://join.worldcoin.org/1JL2CKB" target="_blank">
-            <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjP0RyUPYn_GyC5Z6BV3D9k8KGsxu-3VBNK-Ns0_iH7rUeV-_Zp0P4c2i9SOZGYPQphRhs2U-AaLO24acTySo8qqQU1bZGvZAUUy0p3pwAky2oYVEVHccROi50EWIv5K8IVomnEat89BdSGWWo3j7S0ktr9KKmATgYezuc6O8ojKUh62rXSaBzO05yVFZ6L/s1600/wld.JPG" 
-                alt="WLD GRATIS" width="180" class="rounded shadow">
-        </a>
-    </div>
-    <div>
-        <a href="/buscador" class="btn btn-success btn-lg">🔍 Ver precios de CRIPTOMONEDAS</a>
-    </div>
-</div>
 
-<!-- Botón nuevo para Reclamarchun -->
-<div class="d-flex justify-content-center align-items-center mt-3">
-    <a href="/reclamarchun" class="btn btn-warning btn-lg">🎁 Reclamar CHUN</a>
-</div>
+    <div class="d-flex justify-content-center align-items-center mt-4">
+        <div class="me-3">
+            <a href="https://join.worldcoin.org/1JL2CKB" target="_blank">
+                <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjP0RyUPYn_GyC5Z6BV3D9k8KGsxu-3VBNK-Ns0_iH7rUeV-_Zp0P4c2i9SOZGYPQphRhs2U-AaLO24acTySo8qqQU1bZGvZAUUy0p3pwAky2oYVEVHccROi50EWIv5K8IVomnEat89BdSGWWo3j7S0ktr9KKmATgYezuc6O8ojKUh62rXSaBzO05yVFZ6L/s1600/wld.JPG" 
+                    alt="WLD GRATIS" width="180" class="rounded shadow">
+            </a>
+        </div>
+        <div>
+            <a href="/buscador.html" class="btn btn-success btn-lg">🔍 Ver precios de CRIPTOMONEDAS</a>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-center align-items-center mt-3">
+        <a href="/reclamarchun" class="btn btn-warning btn-lg">🎁 Reclamar CHUN</a>
+    </div>
 
 </body>
 </html>
