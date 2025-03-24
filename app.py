@@ -6,6 +6,10 @@ app = Flask(__name__)
 def home():
     return render_template('index.html')
 
+@app.route('/wdd.html')
+def wdd():
+    return render_template('wdd.html')  # Asegúrate de que este archivo está en la carpeta templates
+
 @app.route('/bienvenida')
 def bienvenida():
     return render_template('bienvenida.html')
