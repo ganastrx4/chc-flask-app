@@ -1,0 +1,182 @@
+
+<html lang="es">
+<head>
+    <meta charset="UTF-8"></meta>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"></meta>
+    <title>Buscador de Criptomonedas</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #1e1e2f;
+            color: #ffffff;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #2c2c3e;
+            border-radius: 10px;
+            box-shadow: 0px 0px 15px rgba(255, 255, 255, 0.1);
+        }
+        input, button {
+            width: 80%;
+            padding: 10px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 5px;
+        }
+        button {
+            background: #f39c12;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        button:hover { background: #e67e22; }
+        #cryptoInfo {
+            display: none;
+            margin-top: 20px;
+            background: #3a3a55;
+            padding: 15px;
+            border-radius: 10px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            background: #3a3a55;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        th, td {
+            padding: 10px;
+            text-align: center;
+            border-bottom: 1px solid #444;
+        }
+        th {
+            background: #f39c12;
+            color: #000;
+        }
+        h3 { color: #f39c12; margin-top: 20px; }
+        .binance-link {
+            display: block;
+            margin-top: 20px;
+            color: #f39c12;
+            font-weight: bold;
+            text-decoration: none;
+        }
+        .binance-link:hover { color: #e67e22; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Buscador de Criptomonedas</h1>
+        <input id="cryptoInput" placeholder="Ejemplo: BTC, ETH, BNB" type="text" />
+        <button id="searchBtn">Buscar</button>
+        <div id="cryptoInfo">
+            <h2 id="cryptoName"></h2>
+            <p><strong>💲 Precio en USDT:</strong> $<span id="priceUSD"></span></p>
+        </div>
+
+        <h3>🏆 Ganadores</h3>
+        <table id="winners"></table>
+
+        <h3>🔥 Populares</h3>
+        <table id="popular"></table>
+
+        <h3>⭐ Favoritos</h3>
+        <table id="favorites"></table>
+
+        <h3>📉 Perdedores</h3>
+        <table id="losers"></table>
+
+        <h3>🆕 Nuevos</h3>
+        <table id="new"></table>
+
+        <a class="binance-link" href="https://www.binance.com/referral/earn-together/refertoearn2000usdc/claim?hl=en&amp;ref=GRO_14352_RAE1T&amp;utm_source=referralmode" target="_blank">BINANCE</a>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            $('#searchBtn').click(async function() {
+                const symbol = $('#cryptoInput').val().toUpperCase().trim();
+                if (!symbol) {
+                    alert('⚠️ Ingresa un símbolo de criptomoneda.');
+                    return;
+                }
+
+                const price = await getCryptoPrice(symbol);
+                if (price) {
+                    $('#cryptoName').text(symbol);
+                    $('#priceUSD').text(price);
+                    $('#cryptoInfo').show();
+                } else {
+                    alert('❌ Criptomoneda no encontrada.');
+                }
+            });
+
+            loadCryptoLists();
+        });
+
+        async function getCryptoPrice(symbol) {
+            try {
+                const response = await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${symbol}USDT`);
+                const data = await response.json();
+                return data.price || null;
+            } catch (error) {
+                console.error('Error al obtener los datos:', error);
+                return null;
+            }
+        }
+
+        async function loadCryptoLists() {
+            try {
+                const response = await fetch('https://api.binance.com/api/v3/ticker/24hr');
+                const data = await response.json();
+                
+                if (!data || !Array.isArray(data)) return;
+
+                const sortedByChange = [...data].sort((a, b) => parseFloat(b.priceChangePercent) - parseFloat(a.priceChangePercent));
+                const sortedByVolume = [...data].sort((a, b) => parseFloat(b.quoteVolume) - parseFloat(a.quoteVolume));
+                const sortedByNew = [...data].reverse();
+
+                displayTable('#winners', sortedByChange.slice(0, 6));
+                displayTable('#losers', sortedByChange.slice(-6).reverse());
+                displayTable('#popular', sortedByVolume.slice(0, 6));
+                displayTable('#favorites', sortedByVolume.slice(6, 12));
+                displayTable('#new', sortedByNew.slice(0, 6));
+            } catch (error) {
+                console.error('Error al obtener listas de criptomonedas:', error);
+            }
+        }
+
+        function displayTable(id, data) {
+            const container = $(id);
+            container.empty();
+            container.append(`
+                <tr>
+                    <th>Moneda</th>
+                    <th>Último Precio</th>
+                    <th>Cambio 24h (%)</th>
+                </tr>
+            `);
+            data.forEach(item => {
+                const symbol = item.symbol.replace('USDT', '');
+                const lastPrice = parseFloat(item.lastPrice).toFixed(6);
+                const changePercent = parseFloat(item.priceChangePercent).toFixed(2);
+                container.append(`
+                    <tr>
+                        <td>${symbol}</td>
+                        <td>$${lastPrice}</td>
+                        <td style="color: ${changePercent >= 0 ? 'lime' : 'red'};">${changePercent}%</td>
+                    </tr>
+                `);
+            });
+        }
+    </script>
+</body>
+</html>
+<div class="separator" style="clear: both; text-align: center;"><a href="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEii8sOPUuStxASzFCxcG_a22JCvTfEGk2qBl8qOUx6qJUbwLpzMV_4iyc-NE0yuKzb_DJ3bO__cAvC4rsqvtwkEE14GBRT4dMf7UlUYBb0ADzydt0mkOhMnfwvXUTAS0zOe5b6sqsPr7eArLgigwNQMU3-QWco4UYas54LqjsfD3LfIKy5OzemdHi4yXb6-/s362/futuro2.JPG" imageanchor="1" style="margin-left: 1em; margin-right: 1em;"><img border="0" data-original-height="360" data-original-width="362" height="318" src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEii8sOPUuStxASzFCxcG_a22JCvTfEGk2qBl8qOUx6qJUbwLpzMV_4iyc-NE0yuKzb_DJ3bO__cAvC4rsqvtwkEE14GBRT4dMf7UlUYBb0ADzydt0mkOhMnfwvXUTAS0zOe5b6sqsPr7eArLgigwNQMU3-QWco4UYas54LqjsfD3LfIKy5OzemdHi4yXb6-/s320/futuro2.JPG" width="320" /></a></div><br />
