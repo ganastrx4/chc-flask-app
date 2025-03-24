@@ -25,6 +25,10 @@ def wdd():
 def buscador():
     return render_template('buscador.html')
 
+@app.route('/reclamarchun')
+def reclamarchun():
+    return render_template('reclamarchun.html')
+
 @app.route('/api/verify', methods=['POST'])
 def verify_proof():
     # Se reciben los datos del frontend para verificar el World ID
