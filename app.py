@@ -6,13 +6,13 @@ app = Flask(__name__)
 def home():
     return render_template('index.html')
 
-@app.route('/wdd.html')
+@app.route('/wdd')
 def wdd():
     return render_template('wdd.html')  # Asegúrate de que este archivo está en la carpeta templates
 
-@app.route('/bienvenida')
+@app.route('/buscador')
 def bienvenida():
-    return render_template('bienvenida.html')
+    return render_template('buscador.html')
 
 @app.route('/next-page')
 def next_page():
