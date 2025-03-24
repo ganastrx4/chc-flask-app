@@ -35,6 +35,9 @@ def verify_proof():
 
     # Devolver la respuesta de la API al frontend
     return jsonify(response.json())
+    import os
+
+    print("Carpeta templates:", os.path.abspath(os.path.join(os.path.dirname(__file__), 'templates')))
 
 if __name__ == '__main__':
     app.run(debug=True)
