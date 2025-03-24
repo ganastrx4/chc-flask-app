@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reclamar 1,000 CHUN</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 50px;
+            background-color: #f4f4f4;
+        }
+        h1 {
+            color: #333;
+        }
+        button {
+            padding: 15px 30px;
+            font-size: 18px;
+            background-color: #008CBA;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        button:hover {
+            background-color: #005f73;
+        }
+    </style>
+</head>
+<body>
+    <h1>¡Bienvenido a CharlyCoin!</h1>
+    <p>Presiona el botón para recibir 1,000 CHUN gratis.</p>
+    
+    <button onclick="reclamarTokens()">Reclamar 1,000 CHUN</button>
+    
+    <p id="mensaje"></p>
+
+    <script>
+        function reclamarTokens() {
+            fetch('/reclamar', { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('mensaje').innerText = data.mensaje;
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    document.getElementById('mensaje').innerText = 'Error al procesar la solicitud.';
+                });
+        }
+    </script>
+</body>
+</html>
