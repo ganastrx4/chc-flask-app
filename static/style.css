@@ -6,11 +6,14 @@ body {
     height: 100vh;
     margin: 0;
     background-color: #f4f4f4;
+    flex-direction: column; /* Asegura que los elementos se alineen en columna en pantallas pequeñas */
 }
 
 .container {
     text-align: center;
     padding: 20px;
+    width: 100%; /* Asegura que el contenedor ocupe todo el ancho disponible */
+    max-width: 1000px; /* Limita el ancho máximo en pantallas grandes */
 }
 
 .gif-container img {
@@ -55,4 +58,30 @@ body {
 
 .next-button:hover {
     background-color: #0056b3;
+}
+
+/* Estilos responsivos */
+@media (max-width: 600px) {
+    .container {
+        padding: 15px;
+    }
+
+    .gif-container img {
+        width: 80%; /* Hacemos que la imagen sea un poco más pequeña en pantallas pequeñas */
+    }
+
+    .loading-bar {
+        width: 90%; /* La barra de carga se ajusta más en pantallas pequeñas */
+    }
+
+    .next-button {
+        width: 100%; /* Botón a pantalla completa en dispositivos pequeños */
+        font-size: 14px; /* Reduce el tamaño de la fuente en dispositivos pequeños */
+    }
+}
+
+@media (min-width: 601px) {
+    .next-button {
+        font-size: 16px; /* Tamaño normal para pantallas más grandes */
+    }
 }
