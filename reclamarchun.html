@@ -46,32 +46,32 @@
 <div class="container">
     <h1>🚀 ¡Atención! Reclama tus <span class="highlight">1,000 CHUN</span></h1>
 
-    <p>Para obtener tus 1000 CHUN, por favor asegúrate de tener tu ID de Worldcoin listo. Si ya tienes una cuenta en <strong>WorldApp</strong>, ingresa tu ID para reclamar tus tokens.</p>
+    <p>¡Reclama tus 1000 CHUN ahora! Solo podrás reclamar cada 24 horas.</p>
 
     <h2>✅ ¿Por qué reclamar CHUN?</h2>
-    <ul style="display: inline-block; text-align: left;">
+    <ul>
         <li>✔ Gana tokens sin hacer nada, ¡solo reclama!</li>
         <li>✔ Acumula CHUN y participa en el ecosistema de WorldApp.</li>
     </ul>
 
     <p>🌎 <strong>¡No te quedes fuera!</strong> Reclama ahora tu CHUN y comienza a disfrutar de las ventajas de este token.</p>
 
-    <!-- Formulario para reclamar CHUN -->
-    <input type="text" id="wld_id" placeholder="Ingresa tu ID de Worldcoin" style="padding: 10px; font-size: 16px; margin-top: 20px;">
+    <!-- Botón para reclamar CHUN -->
     <button onclick="reclamar()" class="btn">Reclamar 1000 CHUN</button>
 
     <p id="mensaje"></p>
 
     <!-- Botón para ver WLD gráfica en Vivo -->
-<a href="./wdd.html" class="btn">TOMA TOKEN WDD 69% EN RENDIMIENTOS</a>
-<a href="./next_page.html" class="btn">WLD Gráfica en Vivo</a>
-<a href="./buscador.html" class="btn">PRECIOS CRIPTO EN VIVO</a>    
+    <a href="./wdd.html" class="btn">TOMA TOKEN WDD 69% EN RENDIMIENTOS</a>
+    <a href="./next_page.html" class="btn">WLD Gráfica en Vivo</a>
+    <a href="./buscador.html" class="btn">PRECIOS CRIPTO EN VIVO</a>    
 </div>
 
 <!-- Script de World ID -->
 <script>
+    // Script World ID Widget para la validación de Worldcoin
     new WorldIDWidget({
-        action_id: "app_7686f9027d3e3c0b53d987a3caf1e111",  
+        action_id: "app_7686f9027d3e3c0b53d987a3caf1e111",
         signal: "user_login",
         enableTelemetry: true,
         app_name: "CharlyCoin",
@@ -81,7 +81,7 @@
             console.log("Verificación exitosa:", proof);
             alert("¡Verificación exitosa!");
             // Enviar prueba al backend para verificarla
-            fetch('https://a691-189-217-216-138.ngrok-free.app/api/verify', {  
+            fetch('https://a691-189-217-216-138.ngrok-free.app/api/verify', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -91,17 +91,46 @@
             .then(response => response.json())
             .then(data => {
                 console.log('Respuesta de la verificación:', data);
-                alert('Verificación completada');
+                // Comprobar si el usuario puede reclamar (verificar 24 horas)
+                if (data.canClaim) {
+                    // Enviar 1000 CHUN al usuario
+                    fetch('https://a691-189-217-216-138.ngrok-free.app/api/reclamar_chun', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ userId: data.userId })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            document.getElementById('mensaje').textContent = "¡1,000 CHUN enviados a tu billetera!";
+                        } else {
+                            document.getElementById('mensaje').textContent = "Hubo un problema al procesar tu reclamo.";
+                        }
+                    });
+                } else {
+                    document.getElementById('mensaje').textContent = "Ya has reclamado tus 1000 CHUN en las últimas 24 horas.";
+                }
             })
             .catch(error => {
                 console.error('Error en la verificación:', error);
+                alert("Error al verificar la cuenta.");
             });
         },
         onError: (error) => {
             console.error("Error en la verificación:", error);
-            alert("Error en la verificación");
+            alert("Error en la verificación.");
         }
     });
+
+    // Función de reclamar (ya no se necesita el input del ID)
+    function reclamar() {
+        document.getElementById('mensaje').textContent = "Verificando...";
+
+        // Inicia la verificación de World ID y espera respuesta
+        WorldIDWidget.render();
+    }
 </script>
 
 </body>
