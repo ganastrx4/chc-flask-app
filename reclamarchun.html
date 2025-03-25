@@ -69,10 +69,10 @@
 </div>
 
 <!-- Script de World ID -->
-<script src="https://cdn.jsdelivr.net/npm/@worldcoin/id"></script> <!-- Usando CDN -->
+<script src="https://cdn.jsdelivr.net/npm/@worldcoin/id"></script>
 <script>
     new WorldIDWidget({
-        action_id: "app_7686f9027d3e3c0b53d987a3caf1e111",
+        action_id: "app_7686f9027d3e3c0b53d987a3caf1e111",  // Asegúrate de que este action_id sea correcto
         signal: "user_login",
         enableTelemetry: true,
         app_name: "CharlyCoin",
@@ -81,36 +81,30 @@
         onSuccess: (proof) => {
             console.log("Verificación exitosa:", proof);
             alert("¡Verificación exitosa!");
+            // Enviar prueba al backend para verificarla
+            fetch('/api/verify', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ proof: proof })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Respuesta de la verificación:', data);
+                alert('Verificación completada');
+            })
+            .catch(error => {
+                console.error('Error en la verificación:', error);
+            });
         },
         onError: (error) => {
             console.error("Error en la verificación:", error);
             alert("Error en la verificación");
         }
     });
-
-    document.getElementById('verifyForm').addEventListener('submit', function(event) {
-        event.preventDefault();
-
-        const worldId = document.getElementById('worldId').value;
-
-        
-        fetch('https://a691-189-217-216-138.ngrok-free.app/api/verify', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ world_id: worldId })
-        })
-        .then(response => response.json())
-        .then(data => {
-            console.log('Respuesta de la verificación:', data);
-            alert('Verificación completada');
-        })
-        .catch(error => {
-            console.error('Error en la verificación:', error);
-        });
-    });
 </script>
+
 
 
 </body>
