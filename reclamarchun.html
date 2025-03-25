@@ -68,31 +68,50 @@
 <a href="./buscador.html" class="btn">PRECIOS CRIPTO EN VIVO</a>    
 </div>
 
+<!-- Script de World ID -->
+<script src="https://cdn.jsdelivr.net/npm/@worldcoin/id"></script> <!-- Usando CDN -->
 <script>
-    function reclamar() {
-        const wldId = document.getElementById('wld_id').value;  // ID de Worldcoin del usuario
-
-        if (!wldId) {
-            alert('Por favor, ingresa tu ID de Worldcoin.');
-            return;
+    new WorldIDWidget({
+        action_id: "app_7686f9027d3e3c0b53d987a3caf1e111",
+        signal: "user_login",
+        enableTelemetry: true,
+        app_name: "CharlyCoin",
+        theme: "light",
+        containerId: "world-id-button",
+        onSuccess: (proof) => {
+            console.log("Verificación exitosa:", proof);
+            alert("¡Verificación exitosa!");
+        },
+        onError: (error) => {
+            console.error("Error en la verificación:", error);
+            alert("Error en la verificación");
         }
+    });
 
-        fetch('/reclamar', {
+    document.getElementById('verifyForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+
+        const worldId = document.getElementById('worldId').value;
+
+        
+        fetch('https://a691-189-217-216-138.ngrok-free.app/api/verify', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
+                'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ 'wld_id': wldId })
+            body: JSON.stringify({ world_id: worldId })
         })
         .then(response => response.json())
         .then(data => {
-            document.getElementById('mensaje').textContent = data.mensaje;
+            console.log('Respuesta de la verificación:', data);
+            alert('Verificación completada');
         })
         .catch(error => {
-            document.getElementById('mensaje').textContent = 'Error: ' + error.message;
+            console.error('Error en la verificación:', error);
         });
-    }
+    });
 </script>
+
 
 </body>
 </html>
