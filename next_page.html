@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>¡Reclama tus 1000 CHUN!</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            text-align: center;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin: auto;
+        }
+        h1 {
+            color: #333;
+        }
+        .highlight {
+            color: #27ae60;
+            font-weight: bold;
+        }
+        .btn {
+            display: inline-block;
+            padding: 12px 20px;
+            background: #007bff;
+            color: #fff;
+            text-decoration: none;
+            font-size: 18px;
+            border-radius: 5px;
+            margin-top: 15px;
+        }
+        .btn:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🚀 ¡Atención! Reclama tus <span class="highlight">1,000 CHUN</span></h1>
+
+    <p>Para obtener tus 1000 CHUN, por favor asegúrate de tener tu ID de Worldcoin listo. Si ya tienes una cuenta en <strong>WorldApp</strong>, ingresa tu ID para reclamar tus tokens.</p>
+
+    <h2>✅ ¿Por qué reclamar CHUN?</h2>
+    <ul style="display: inline-block; text-align: left;">
+        <li>✔ Gana tokens sin hacer nada, ¡solo reclama!</li>
+        <li>✔ Acumula CHUN y participa en el ecosistema de WorldApp.</li>
+    </ul>
+
+    <p>🌎 <strong>¡No te quedes fuera!</strong> Reclama ahora tu CHUN y comienza a disfrutar de las ventajas de este token.</p>
+
+    <!-- Formulario para reclamar CHUN -->
+    <input type="text" id="wld_id" placeholder="Ingresa tu ID de Worldcoin" style="padding: 10px; font-size: 16px; margin-top: 20px;">
+    <button onclick="reclamar()" class="btn">Reclamar 1000 CHUN</button>
+
+    <p id="mensaje"></p>
+
+    <!-- Botón para ver WLD gráfica en Vivo -->
+<a href="{{ url_for('reclamarchun') }}" class="btn">WLD Gráfica en Vivo</a>
+</div>
+
+<script>
+    function reclamar() {
+        const wldId = document.getElementById('wld_id').value;  // ID de Worldcoin del usuario
+
+        if (!wldId) {
+            alert('Por favor, ingresa tu ID de Worldcoin.');
+            return;
+        }
+
+        fetch('/reclamar', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ 'wld_id': wldId })
+        })
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('mensaje').textContent = data.mensaje;
+        })
+        .catch(error => {
+            document.getElementById('mensaje').textContent = 'Error: ' + error.message;
+        });
+    }
+</script>
+
+</body>
+</html>
