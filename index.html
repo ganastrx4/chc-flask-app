@@ -68,7 +68,42 @@
             font-weight: bold;
             text-decoration: none;
         }
-        .grafica-link:hover { color: #e67e22; }
+        .grafica-link {
+            display: block;
+            margin-top: 20px;
+            color: #e67e22;
+            font-weight: bold;
+            text-decoration: none;
+        }
+        .grafica-link:hover {
+            color: #f39c12;
+        }
+
+        /* Estilo para la imagen */
+        .gif-container img {
+            width: 100%;
+            height: auto;
+            max-width: 400px; /* Ajusta el tamaño máximo si es necesario */
+            margin: 0 auto;
+        }
+
+        /* Estilo para los enlaces */
+        .next-button, .grafica-link, .binance-link {
+            color: #ffffff; /* Asegúrate de que los enlaces sean legibles */
+            text-decoration: none;
+            font-size: 16px;
+            margin: 10px 0;
+            display: inline-block;
+            padding: 10px;
+            border-radius: 5px;
+            background: #f39c12;
+            transition: background-color 0.3s ease;
+        }
+        
+        /* Cambio de color de los enlaces al pasar el ratón */
+        .next-button:hover, .grafica-link:hover, .binance-link:hover {
+            background: #e67e22;
+        }
     </style>
 </head>
 <body>
@@ -90,10 +125,11 @@
             <button type="submit">Verificar World ID</button>
         </form>
 
+        <!-- Enlaces de navegación -->
         <a href="./buscador.html" class="next-button">Valor de las Criptomonedas</a>
-        <a class="grafica-link"href="./grafica.html">WLD Gráfica en Vivo</a>
+        <a href="./grafica.html" class="grafica-link">WLD Gráfica en Vivo</a>
         <a href="./reclamarchun.html" class="next-button">RECLAMA CHUN</a>
-        <a href="./wdd.html" class="next-button">mULTIPLICA TU WDD</a>
+        <a href="./wdd.html" class="next-button">MULTIPLICA TU WDD</a>
     </div>
 
     <!-- Script de World ID -->
