@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GANAR CHUN</title>
+  <style>
+    body {
+      text-align: center;
+      padding: 50px;
+      font-family: Arial, sans-serif;
+    }
+    #resultado {
+      margin-top: 20px;
+    }
+    input,
+    button {
+      margin: 10px;
+      padding: 10px;
+    }
+  </style>
+</head>
+<body>
+
+<div id="redireccion"></div>
+
+<button onclick="generarBilletera()">Generar Billetera</button>
+<div id="resultado"></div>
+
+<!-- Caja para ingresar billetera y correo -->
+<div id="usuario-info">
+  <input type="text" id="wallet" placeholder="Introduce tu billetera Worldchain" onpaste="return true" />
+  <input type="email" id="correo" placeholder="Introduce tu correo" onpaste="return true" />
+  <button onclick="guardarDatos()">Guardar Datos</button>
+</div>
+
+<button onclick="pararMineria()">Parar Minería</button>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
+
+<script>
+let tiempoTotal = 0;
+let interval;
+let minando = true;
+
+const urls = [
+  "https://notiiciasmex.blogspot.com",
+  "https://tareasunamyunadm.blogspot.com",
+  "https://faucentminialtcrypto.blogspot.com",
+  "https://solotareasmex.blogspot.com",
+  "https://colegialas-calientes-69.blogspot.com",
+  "https://colegialas14defebrero.blogspot.com",
+  "https://joseperez69.blogspot.com",
+  "https://mundogamermejico.blogspot.com",
+  "https://backtrackingchesscaso.blogspot.com",
+  "https://games2015steamyorigin.blogspot.com", 
+  "https://videoescandalosmex.blogspot.com",
+  "https://basededatosunadm.blogspot.com",
+  "https://gmcas77.blogspot.com",
+  "https://basededatostareas.blogspot.com"
+];
+
+// Función para redirigir dentro de la misma ventana
+function redireccionAleatoria() {
+  if (!minando) return; // Si la minería se ha detenido, no redirige
+
+  const indiceAleatorio = Math.floor(Math.random() * urls.length);
+  const urlRedireccion = urls[indiceAleatorio];
+
+  document.getElementById('redireccion').innerHTML = `<p>Redireccionando a: <a href="${urlRedireccion}" target="_self">${urlRedireccion}</a></p>`;
+
+  // Redirige en la misma ventana después de 10 segundos
+  setTimeout(() => {
+    window.location.href = urlRedireccion;
+  }, 10000);
+}
+
+// Inicia la redirección solo si está minando
+redireccionAleatoria();
+
+// Función para generar billetera
+async function generarBilletera() {
+  const wallet = ethers.Wallet.createRandom();
+  document.getElementById('resultado').innerHTML = `
+      <p><strong>Dirección:</strong> ${wallet.address}</p>
+      <p><strong>Clave Privada:</strong> ${wallet.privateKey}</p>
+  `;
+}
+
+// Función para guardar datos (billetera y correo)
+function guardarDatos() {
+  const wallet = document.getElementById('wallet').value;
+  const correo = document.getElementById('correo').value;
+
+  if (!wallet || !correo) {
+    alert('Completa todos los campos.');
+    return;
+  }
+
+  console.log(`Billetera: ${wallet}, Correo: ${correo}`);
+  alert('Datos guardados correctamente.');
+}
+
+// Función para detener la minería
+function pararMineria() {
+  clearInterval(interval);
+  minando = false;
+  alert(`Ganaste ${tiempoTotal} CHC! Gracias por usar la página.`);
+
+  // Limpia el mensaje de redirección y detiene cualquier redirección
+  document.getElementById('redireccion').innerHTML = '<p>Minería detenida.</p>';
+}
+
+// Función para contar el tiempo en la página
+function contarTiempo() {
+  if (minando) {
+    tiempoTotal++;
+    if (tiempoTotal % 100 === 0) {
+      alert(`¡Has ganado 100 CHC!`);
+    }
+  }
+}
+
+// Inicia el conteo cada segundo
+interval = setInterval(contarTiempo, 1000);
+</script>
+
+</body>
+</html>
