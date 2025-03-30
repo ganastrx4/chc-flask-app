@@ -5,176 +5,43 @@
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <title>Minijuego de Apuestas - Word Coin</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            text-align: center;
-            padding: 20px;
-        }
-        .container {
-            max-width: 600px;
-            background: #fff;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            margin: auto;
-        }
-        h1 {
-            color: #333;
-        }
-        .highlight {
-            color: #27ae60;
-            font-weight: bold;
-        }
-        .btn {
-            display: inline-block;
-            padding: 12px 20px;
-            background: #007bff;
-            color: #fff;
-            text-decoration: none;
-            font-size: 18px;
-            border-radius: 5px;
-            margin-top: 15px;
-        }
-        .btn:hover {
-            background: #0056b3;
-        }
-        table {
-            width: 100%;
-            margin-top: 20px;
-            border-collapse: collapse;
-        }
-        table, th, td {
-            border: 1px solid #ddd;
-            padding: 10px;
-            text-align: left;
-        }
-        th {
-            background-color: #007bff;
-            color: white;
-        }
+        body { font-family: Arial, sans-serif; text-align: center; background-color: #f4f4f4; }
+        .container { max-width: 600px; background: #fff; padding: 20px; border-radius: 10px; margin: auto; }
+        .btn { padding: 12px 20px; background: #007bff; color: #fff; border: none; cursor: pointer; }
+        .btn:hover { background: #0056b3; }
     </style>
 </head>
 <body>
-
-<div class="container">
-    <h1>🎰 Minijuego de Apuestas - Word Coin</h1>
-
-    <p id="user-wallet">Billetera: Cargando...</p>
-    <p id="user-balance">Saldo: Cargando...</p>
-
-    <div>
-        <h3>Apostar</h3>
-        <input type="number" id="bet-amount" placeholder="Cantidad en WLD" />
-        <button onclick="placeBet(document.getElementById('bet-amount').value)" class="btn">Apostar</button>
+    <div class="container">
+        <h1>🎰 Minijuego de Apuestas - Word Coin</h1>
+        <p id="user-status">Estado: No autenticado</p>
+        <button id="verify-worldid" class="btn">Verificar con World ID</button>
+        <div id="game-section" style="display:none;">
+            <h3>Apostar</h3>
+            <input type="number" id="bet-amount" placeholder="Cantidad en WLD" />
+            <button onclick="placeBet()" class="btn">Apostar</button>
+        </div>
     </div>
 
-    <h3>Historial de Apuestas</h3>
-    <table>
-        <thead>
-            <tr>
-                <th>Billetera</th>
-                <th>Apuesta</th>
-                <th>Ganancia</th>
-                <th>Fecha</th>
-            </tr>
-        </thead>
-        <tbody id="bet-history-body">
-            <tr><td colspan="4">Cargando historial...</td></tr>
-        </tbody>
-    </table>
-</div>
-
-<!-- Importar ethers.js -->
-<script src="https://cdn.jsdelivr.net/npm/ethers@5.6.8/dist/ethers.min.js"></script>
-
-<script>
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
-    const wordCoinContractAddress = "0xdc178d65c502f9589bb1a35af08b5723f85ec168"; // Dirección del contrato de Word Coin
-    const wordCoinContractABI = [
-        "function placeBet() public payable",
-        "function getBetHistory() public view returns (tuple(address player, uint256 amount, uint256 payout, uint256 timestamp)[])",
-        "function getBalance() public view returns (uint256)"
-    ];
-    const wordCoinContract = new ethers.Contract(wordCoinContractAddress, wordCoinContractABI, provider.getSigner());
-
-    async function loadUserData() {
-        if (!window.ethereum) {
-            alert("Instala MetaMask para conectarte.");
-            return;
-        }
-
-        const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
-        const userAddress = accounts[0];
-
-        document.getElementById("user-wallet").textContent = `Billetera: ${userAddress}`;
-
-        const balance = await provider.getBalance(userAddress);
-        document.getElementById("user-balance").textContent = `Saldo: ${ethers.utils.formatEther(balance)} WLD`;
-    }
-
-    async function placeBet(amount) {
-        if (!window.ethereum) {
-            alert("Instala MetaMask para jugar.");
-            return;
-        }
-
-        const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
-        const userAddress = accounts[0];
-
-        if (amount < 0.5) {
-            alert("La apuesta mínima es 0.5 WLD");
-            return;
-        }
-
-        try {
-            const userBalance = await provider.getBalance(userAddress);
-            if (userBalance.lt(ethers.utils.parseEther(amount.toString()))) {
-                alert("No tienes suficiente saldo en tu billetera.");
-                return;
+    <script src="https://cdn.jsdelivr.net/npm/ethers@5.6.8/dist/ethers.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@worldcoin/idkit"></script>
+    <script>
+        async function verifyWithWorldID() {
+            try {
+                const result = await IDKit.open({
+                    action: "play_game",
+                    signal: "unique_user",
+                    app_id: "tu-app-id",
+                    onSuccess: async (response) => {
+                        document.getElementById("user-status").textContent = "Autenticado";
+                        document.getElementById("game-section").style.display = "block";
+                    },
+                });
+            } catch (error) {
+                console.error("Error en la verificación:", error);
             }
-
-            const tx = await wordCoinContract.placeBet({
-                from: userAddress,
-                value: ethers.utils.parseEther(amount.toString())
-            });
-
-            await tx.wait();
-            alert("Apuesta realizada con éxito!");
-
-            updateBetHistory();
-            loadUserData();
-        } catch (error) {
-            console.error("Error en la apuesta:", error);
-            alert("Hubo un problema con la apuesta");
         }
-    }
-
-    async function updateBetHistory() {
-        try {
-            const bets = await wordCoinContract.getBetHistory();
-            const tableBody = document.getElementById("bet-history-body");
-            tableBody.innerHTML = "";
-
-            bets.forEach((bet) => {
-                const row = document.createElement("tr");
-                row.innerHTML = `
-                    <td>${bet.player}</td>
-                    <td>${ethers.utils.formatEther(bet.amount)} WLD</td>
-                    <td>${ethers.utils.formatEther(bet.payout)} WLD</td>
-                    <td>${new Date(bet.timestamp * 1000).toLocaleString()}</td>
-                `;
-                tableBody.appendChild(row);
-            });
-        } catch (error) {
-            console.error("Error al obtener historial de apuestas:", error);
-        }
-    }
-
-    // Cargar datos al inicio
-    loadUserData();
-    updateBetHistory();
-</script>
-
+        document.getElementById("verify-worldid").addEventListener("click", verifyWithWorldID);
+    </script>
 </body>
 </html>
