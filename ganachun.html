@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Redirección Aleatoria</title>
+  <script src="https://cdn.jsdelivr.net/npm/@worldcoin/id"></script> 
   <style>
     body {
       text-align: center;
@@ -46,7 +47,7 @@
 
 <h2>Redirección de Blogs en Ventana Interna</h2>
 <div id="iframeContainer">
-  <iframe id="iframeRedireccion" src=""></iframe>
+  <iframe id="iframeRedireccion" src="https://blogger.com"></iframe>
 </div>
 
 <div id="usuario-info">
@@ -58,7 +59,7 @@
 <button onclick="pararMineria()">Parar Minería</button>
 <button onclick="continuarMineria()">Continuar Minería</button>
 
-<button id="authButton">Autenticarse con World ID</button>
+<div id="world-id-container"></div>
 <p id="userStatus">No autenticado</p>
 
 <script>
@@ -66,50 +67,51 @@
   let interval;
   let minando = true;
   let userWallet = null;
-  
+
   function contarTiempo() {
     if (minando) {
       tiempoTotal++;
       if (tiempoTotal % 100 === 0) {
-        alert(`¡Has ganado 100 CHC!`);
+        console.log(`Has ganado 100 CHC.`);
       }
     }
   }
-  
+
   function pararMineria() {
     clearInterval(interval);
     minando = false;
     alert(`Ganaste ${tiempoTotal} CHC! Gracias por usar la página.`);
   }
-  
+
   function continuarMineria() {
     if (!minando) {
       minando = true;
       interval = setInterval(contarTiempo, 1000);
     }
   }
-  
+
   interval = setInterval(contarTiempo, 1000);
 
-  async function authenticateWithWorldID() {
-    try {
-      const response = await window.ethereum.request({
-        method: 'eth_requestAccounts'
-      });
-
-      if (response.length > 0) {
-        userWallet = response[0];
-        document.getElementById('userStatus').innerText = `Conectado: ${userWallet}`;
-        document.getElementById('wallet').value = userWallet;
-        alert('Autenticación exitosa con World ID');
-      }
-    } catch (error) {
-      console.error('Error en autenticación:', error);
-      alert('Error al autenticar con World ID');
+  function guardarDatos() {
+    let correo = document.getElementById("correo").value;
+    if (correo && userWallet) {
+      alert(`Datos guardados: Correo: ${correo}, Wallet: ${userWallet}`);
+    } else {
+      alert("Completa todos los datos.");
     }
   }
 
-  document.getElementById('authButton').addEventListener('click', authenticateWithWorldID);
+  new WorldIDWidget({
+    action_id: "wid_staging_xxxxxx", // Reemplázalo con tu ID de acción
+    signal: "user_login",
+    enable_telemetry: true,
+    onSuccess: (verification) => {
+      console.log("Verificación exitosa:", verification);
+      document.getElementById("userStatus").innerText = "✅ Autenticado con World ID";
+    },
+    onError: (error) => console.error("Error de World ID:", error),
+  }).mount("#world-id-container");
+
 </script>
 
 </body>
