@@ -100,7 +100,7 @@
 
     async function loadUserData() {
         if (!window.ethereum) {
-            alert("Instala WorldApp para conectarte.");
+            alert("Instala MetaMask para conectarte.");
             return;
         }
 
@@ -115,7 +115,7 @@
 
     async function placeBet(amount) {
         if (!window.ethereum) {
-            alert("Instala WorldApp para jugar.");
+            alert("Instala MetaMask para jugar.");
             return;
         }
 
@@ -128,6 +128,13 @@
         }
 
         try {
+            // Verificar saldo de usuario
+            const userBalance = await provider.getBalance(userAddress);
+            if (userBalance.lt(ethers.utils.parseEther(amount.toString()))) {
+                alert("No tienes suficiente saldo en tu billetera.");
+                return;
+            }
+
             const tx = await worldChainContract.placeBet({
                 from: userAddress,
                 value: ethers.utils.parseEther(amount.toString())
