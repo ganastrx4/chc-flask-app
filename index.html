@@ -6,6 +6,7 @@
     <title>Bienvenida a CharlyCoin</title>
     <link rel="stylesheet" href="style.css">
     <style>
+        /* Estilos básicos de la página */
         body {
             font-family: Arial, sans-serif;
             background: #1e1e2f;
@@ -36,43 +37,72 @@
             font-weight: bold;
         }
         button:hover { background: #e67e22; }
-        #world-id-button {
+        #cryptoInfo {
+            display: none;
             margin-top: 20px;
+            background: #3a3a55;
+            padding: 15px;
+            border-radius: 10px;
         }
-        .next-button, .grafica-link, .binance-link {
-            display: inline-block;
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            background: #3a3a55;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        th, td {
             padding: 10px;
-            border-radius: 5px;
+            text-align: center;
+            border-bottom: 1px solid #444;
+        }
+        th {
             background: #f39c12;
-            color: white;
+            color: #000;
+        }
+        h3 { color: #f39c12; margin-top: 20px; }
+        .binance-link {
+            display: block;
+            margin-top: 20px;
+            color: #f39c12;
             font-weight: bold;
             text-decoration: none;
-            margin: 10px;
-            transition: background-color 0.3s ease;
         }
-        .next-button:hover, .grafica-link:hover, .binance-link:hover {
-            background: #e67e22;
+        .grafica-link {
+            display: block;
+            margin-top: 20px;
+            color: #e67e22;
+            font-weight: bold;
+            text-decoration: none;
+        }
+        .grafica-link:hover {
+            color: #f39c12;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Bienvenido a CharlyCoin</h1>
+        <h1>Bienvenida a CharlyCoin</h1>
         <div id="world-id-button"></div>
+        
+        <!-- Formulario para la verificación de World ID -->
         <form id="verifyForm">
             <label for="worldId">World ID:</label>
-            <input type="text" id="worldId" required>
-            <button type="submit">Verificar</button>
+            <input type="text" id="worldId" name="worldId" required>
+            <button type="submit">Verificar World ID</button>
         </form>
-        <a href="./apuestaswldchain.html" class="next-button">APUESTAS WLD CHAIN</a>
-        <a href="./buscador.html" class="next-button">Valor de las Criptomonedas</a>
-        <a href="./next_page.html" class="grafica-link">WLD Gráfica en Vivo</a>
+
+        <p id="verificationResult"></p>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/@worldcoin/id@0.1.2"></script>
+
+    <!-- Script de World ID -->
+    <script src="https://cdn.jsdelivr.net/npm/@worldcoin/id"></script>
     <script>
+        // Configuración del widget World ID
         new WorldIDWidget({
             action_id: "app_7686f9027d3e3c0b53d987a3caf1e111",
-            signal: "verify_user",
+            signal: "user_login",
             enableTelemetry: true,
             app_name: "CharlyCoin",
             theme: "light",
@@ -80,30 +110,61 @@
             onSuccess: (proof) => {
                 console.log("Verificación exitosa:", proof);
                 alert("¡Verificación exitosa!");
-                enviarVerificacion(proof);
             },
             onError: (error) => {
                 console.error("Error en la verificación:", error);
-                alert("Error en la verificación: " + JSON.stringify(error));
+                alert("Error en la verificación");
             }
         });
-        
-        function enviarVerificacion(proof) {
+
+        // Manejo del formulario de verificación
+        document.getElementById('verifyForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const worldId = document.getElementById('worldId').value;
+
+            // Enviar la solicitud de verificación al backend
             fetch('/api/verify', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ world_id_proof: proof })
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ world_id: worldId })
             })
             .then(response => response.json())
             .then(data => {
-                console.log('Respuesta del servidor:', data);
-                alert(data.success ? 'Verificación completada' : 'Verificación fallida: ' + data.message);
+                if (data.success) {
+                    document.getElementById('verificationResult').innerText = "¡Verificación exitosa!";
+                } else {
+                    document.getElementById('verificationResult').innerText = "Verificación fallida.";
+                }
             })
             .catch(error => {
                 console.error('Error en la verificación:', error);
-                alert('Error en la comunicación con el servidor.');
+                document.getElementById('verificationResult').innerText = "Hubo un error al verificar.";
             });
-        }
+        });
     </script>
-</body>
+    
+</body><div class="link-container">
+        <p>¡Obtén NUEVO TOKEN WDD GRATIS!</p>
+        <div class="d-flex justify-content-center align-items-center mt-3">
+            <a href="./wdd.html" class="btn btn-warning btn-lg">Ver la página de WDD</a>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-center align-items-center mt-4">
+        <a href="./buscador.html" class="btn btn-warning btn-lg">🔍 Ver precios de CRIPTOMONEDAS</a>
+    </div>
+ 
+
+    <div class="d-flex justify-content-center align-items-center mt-4">
+        <a href="./reclamarchun.html" class="btn btn-warning btn-lg">🌐 Reclamar CHUN</a>
+    </div>
+
+    <a href="./apuestaswldchain.html" class="next-button">APUESTAS WLD CHAIN</a>
+        <a href="./buscador.html" class="next-button">Valor de las Criptomonedas</a>
+        <a href="./next_page.html" class="grafica-link">WLD Gráfica en Vivo</a>
+    
+
 </html>
