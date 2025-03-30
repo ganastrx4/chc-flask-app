@@ -2,9 +2,8 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <title>Minijuego de Apuestas - World Chain</title>
-    <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -23,10 +22,9 @@
         h1 {
             color: #333;
         }
-        .input-box {
-            padding: 10px;
-            width: 100px;
-            text-align: center;
+        .highlight {
+            color: #27ae60;
+            font-weight: bold;
         }
         .btn {
             display: inline-block;
@@ -37,7 +35,6 @@
             font-size: 18px;
             border-radius: 5px;
             margin-top: 15px;
-            cursor: pointer;
         }
         .btn:hover {
             background: #0056b3;
@@ -47,13 +44,13 @@
             margin-top: 20px;
             border-collapse: collapse;
         }
-        th, td {
-            padding: 10px;
+        table, th, td {
             border: 1px solid #ddd;
-            text-align: center;
+            padding: 10px;
+            text-align: left;
         }
         th {
-            background: #007bff;
+            background-color: #007bff;
             color: white;
         }
     </style>
@@ -61,68 +58,98 @@
 <body>
 
 <div class="container">
-    <h1>🎲 Minijuego de Apuestas - World Chain</h1>
-    <p>Introduce la cantidad a apostar (mínimo <strong>0.5 WLD</strong>):</p>
-    <input type="number" id="betAmount" class="input-box" min="0.5" step="0.1" placeholder="0.5 WLD">
-    <button onclick="placeBet()" class="btn">Apostar</button>
-    <p id="status"></p>
-    <h2>📜 Historial de Apuestas</h2>
+    <h1>🎰 Minijuego de Apuestas - World Chain</h1>
+
+    <p id="user-wallet">Billetera: Cargando...</p>
+    <p id="user-balance">Saldo: Cargando...</p>
+
+    <div>
+        <h3>Apostar</h3>
+        <input type="number" id="bet-amount" placeholder="Cantidad en WLD" />
+        <button onclick="placeBet(document.getElementById('bet-amount').value)" class="btn">Apostar</button>
+    </div>
+
+    <h3>Historial de Apuestas</h3>
     <table>
         <thead>
             <tr>
-                <th>Jugador</th>
+                <th>Billetera</th>
                 <th>Apuesta</th>
                 <th>Ganancia</th>
                 <th>Fecha</th>
             </tr>
         </thead>
         <tbody id="bet-history-body">
+            <tr><td colspan="4">Cargando historial...</td></tr>
         </tbody>
     </table>
 </div>
 
-<script>
-    const provider = new ethers.providers.JsonRpcProvider("https://rpc.worldchain.dev");
-    const signer = provider.getSigner();
-    const worldChainContract = new ethers.Contract(
-        "0xdc178d65c502f9589bb1a35af08b5723f85ec168", 
-        [
-            "function bet(uint256 amount) public payable",
-            "function getBets() public view returns (tuple(address player, uint256 amount, uint256 payout, uint256 timestamp)[])"
-        ],
-        signer
-    );
+<!-- Importar ethers.js -->
+<script src="https://cdn.jsdelivr.net/npm/ethers@5.6.8/dist/ethers.min.js"></script>
 
-    async function placeBet() {
-        const amount = parseFloat(document.getElementById("betAmount").value);
-        if (isNaN(amount) || amount < 0.5) {
-            alert("Debes apostar al menos 0.5 WLD");
+<script>
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    const worldChainContractAddress = "0xdc178d65c502f9589bb1a35af08b5723f85ec168"; // Dirección del contrato
+    const worldChainContractABI = [
+        "function placeBet() public payable",
+        "function getBetHistory() public view returns (tuple(address player, uint256 amount, uint256 payout, uint256 timestamp)[])",
+        "function getBalance() public view returns (uint256)"
+    ];
+    const worldChainContract = new ethers.Contract(worldChainContractAddress, worldChainContractABI, provider.getSigner());
+
+    async function loadUserData() {
+        if (!window.ethereum) {
+            alert("Instala WorldApp para conectarte.");
             return;
         }
-        
-        try {
-            const randomMultiplier = Math.floor(Math.random() * (80 - 10 + 1) + 10) / 100;
-            const payout = amount + (amount * randomMultiplier);
-            document.getElementById("status").textContent = "⏳ Procesando apuesta...";
 
-            const tx = await worldChainContract.bet(ethers.utils.parseEther(amount.toString()), {
+        const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+        const userAddress = accounts[0];
+
+        document.getElementById("user-wallet").textContent = `Billetera: ${userAddress}`;
+
+        const balance = await provider.getBalance(userAddress);
+        document.getElementById("user-balance").textContent = `Saldo: ${ethers.utils.formatEther(balance)} WLD`;
+    }
+
+    async function placeBet(amount) {
+        if (!window.ethereum) {
+            alert("Instala WorldApp para jugar.");
+            return;
+        }
+
+        const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+        const userAddress = accounts[0];
+
+        if (amount < 0.5) {
+            alert("La apuesta mínima es 0.5 WLD");
+            return;
+        }
+
+        try {
+            const tx = await worldChainContract.placeBet({
+                from: userAddress,
                 value: ethers.utils.parseEther(amount.toString())
             });
-            
+
             await tx.wait();
-            document.getElementById("status").textContent = `✅ Apuesta realizada. Posible ganancia: ${payout.toFixed(2)} WLD`;
+            alert("Apuesta realizada con éxito!");
+
             updateBetHistory();
+            loadUserData();
         } catch (error) {
             console.error("Error en la apuesta:", error);
-            document.getElementById("status").textContent = "❌ Error al procesar la apuesta.";
+            alert("Hubo un problema con la apuesta");
         }
     }
 
     async function updateBetHistory() {
         try {
-            const bets = await worldChainContract.getBets();
+            const bets = await worldChainContract.getBetHistory();
             const tableBody = document.getElementById("bet-history-body");
             tableBody.innerHTML = "";
+
             bets.forEach((bet) => {
                 const row = document.createElement("tr");
                 row.innerHTML = `
@@ -138,7 +165,9 @@
         }
     }
 
-    window.onload = updateBetHistory;
+    // Cargar datos al inicio
+    loadUserData();
+    updateBetHistory();
 </script>
 
 </body>
