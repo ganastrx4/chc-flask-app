@@ -23,24 +23,24 @@
             border-radius: 10px;
             box-shadow: 0px 0px 15px rgba(255, 255, 255, 0.1);
         }
-        button {
-            width: 80%;
-            padding: 10px;
-            margin: 10px 0;
-            border: none;
-            border-radius: 5px;
-            background: #f39c12;
-            color: white;
-            cursor: pointer;
-            font-weight: bold;
+        .floating-button {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
         }
-        button:hover { background: #e67e22; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Bienvenido a CharlyCoin</h1>
-        <div id="world-id-button"></div>
+        <h1>Bienvenida a CharlyCoin</h1>
+        <p>Autenticación con World ID</p>
+        
+        <!-- Botón flotante de World ID -->
+        <div class="floating-button">
+            <div id="world-id-button"></div>
+        </div>
+        
         <a href="./ganachun.html" class="next-button">GANAR CHUN</a>
         <a href="./buscador.html" class="next-button">Valor de las Criptomonedas</a>
         <a href="./next_page.html" class="grafica-link">WLD Gráfica en Vivo</a>
@@ -50,7 +50,7 @@
 
     <script>
         new WorldIDWidget({
-            action_id: "app_7686f9027d3e3c0b53d987a3caf1e111",  
+            action_id: "app_7686f9027d3e3c0b53d987a3caf1e111",
             signal: "user_login",
             enableTelemetry: true,
             app_name: "CharlyCoin",
