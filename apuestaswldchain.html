@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
-    <title>Minijuego de Apuestas - World Chain</title>
+    <title>Minijuego de Apuestas - Word Coin</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -58,7 +58,7 @@
 <body>
 
 <div class="container">
-    <h1>🎰 Minijuego de Apuestas - World Chain</h1>
+    <h1>🎰 Minijuego de Apuestas - Word Coin</h1>
 
     <p id="user-wallet">Billetera: Cargando...</p>
     <p id="user-balance">Saldo: Cargando...</p>
@@ -90,13 +90,13 @@
 
 <script>
     const provider = new ethers.providers.Web3Provider(window.ethereum);
-    const worldChainContractAddress = "0xdc178d65c502f9589bb1a35af08b5723f85ec168"; // Dirección del contrato
-    const worldChainContractABI = [
+    const wordCoinContractAddress = "0xdc178d65c502f9589bb1a35af08b5723f85ec168"; // Dirección del contrato de Word Coin
+    const wordCoinContractABI = [
         "function placeBet() public payable",
         "function getBetHistory() public view returns (tuple(address player, uint256 amount, uint256 payout, uint256 timestamp)[])",
         "function getBalance() public view returns (uint256)"
     ];
-    const worldChainContract = new ethers.Contract(worldChainContractAddress, worldChainContractABI, provider.getSigner());
+    const wordCoinContract = new ethers.Contract(wordCoinContractAddress, wordCoinContractABI, provider.getSigner());
 
     async function loadUserData() {
         if (!window.ethereum) {
@@ -128,14 +128,13 @@
         }
 
         try {
-            // Verificar saldo de usuario
             const userBalance = await provider.getBalance(userAddress);
             if (userBalance.lt(ethers.utils.parseEther(amount.toString()))) {
                 alert("No tienes suficiente saldo en tu billetera.");
                 return;
             }
 
-            const tx = await worldChainContract.placeBet({
+            const tx = await wordCoinContract.placeBet({
                 from: userAddress,
                 value: ethers.utils.parseEther(amount.toString())
             });
@@ -153,7 +152,7 @@
 
     async function updateBetHistory() {
         try {
-            const bets = await worldChainContract.getBetHistory();
+            const bets = await wordCoinContract.getBetHistory();
             const tableBody = document.getElementById("bet-history-body");
             tableBody.innerHTML = "";
 
