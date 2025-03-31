@@ -14,8 +14,8 @@ def wdd():
 def bienvenida():
     return render_template('bienvenida.html')
 
-@app.route('/next-page')
+@app.route('/salas')
 def next_page():
-    return render_template('next_page.html')  # O cualquier otra página que desees
+    return render_template('salas.html')  # O cualquier otra página que desees
 if __name__ == '__main__':
     app.run(debug=True)
