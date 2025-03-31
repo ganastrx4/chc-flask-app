@@ -28,8 +28,10 @@
 <body>
     <div class="container">
         <h2>Compra de Saldo</h2>
-        <label for="wallet">Dirección de tu billetera:</label>
-        <input type="text" id="wallet" placeholder="0x...">
+        <p><strong>Billetera de destino:</strong> 0xdc178d65c502f9589bb1a35af08b5723f85ec168</p>
+        
+        <label for="user_wallet">Tu billetera:</label>
+        <input type="text" id="user_wallet" placeholder="0x...">
         
         <label for="amount">Cantidad de WLD a enviar:</label>
         <input type="number" id="amount" placeholder="0">
@@ -42,7 +44,7 @@
 
     <script>
         function enviarDatos() {
-            const wallet = document.getElementById('wallet').value;
+            const userWallet = document.getElementById('user_wallet').value;
             const amount = document.getElementById('amount').value;
             const txhash = document.getElementById('txhash').value;
             
@@ -50,7 +52,7 @@
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    user_id: wallet,
+                    user_id: userWallet,
                     wld_amount: amount,
                     tx_hash: txhash
                 })
