@@ -22,13 +22,15 @@
             border-radius: 10px;
             box-shadow: 0px 0px 15px rgba(255, 255, 255, 0.1);
         }
-        button, .btn {
+        input, button, .btn {
             width: 80%;
             padding: 12px;
             margin: 10px 0;
             border: none;
             border-radius: 5px;
             font-size: 16px;
+        }
+        button, .btn {
             background: #f39c12;
             color: white;
             cursor: pointer;
@@ -37,47 +39,18 @@
             text-decoration: none;
         }
         button:hover, .btn:hover { background: #e67e22; }
+        
+        .btn-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Bienvenida a CharlyCoin</h1>
-        <div id="world-id-button"></div>
-        <p id="verificationResult"></p>
-    </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/@worldcoin/id"></script>
-    <script>
-        new WorldIDWidget({
-            action_id: "app_7686f9027d3e3c0b53d987a3caf1e111",
-            signal: "user_login",
-            enableTelemetry: true,
-            app_name: "CharlyCoin",
-            theme: "light",
-            containerId: "world-id-button",
-            onSuccess: async (proof) => {
-                console.log("Verificación exitosa:", proof);
-                try {
-                    let response = await fetch('/api/verify', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ proof: proof })
-                    });
-                    let data = await response.json();
-                    document.getElementById('verificationResult').innerText = data.success ? "¡Verificación exitosa!" : "Verificación fallida.";
-                } catch (error) {
-                    console.error('Error en la verificación:', error);
-                    document.getElementById('verificationResult').innerText = "Hubo un error al verificar.";
-                }
-            },
-            onError: (error) => {
-                console.error("Error en la verificación:", error);
-                alert("Error en la verificación");
-            }
-        });
-    </script>
-
-<div class="container">
         <h1>Bienvenida a CharlyCoin</h1>
         <div id="world-id-button"></div>
         <form id="verifyForm">
@@ -99,7 +72,43 @@
         <a href="./ganachun.html" class="btn">🏅 Ganar CHUN Extra</a>
         <a href="./next_page.html" class="btn">📊 WLD Gráfica en Vivo</a>
     </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@worldcoin/id"></script>
+    <script>
+        new WorldIDWidget({
+            action_id: "app_7686f9027d3e3c0b53d987a3caf1e111",
+            signal: "user_login",
+            enableTelemetry: true,
+            app_name: "CharlyCoin",
+            theme: "light",
+            containerId: "world-id-button",
+            onSuccess: (proof) => {
+                console.log("Verificación exitosa:", proof);
+                alert("¡Verificación exitosa!");
+            },
+            onError: (error) => {
+                console.error("Error en la verificación:", error);
+                alert("Error en la verificación");
+            }
+        });
 
-
+        document.getElementById('verifyForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const worldId = document.getElementById('worldId').value;
+            fetch('/api/verify', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ world_id: worldId })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('verificationResult').innerText = data.success ? "¡Verificación exitosa!" : "Verificación fallida.";
+            })
+            .catch(error => {
+                console.error('Error en la verificación:', error);
+                document.getElementById('verificationResult').innerText = "Hubo un error al verificar.";
+            });
+        });
+    </script>
 </body>
 </html>
