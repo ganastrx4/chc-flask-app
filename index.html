@@ -75,40 +75,44 @@
     
     <script src="https://cdn.jsdelivr.net/npm/@worldcoin/id"></script>
     <script>
-        new WorldIDWidget({
-            action_id: "app_7686f9027d3e3c0b53d987a3caf1e111",
-            signal: "user_login",
-            enableTelemetry: true,
-            app_name: "CharlyCoin",
-            theme: "light",
-            containerId: "world-id-button",
-            onSuccess: (proof) => {
-                console.log("Verificación exitosa:", proof);
-                alert("¡Verificación exitosa!");
-            },
-            onError: (error) => {
-                console.error("Error en la verificación:", error);
-                alert("Error en la verificación");
+    function enviarVerificacionAlServidor(proof) {
+        fetch("https://92d1-189-217-222-56.ngrok-free.app", {  
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(proof)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert("Usuario verificado con éxito");
+            } else {
+                alert("No se pudo verificar al usuario");
             }
+        })
+        .catch(error => {
+            console.error("Error enviando la verificación:", error);
+            alert("Error en la verificación");
         });
+    }
 
-        document.getElementById('verifyForm').addEventListener('submit', function(event) {
-            event.preventDefault();
-            const worldId = document.getElementById('worldId').value;
-            fetch('/api/verify', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ world_id: worldId })
-            })
-            .then(response => response.json())
-            .then(data => {
-                document.getElementById('verificationResult').innerText = data.success ? "¡Verificación exitosa!" : "Verificación fallida.";
-            })
-            .catch(error => {
-                console.error('Error en la verificación:', error);
-                document.getElementById('verificationResult').innerText = "Hubo un error al verificar.";
-            });
-        });
-    </script>
+    new WorldIDWidget({
+        action_id: "app_7686f9027d3e3c0b53d987a3caf1e111",
+        signal: "user_login",
+        enableTelemetry: true,
+        app_name: "CharlyCoin",
+        theme: "light",
+        containerId: "world-id-button",
+        onSuccess: (proof) => {
+            console.log("Verificación exitosa:", proof);
+            alert("¡Verificación exitosa!");
+            enviarVerificacionAlServidor(proof);
+        },
+        onError: (error) => {
+            console.error("Error en la verificación:", error);
+            alert("Error en la verificación");
+        }
+    });
+</script>
+
 </body>
 </html>
