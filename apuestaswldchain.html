@@ -23,48 +23,63 @@
         </div>
     </div>
 
-   
     <script src="https://cdn.jsdelivr.net/npm/@worldcoin/idkit"></script>
+
     <script>
+        // Función para verificar al usuario con Worldcoin
         async function verifyWithWorldID() {
             try {
+                // Llamada a Worldcoin IDKit
                 const result = await IDKit.open({
-                    action: "play_game",
-                    signal: "unique_user",
-                    app_id: "tu-app-id",
+                    action: "play_game",  // Acción para el juego
+                    signal: "unique_user",  // Signal único para verificar usuario
+                    app_id: "tu-app-id",  // Reemplazar con tu propio app_id de Worldcoin
                     onSuccess: async (response) => {
                         document.getElementById("user-status").textContent = "Autenticado";
-                        document.getElementById("game-section").style.display = "block";
+                        document.getElementById("game-section").style.display = "block";  // Mostrar sección de apuestas
                     },
                 });
             } catch (error) {
                 console.error("Error en la verificación:", error);
             }
         }
+
+        // Agregar el evento para el botón de verificación
         document.getElementById("verify-worldid").addEventListener("click", verifyWithWorldID);
-    </script>
-    <script src="https://cdn.jsdelivr.net/npm/@worldcoin/id"></script>
-<script>
-    // Crear un widget de Worldcoin para verificar al usuario
-    new WorldIDWidget({
-        action_id: "app_7686f9027d3e3c0b53d987a3caf1e111", // Cambiar con tu action_id real
-        signal: "user_login", // El tipo de acción, como un inicio de sesión
-        enableTelemetry: true,
-        app_name: "CharlyCoin", // Nombre de tu aplicación
-        theme: "light",
-        containerId: "world-id-button", // Este id debe estar en tu HTML donde desees que se muestre el botón
-        onSuccess: (proof) => {
-            console.log("Verificación exitosa:", proof);
-            // Aquí guardas la verificación para que no se repita y puedas realizar acciones
-            sessionStorage.setItem("verificado", "true"); // Almacenas en sessionStorage que el usuario ha sido verificado
-            alert("¡Verificación exitosa! Ahora puedes continuar.");
-        },
-        onError: (error) => {
-            console.error("Error en la verificación:", error);
-            alert("Hubo un error al verificar tu World ID.");
+
+        // Función para realizar una apuesta (solo como ejemplo)
+        function placeBet() {
+            const betAmount = document.getElementById("bet-amount").value;
+            if (betAmount && betAmount > 0) {
+                alert(`¡Apuesta realizada! Has apostado ${betAmount} WLD.`);
+            } else {
+                alert("Por favor, ingresa una cantidad válida para apostar.");
+            }
         }
-    });
-</script>
+    </script>
+
+    <script>
+        // Crear el widget de Worldcoin para verificar al usuario
+        new WorldIDWidget({
+            action_id: "app_7686f9027d3e3c0b53d987a3caf1e111",  // Cambiar con tu action_id real
+            signal: "user_login",  // Acción de inicio de sesión
+            enableTelemetry: true,
+            app_name: "CharlyCoin",  // Nombre de tu aplicación
+            theme: "light",
+            containerId: "world-id-button",  // Este ID debe estar en tu HTML
+            onSuccess: (proof) => {
+                console.log("Verificación exitosa:", proof);
+                sessionStorage.setItem("verificado", "true");  // Almacenar que el usuario está verificado
+                alert("¡Verificación exitosa! Ahora puedes continuar.");
+                document.getElementById("user-status").textContent = "Autenticado";
+                document.getElementById("game-section").style.display = "block";  // Mostrar sección de apuestas
+            },
+            onError: (error) => {
+                console.error("Error en la verificación:", error);
+                alert("Hubo un error al verificar tu World ID.");
+            }
+        });
+    </script>
 
 </body>
 </html>
