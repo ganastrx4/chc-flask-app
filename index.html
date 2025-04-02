@@ -51,11 +51,28 @@
         <a href="wdd.html">Worldcoin Dashboard</a>
     </div>
 
-    <script>
-        // Verificamos si el usuario ha sido verificado, si no, lo redirigimos
-        if (sessionStorage.getItem("verificado") !== "true") {
-            window.location.href = "index.html"; // Redirigir a la página de inicio si no está verificado
+   <script src="https://cdn.jsdelivr.net/npm/@worldcoin/id"></script>
+<script>
+    // Crear un widget de Worldcoin para verificar al usuario
+    new WorldIDWidget({
+        action_id: "app_7686f9027d3e3c0b53d987a3caf1e111", // Cambiar con tu action_id real
+        signal: "user_login", // El tipo de acción, como un inicio de sesión
+        enableTelemetry: true,
+        app_name: "CharlyCoin", // Nombre de tu aplicación
+        theme: "light",
+        containerId: "world-id-button", // Este id debe estar en tu HTML donde desees que se muestre el botón
+        onSuccess: (proof) => {
+            console.log("Verificación exitosa:", proof);
+            // Aquí guardas la verificación para que no se repita y puedas realizar acciones
+            sessionStorage.setItem("verificado", "true"); // Almacenas en sessionStorage que el usuario ha sido verificado
+            alert("¡Verificación exitosa! Ahora puedes continuar.");
+        },
+        onError: (error) => {
+            console.error("Error en la verificación:", error);
+            alert("Hubo un error al verificar tu World ID.");
         }
-    </script>
+    });
+</script>
+
 </body>
 </html>
