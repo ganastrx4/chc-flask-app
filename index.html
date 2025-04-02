@@ -1,62 +1,117 @@
+<!-- index.html -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta content="width=device-width, initial-scale=1.0" name="viewport">
-    <title>Minijuego de Apuestas - World Coin</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verificación - CharlyCoin</title>
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; background-color: #f4f4f4; }
-        .container { max-width: 600px; background: #fff; padding: 20px; border-radius: 10px; margin: auto; }
-        .btn { padding: 12px 20px; background: #007bff; color: #fff; border: none; cursor: pointer; }
-        .btn:hover { background: #0056b3; }
+        body {
+            font-family: Arial, sans-serif;
+            background: #1e1e2f;
+            color: #ffffff;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #2c2c3e;
+            border-radius: 10px;
+            box-shadow: 0px 0px 15px rgba(255, 255, 255, 0.1);
+        }
+        img {
+            width: 150px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        button {
+            background: #f39c12;
+            color: white;
+            padding: 12px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        button:hover { background: #e67e22; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🎰 Minijuego de Apuestas - World Coin</h1>
-        <p id="user-status">Estado: No autenticado</p>
-        <button id="verify-worldid" class="btn">Verificar con World ID</button>
-        <div id="game-section" style="display:none;">
-            <h3>Apostar</h3>
-            <input type="number" id="bet-amount" placeholder="Cantidad en WLD" />
-            <button onclick="placeBet()" class="btn">Apostar</button>
-        </div>
+        <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgs4uyyEce9czJNopvAJUC-EuqRY0GilYfi7dguE0OEkUjTcrn6PVYsIFXo2NbemRvavHvVWsD8ru9ZGJXUpfhSVsUyrNYeJri7NP2XU6-9NUjbyrVjQtYUNjt7N9dUaouupuqlczAJlDqpYVhdArBcT7MRvEAwVfQv8JeOKD-EWAecMuSsfAE4gizyojtT/s1024/0ed01250-9b4a-4d44-924c-7c0011004aa0.webp" alt="CharlyCoin Logo">
+        <h1>Verificación con Worldcoin</h1>
+        <div id="world-id-button"></div>
+        <p id="verificationResult"></p>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/@worldcoin/idkit"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@worldcoin/id"></script>
     <script>
-        async function verifyWithWorldID() {
-            try {
-                const result = await IDKit.open({
-                    action: "play_game",
-                    signal: "unique_user",
-                    app_id: "tu-app-id", // Sustituye con tu app_id real
-                    onSuccess: async (response) => {
-                        document.getElementById("user-status").textContent = "Autenticado";
-                        document.getElementById("game-section").style.display = "block";
-                        
-                        // Enviar proof al servidor Flask para verificar
-                        const proof = response.proof;
-                        const verifyResponse = await fetch('/verify-proof', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ proof }),
-                        });
-
-                        const result = await verifyResponse.json();
-                        if (result.verified) {
-                            alert("¡Verificación exitosa! Ahora puedes apostar.");
-                        } else {
-                            alert("No se pudo verificar al usuario.");
-                        }
-                    },
-                });
-            } catch (error) {
+        new WorldIDWidget({
+            action_id: "app_7686f9027d3e3c0b53d987a3caf1e111",
+            signal: "user_login",
+            enableTelemetry: true,
+            app_name: "CharlyCoin",
+            theme: "light",
+            containerId: "world-id-button",
+            onSuccess: (proof) => {
+                console.log("Verificación exitosa:", proof);
+                window.location.href = "next_page.html"; // Redirigir si la verificación es correcta
+            },
+            onError: (error) => {
                 console.error("Error en la verificación:", error);
+                alert("Error en la verificación");
             }
-        }
-
-        document.getElementById("verify-worldid").addEventListener("click", verifyWithWorldID);
+        });
     </script>
+</body>
+</html>
+
+<!-- next_page.html -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Página Siguiente - CharlyCoin</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #1e1e2f;
+            color: #ffffff;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #2c2c3e;
+            border-radius: 10px;
+            box-shadow: 0px 0px 15px rgba(255, 255, 255, 0.1);
+        }
+        a {
+            display: inline-block;
+            background: #f39c12;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 5px;
+            font-size: 16px;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        a:hover { background: #e67e22; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>¡Verificación completada con éxito!</h1>
+        <p>Ahora puedes continuar con el uso de CharlyCoin.</p>
+        <a href="https://worldcoin.org/verify?t=wld&i=d8c9140c-628c-49b4-b929-3864e4916b5b&k=q3ss7vZp8TU8%2Bcxc7FfJknJO2GD8qQxEv0xPm3aV%2Bxs%3D">Volver al inicio</a>
+    </div>
 </body>
 </html>
