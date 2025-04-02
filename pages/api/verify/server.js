@@ -44,3 +44,57 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Servidor escuchando en el puerto ${PORT}`);
 });
+
+// pages/verify.js
+
+"use client";
+import { IDKitWidget, VerificationLevel } from '@worldcoin/idkit';
+
+const VerifyPage = () => {
+  const verifyProof = async (proof) => {
+    try {
+      // Enviar el proof al servidor para su verificación
+      const response = await fetch('/verify-proof', {
+        method: 'POST',
+        body: JSON.stringify({ proof }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      const result = await response.json();
+
+      if (result.message === "Verificación exitosa") {
+        console.log("Usuario verificado");
+      } else {
+        console.log("Proof no válido");
+      }
+    } catch (error) {
+      console.error("Error al verificar:", error);
+    }
+  };
+
+  const onSuccess = () => {
+    console.log("Verificación exitosa!");
+    // Aquí puedes agregar acciones que ocurran después de la verificación
+  };
+
+  return (
+    <div>
+      <h1>Verificación con Worldcoin</h1>
+      <IDKitWidget
+        app_id="app_7686f9027d3e3c0b53d987a3caf1e111"
+        action="user_login"
+        verification_level={VerificationLevel.Device}
+        handleVerify={verifyProof}
+        onSuccess={onSuccess}
+      >
+        {({ open }) => (
+          <button onClick={open}>Verificar con World ID</button>
+        )}
+      </IDKitWidget>
+    </div>
+  );
+};
+
+export default VerifyPage;
+
