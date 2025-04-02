@@ -66,12 +66,14 @@
             containerId: "world-id-button",
             onSuccess: (proof) => {
                 console.log("Verificación exitosa:", proof);
-                localStorage.setItem("verificado", "true");  // Guardamos la verificación
-                window.location.href = "./next_page.html";   // Redirigir si la verificación es correcta
+                // Guardamos que el usuario está verificado
+                localStorage.setItem("verificado", "true");
+                // Redirigimos a la página siguiente
+                window.location.href = "./next_page.html";
             },
             onError: (error) => {
                 console.error("Error en la verificación:", error);
-                alert("Error en la verificación");
+                alert("Hubo un error en la verificación.");
             }
         });
     </script>
