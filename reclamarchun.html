@@ -54,8 +54,7 @@
 
     <p>Para obtener tus 1000 CHUN, primero verifica tu identidad con World ID.</p>
 
-    <!-- Contenedor para el botón de World ID -->
-    <div id="world-id-container"></div>
+    
 
     <button id="reclamar-btn" class="btn" style="display: none;" onclick="reclamar1000CHUN()">Reclamar 1000 CHUN</button>
 
@@ -64,71 +63,7 @@
 <!-- Botón para redirigir al link de Worldcoin -->
         <a href="https://worldcoin.org/verify?t=wld&i=641219dc-c1af-4544-99fa-1e4b121d418d&k=cPAYJT83nqoau4ztdtPHiSeTxePvhrgzMvwzcBJnNyI%3D" class="world-id-button" target="_blank">Verificar World ID</a>
         
-<script>
-    let userProof = null; // Guardará la prueba de verificación
 
-    // Cargar el widget de autenticación de World ID
-    new WorldIDWidget({
-        action_id: "app_7686f9027d3e3c0b53d987a3caf1e111", // Reemplaza con tu Action ID
-        signal: "reclamar_chun",
-        enableTelemetry: true,
-        app_name: "CharlyCoin",
-        theme: "light",
-        containerId: "world-id-container",
-        onSuccess: (proof) => {
-            console.log("Verificación exitosa:", proof);
-            userProof = proof;
-            document.getElementById("mensaje").textContent = "✅ Verificación exitosa, ahora puedes reclamar los CHUN.";
-            document.getElementById("reclamar-btn").style.display = "block"; // Mostrar el botón de reclamar
-        },
-        onError: (error) => {
-            console.error("Error en la verificación:", error);
-            document.getElementById("mensaje").textContent = "⚠ Error en la verificación. Inténtalo de nuevo.";
-        }
-    });
-
-    async function reclamar1000CHUN() {
-        if (!userProof) {
-            alert("Debes verificar tu identidad primero.");
-            return;
-        }
-
-        try {
-            // Verificar si el usuario ya reclamó en las últimas 24 horas
-            const respuesta = await fetch('https://bdcb-189-217-216-138.ngrok-free.app/api/verificar-reclamo', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ proof: userProof })
-            });
-
-            const data = await respuesta.json();
-            if (data.puedeReclamar) {
-                // Si puede reclamar, proceder con la transferencia
-                const txResponse = await fetch('https://d375-189-217-216-138.ngrok-free.app/api/reclamar-chun', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ proof: userProof, cantidad: 1000 })
-                });
-
-                const txData = await txResponse.json();
-                if (txData.exito) {
-                    document.getElementById('mensaje').textContent = "🎉 ¡1000 CHUN enviados a tu billetera!";
-                } else {
-                    document.getElementById('mensaje').textContent = "❌ Hubo un problema al procesar la transacción.";
-                }
-            } else {
-                document.getElementById('mensaje').textContent = "⏳ Ya reclamaste CHUN en las últimas 24 horas.";
-            }
-        } catch (error) {
-            console.error("Error en la transacción:", error);
-            alert("Hubo un problema al intentar reclamar los CHUN.");
-        }
-    }
-</script>
 
 </body>
 </html>
