@@ -185,46 +185,6 @@
         <a href="./next_page.html" class="btn">📊 WLD Gráfica en Vivo</a>
     </div>
     
-    <script src="https://cdn.jsdelivr.net/npm/@worldcoin/id"></script>
-<div id="world-id-button"></div>
-
-<script>
-    new WorldIDWidget({
-        action_id: "app_7686f9027d3e3c0b53d987a3caf1e111", 
-        signal: "user_login",
-        enableTelemetry: true,
-        app_name: "CharlyCoin",
-        theme: "light",
-        containerId: "world-id-button",
-        onSuccess: (proof) => {
-            console.log("Verificación exitosa:", proof);
-            enviarVerificacionAlServidor(proof);
-        },
-        onError: (error) => {
-            console.error("Error en la verificación:", error);
-            alert("Error en la verificación");
-        }
-    });
-
-    function enviarVerificacionAlServidor(proof) {
-        fetch("https://916a-189-217-222-56.ngrok-free.app", {  // Reemplaza con tu URL de ngrok
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(proof)
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert("Usuario verificado con éxito");
-            } else {
-                alert("No se pudo verificar al usuario");
-            }
-        })
-        .catch(error => {
-            console.error("Error enviando la verificación:", error);
-            alert("Error en la verificación");
-        });
-    }
-</script>
+  
 </body>
 </html>
