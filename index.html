@@ -2,78 +2,60 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Menú de navegación - CharlyCoin</title>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>Minijuego de Apuestas - Word Coin</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #1e1e2f;
-            color: #ffffff;
-            text-align: center;
-            margin: 0;
-            padding: 0;
-        }
-        .container {
-            max-width: 600px;
-            margin: 50px auto;
-            padding: 20px;
-            background: #2c2c3e;
-            border-radius: 10px;
-            box-shadow: 0px 0px 15px rgba(255, 255, 255, 0.1);
-        }
-        a {
-            display: inline-block;
-            background: #f39c12;
-            color: white;
-            padding: 12px 20px;
-            border-radius: 5px;
-            font-size: 16px;
-            text-decoration: none;
-            font-weight: bold;
-            margin: 10px;
-        }
-        a:hover { background: #e67e22; }
+        body { font-family: Arial, sans-serif; text-align: center; background-color: #f4f4f4; }
+        .container { max-width: 600px; background: #fff; padding: 20px; border-radius: 10px; margin: auto; }
+        .btn { padding: 12px 20px; background: #007bff; color: #fff; border: none; cursor: pointer; }
+        .btn:hover { background: #0056b3; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>¡Verificación completada con éxito!</h1>
-        <p>Ahora puedes continuar con el uso de CharlyCoin.</p>
-        <p>Selecciona a dónde deseas ir:</p>
-        <!-- Menú de navegación -->
-        <a href="apuestaswldchain.html">Apuestas WLChain</a>
-        <a href="buscador.html">Buscador</a>
-        <a href="ganachun.html">Ganar CharlyCoin</a>
-        <a href="ganarchun.html">Ganador CharlyCoin</a>
-        <a href="reclamarchun.html">Reclamar CharlyCoin</a>
-        <a href="ruleta.html">Ruleta</a>
-        <a href="salas.html">Salas</a>
-        <a href="wdd.html">Worldcoin Dashboard</a>
+        <h1>🎰 Minijuego de Apuestas - World Coin</h1>
+        <p id="user-status">Estado: No autenticado</p>
+        <button id="verify-worldid" class="btn">Verificar con World ID</button>
+        <div id="game-section" style="display:none;">
+            <h3>Apostar</h3>
+            <input type="number" id="bet-amount" placeholder="Cantidad en WLD" />
+            <button onclick="placeBet()" class="btn">Apostar</button>
+        </div>
     </div>
 
-   <script src="https://cdn.jsdelivr.net/npm/@worldcoin/id"></script>
- <script>
-        // Crear el widget de Worldcoin para verificar al usuario
-        new WorldIDWidget({
-            action_id: "app_7686f9027d3e3c0b53d987a3caf1e111",  // Cambiar con tu action_id real
-            signal: "user_login",  // Acción de inicio de sesión
-            enableTelemetry: true,
-            app_name: "CharlyCoin",  // Nombre de tu aplicación
-            theme: "light",
-            containerId: "world-id-button",  // Este ID debe estar en tu HTML
-            onSuccess: (proof) => {
-                console.log("Verificación exitosa:", proof);
-                sessionStorage.setItem("verificado", "true");  // Almacenar que el usuario está verificado
-                alert("¡Verificación exitosa! Ahora puedes continuar.");
-                document.getElementById("user-status").textContent = "Autenticado";
-                document.getElementById("game-section").style.display = "block";  // Mostrar sección de apuestas
-            },
-            onError: (error) => {
-                console.error("Error en la verificación:", error);
-                alert("Hubo un error al verificar tu World ID.");
-            }
-        });
-    </script>
+    <script src="https://cdn.jsdelivr.net/npm/@worldcoin/idkit"></script>
+    <script>
+        async function verifyWithWorldID() {
+            try {
+                const result = await IDKit.open({
+                    action: "play_game",
+                    signal: "unique_user",
+                    app_id: "tu-app-id", // Sustituye con tu app_id
+                    onSuccess: async (response) => {
+                        document.getElementById("user-status").textContent = "Autenticado";
+                        document.getElementById("game-section").style.display = "block";
+                        
+                        // Enviar proof al servidor para verificar
+                        const proof = response.proof;
+                        const verifyResponse = await fetch('/verify-proof', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ proof }),
+                        });
 
+                        const result = await verifyResponse.json();
+                        if (result.verified) {
+                            alert("¡Verificación exitosa! Ahora puedes apostar.");
+                        } else {
+                            alert("No se pudo verificar al usuario.");
+                        }
+                    },
+                });
+            } catch (error) {
+                console.error("Error en la verificación:", error);
+            }
+        }
+        document.getElementById("verify-worldid").addEventListener("click", verifyWithWorldID);
+    </script>
 </body>
 </html>
