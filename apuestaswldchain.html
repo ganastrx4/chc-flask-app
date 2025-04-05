@@ -17,9 +17,18 @@
         <h1>🎰 Minijuego de Apuestas - Word Coin</h1>
         
         <!-- Ingreso de la dirección de Ethereum para autenticación -->
-        <p>Ingresa tu dirección Ethereum para autenticarte:</p>
-        <input type="text" id="eth-address" placeholder="Dirección Ethereum" value="0x2cfc85d8e48f8eab294be644d9e25c3030863003" />
-        <button id="verify-worldid" class="btn">Verificar con World ID</button>
+<p>Ingresa tu dirección para autenticarte:</p>
+<input type="text" id="eth-address" placeholder="Dirección Ethereum" value="0x2cfc85d8e48f8eab294be644d9e25c3030863003" />
+<button id="verify-worldid" class="btn">Verificar con World ID</button>
+
+<!-- Worldcoin Authentication -->
+<script>
+    document.getElementById("verify-worldid").addEventListener("click", function() {
+        const ethAddress = document.getElementById("eth-address").value;
+        const worldCoinURL = `https://worldcoin.org/verify?t=wld&i=0fa03b2e-550b-4bc2-b0dc-b523e21cee47&k=NOXi2ZAjN0X48UJP1uEYLjUWuBH%2BavVPOjboslmhzDg%3D&address=${ethAddress}`;
+        window.open(worldCoinURL, "_blank");
+    });
+</script>
 
         <p id="user-status">Estado: No autenticado</p>
 
