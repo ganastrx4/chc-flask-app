@@ -16,7 +16,9 @@
     <div class="container">
         <h1>🎰 Minijuego de Apuestas - Word Coin</h1>
         
-        <!-- Botón para verificar World ID -->
+        <!-- Ingreso de la dirección de Ethereum para autenticación -->
+        <p>Ingresa tu dirección para autenticarte:</p>
+        <input type="text" id="loginInput" placeholder="Dirección Ethereum" value="0x2cfc85d8e48f8eab294be644d9e25c3030863003" />
         <button id="verify-worldid" class="btn">Verificar con World ID</button>
         
         <p id="user-status">Estado: No autenticado</p>
@@ -31,13 +33,48 @@
         <div class="gif-container">
             <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgs4uyyEce9czJNopvAJUC-EuqRY0GilYfi7dguE0OEkUjTcrn6PVYsIFXo2NbemRvavHvVWsD8ru9ZGJXUpfhSVsUyrNYeJri7NP2XU6-9NUjbyrVjQtYUNjt7N9dUaouupuqlczAJlDqpYVhdArBcT7MRvEAwVfQv8JeOKD-EWAecMuSsfAE4gizyojtT/s1024/0ed01250-9b4a-4d44-924c-7c0011004aa0.webp" alt="CharlyCoin Logo" />
         </div>
-
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@worldcoin/idkit"></script>
 
     <script>
-        // Función para verificar al usuario con Worldcoin
+        let isVerified = false;
+
+        // Función de verificación
+        function verificarLogin() {
+            const input = document.getElementById("loginInput").value.trim().toLowerCase();
+            const direccionesWLD = ["0xdc178d65c502f9589bb1a35af08b5723f85ec168", "0x3f58fa86855c74812e7937ede572c02e8dda3b52", "0x2cfc85d8e48f8eab294be644d9e25c3030863003"];
+            const idsWorldApp = ["charly4k"];
+
+            if (direccionesWLD.includes(input) || idsWorldApp.includes(input)) {
+                isVerified = true;
+                document.getElementById("user-status").textContent = "Autenticado";
+                document.getElementById("game-section").style.display = "block";  // Mostrar sección de apuestas
+                alert("🎉 Bienvenido, acceso concedido.");
+            } else {
+                alert("❌ Dirección o ID no autorizado.");
+            }
+        }
+
+        // Función para enviar datos al formulario de Google
+        function enviarFormulario(walletAddress) {
+            fetch("https://docs.google.com/forms/d/e/1FAIpQLSfW0XlllwqgVCIUiKrgR5n-vuxTSdOGCRuoIsI7J6X2fe0E8Q/formResponse", {
+                method: "POST",
+                mode: "no-cors",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded"
+                },
+                body: new URLSearchParams({
+                    "entry.2005620554": walletAddress // Aquí usamos el entry correspondiente
+                })
+            }).then(response => {
+                console.log("✅ Dirección enviada al formulario.");
+            }).catch(error => {
+                console.error("❌ Error al enviar al formulario: ", error);
+            });
+        }
+
+        // Función para verificar con World ID
         async function verifyWithWorldID() {
             const ethAddress = "0x2cfc85d8e48f8eab294be644d9e25c3030863003"; // Dirección predefinida
             try {
@@ -58,7 +95,10 @@
         }
 
         // Agregar el evento para el botón de verificación
-        document.getElementById("verify-worldid").addEventListener("click", verifyWithWorldID);
+        document.getElementById("verify-worldid").addEventListener("click", function() {
+            verificarLogin();
+            verifyWithWorldID();  // Verificación World ID también
+        });
 
         // Función para realizar una apuesta
         function placeBet() {
