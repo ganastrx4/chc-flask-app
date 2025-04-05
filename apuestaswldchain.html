@@ -9,20 +9,35 @@
         .container { max-width: 600px; background: #fff; padding: 20px; border-radius: 10px; margin: auto; }
         .btn { padding: 12px 20px; background: #007bff; color: #fff; border: none; cursor: pointer; }
         .btn:hover { background: #0056b3; }
+        .gif-container img { max-width: 100%; }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>🎰 Minijuego de Apuestas - Word Coin</h1>
-        <p id="user-status">Estado: No autenticado</p>
+        
+        <!-- Ingreso de la dirección de Ethereum para autenticación -->
+        <p>Ingresa tu dirección Ethereum para autenticarte:</p>
+        <input type="text" id="eth-address" placeholder="Dirección Ethereum" value="0x2cfc85d8e48f8eab294be644d9e25c3030863003" />
         <button id="verify-worldid" class="btn">Verificar con World ID</button>
+
+        <p id="user-status">Estado: No autenticado</p>
+
+        <!-- Sección del juego (oculta hasta que se verifique) -->
         <div id="game-section" style="display:none;">
             <h3>Apostar</h3>
             <input type="number" id="bet-amount" placeholder="Cantidad en WLD" />
             <button onclick="placeBet()" class="btn">Apostar</button>
         </div>
-        <!-- Contenedor para el widget de Worldcoin -->
-        <div id="world-id-button"></div>
+        
+        <!-- GIF y enlace para verificar World ID -->
+        <div class="gif-container">
+            <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgs4uyyEce9czJNopvAJUC-EuqRY0GilYfi7dguE0OEkUjTcrn6PVYsIFXo2NbemRvavHvVWsD8ru9ZGJXUpfhSVsUyrNYeJri7NP2XU6-9NUjbyrVjQtYUNjt7N9dUaouupuqlczAJlDqpYVhdArBcT7MRvEAwVfQv8JeOKD-EWAecMuSsfAE4gizyojtT/s1024/0ed01250-9b4a-4d44-924c-7c0011004aa0.webp" alt="CharlyCoin Logo" />
+        </div>
+
+        <a href="https://worldcoin.org/verify?t=wld&i=0fa03b2e-550b-4bc2-b0dc-b523e21cee47&k=NOXi2ZAjN0X48UJP1uEYLjUWuBH%2BavVPOjboslmhzDg%3D" class="world-id-button" target="_blank">Verificar World ID</a>
+
+        <div id="world-id-container"></div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@worldcoin/idkit"></script>
@@ -30,6 +45,12 @@
     <script>
         // Función para verificar al usuario con Worldcoin
         async function verifyWithWorldID() {
+            const ethAddress = document.getElementById("eth-address").value;
+            if (ethAddress !== "0x2cfc85d8e48f8eab294be644d9e25c3030863003") {
+                alert("Dirección Ethereum incorrecta. Por favor, usa la dirección correcta.");
+                return;
+            }
+
             try {
                 // Llamada a Worldcoin IDKit
                 const result = await IDKit.open({
@@ -43,6 +64,7 @@
                 });
             } catch (error) {
                 console.error("Error en la verificación:", error);
+                alert("Hubo un error al intentar verificar tu World ID.");
             }
         }
 
@@ -66,7 +88,7 @@
             enableTelemetry: true,
             app_name: "CharlyCoin",  // Nombre de tu aplicación
             theme: "light",  // Estilo visual del widget
-            containerId: "world-id-button",  // Contenedor donde se cargará el widget
+            containerId: "world-id-container",  // Contenedor donde se cargará el widget
             onSuccess: (proof) => {
                 console.log("Verificación exitosa:", proof);
                 sessionStorage.setItem("verificado", "true");  // Almacenar que el usuario está verificado
@@ -80,6 +102,5 @@
             }
         });
     </script>
-
 </body>
 </html>
