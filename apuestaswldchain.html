@@ -10,6 +10,9 @@
         .btn { padding: 12px 20px; background: #007bff; color: #fff; border: none; cursor: pointer; }
         .btn:hover { background: #0056b3; }
         .gif-container img { max-width: 100%; }
+        .history { margin-top: 20px; padding: 10px; background-color: #e9ecef; border-radius: 8px; }
+        .history ul { list-style-type: none; padding: 0; }
+        .history li { padding: 5px; }
     </style>
 </head>
 <body>
@@ -26,12 +29,28 @@
         <!-- Sección del juego (oculta hasta que se verifique) -->
         <div id="game-section" style="display:none;">
             <h3>Apostar</h3>
-            <input type="number" id="bet-amount" placeholder="Cantidad en WLD" />
+            <p>Saldo Virtual: <span id="virtual-balance">1000 WLD</span></p>
+            <input type="number" id="bet-amount" placeholder="Cantidad en WLD" min="1" />
+            <p>Selecciona hasta 3 números (1-6):</p>
+            <div id="dice-options">
+                <input type="checkbox" id="num1" value="1"> 1
+                <input type="checkbox" id="num2" value="2"> 2
+                <input type="checkbox" id="num3" value="3"> 3
+                <input type="checkbox" id="num4" value="4"> 4
+                <input type="checkbox" id="num5" value="5"> 5
+                <input type="checkbox" id="num6" value="6"> 6
+            </div>
             <button onclick="placeBet()" class="btn">Apostar</button>
+            <div class="gif-container" id="dice-gif">
+                <!-- Aquí agregaremos una animación de dados más adelante -->
+            </div>
         </div>
 
-        <div class="gif-container">
-            <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgs4uyyEce9czJNopvAJUC-EuqRY0GilYfi7dguE0OEkUjTcrn6PVYsIFXo2NbemRvavHvVWsD8ru9ZGJXUpfhSVsUyrNYeJri7NP2XU6-9NUjbyrVjQtYUNjt7N9dUaouupuqlczAJlDqpYVhdArBcT7MRvEAwVfQv8JeOKD-EWAecMuSsfAE4gizyojtT/s1024/0ed01250-9b4a-4d44-924c-7c0011004aa0.webp" alt="CharlyCoin Logo" />
+        <div class="history">
+            <h4>Historial de Apuestas</h4>
+            <ul id="bet-history">
+                <!-- Aquí se mostrarán las apuestas -->
+            </ul>
         </div>
     </div>
 
@@ -39,6 +58,8 @@
 
     <script>
         let isVerified = false;
+        let virtualBalance = 1000;  // Saldo virtual inicial
+        let betHistory = [];
 
         // Función de verificación
         function verificarLogin() {
@@ -56,59 +77,72 @@
             }
         }
 
-        // Función para enviar datos al formulario de Google
-        function enviarFormulario(walletAddress) {
-            fetch("https://docs.google.com/forms/d/e/1FAIpQLSfW0XlllwqgVCIUiKrgR5n-vuxTSdOGCRuoIsI7J6X2fe0E8Q/formResponse", {
-                method: "POST",
-                mode: "no-cors",
-                headers: {
-                    "Content-Type": "application/x-www-form-urlencoded"
-                },
-                body: new URLSearchParams({
-                    "entry.2005620554": walletAddress // Aquí usamos el entry correspondiente
-                })
-            }).then(response => {
-                console.log("✅ Dirección enviada al formulario.");
-            }).catch(error => {
-                console.error("❌ Error al enviar al formulario: ", error);
+        // Función para realizar una apuesta
+        function placeBet() {
+            const betAmount = parseInt(document.getElementById("bet-amount").value);
+            if (betAmount > virtualBalance || betAmount <= 0) {
+                alert("No tienes suficiente saldo o la cantidad no es válida.");
+                return;
+            }
+
+            const selectedNumbers = [];
+            for (let i = 1; i <= 6; i++) {
+                if (document.getElementById(`num${i}`).checked) {
+                    selectedNumbers.push(i);
+                }
+            }
+
+            if (selectedNumbers.length === 0) {
+                alert("Selecciona al menos un número.");
+                return;
+            }
+
+            // Lógica del juego de dados
+            const diceRoll = Math.floor(Math.random() * 6) + 1;
+            let winAmount = 0;
+
+            if (selectedNumbers.includes(diceRoll)) {
+                if (selectedNumbers.length === 1) {
+                    winAmount = betAmount * 1;  // 100% si se elige solo 1 número
+                } else if (selectedNumbers.length === 2) {
+                    winAmount = betAmount * 0.2;  // 20% si se eligen 2 números
+                } else if (selectedNumbers.length === 3) {
+                    winAmount = betAmount * 0.1;  // 10% si se eligen 3 números
+                }
+                virtualBalance += winAmount;
+                betHistory.push(`Apostaste ${betAmount} WLD, ganaste ${winAmount} WLD (Número: ${diceRoll})`);
+            } else {
+                virtualBalance -= betAmount;
+                betHistory.push(`Apostaste ${betAmount} WLD, perdiste (Número: ${diceRoll})`);
+            }
+
+            // Actualizar el historial y saldo
+            updateHistory();
+            updateBalance();
+
+            alert(`Tiraste el dado: ${diceRoll}. Saldo actual: ${virtualBalance} WLD.`);
+        }
+
+        // Función para actualizar el historial de apuestas
+        function updateHistory() {
+            const historyList = document.getElementById("bet-history");
+            historyList.innerHTML = "";
+            betHistory.forEach(entry => {
+                const listItem = document.createElement("li");
+                listItem.textContent = entry;
+                historyList.appendChild(listItem);
             });
         }
 
-        // Función para verificar con World ID
-        async function verifyWithWorldID() {
-            const ethAddress = "0x2cfc85d8e48f8eab294be644d9e25c3030863003"; // Dirección predefinida
-            try {
-                // Llamada a Worldcoin IDKit
-                const result = await IDKit.open({
-                    action: "play_game",  // Acción para el juego
-                    signal: "unique_user",  // Signal único para verificar usuario
-                    app_id: "app_7686f9027d3e3c0b53d987a3caf1e111",  // Tu app_id de Worldcoin
-                    onSuccess: async (response) => {
-                        document.getElementById("user-status").textContent = "Autenticado";
-                        document.getElementById("game-section").style.display = "block";  // Mostrar sección de apuestas
-                    },
-                });
-            } catch (error) {
-                console.error("Error en la verificación:", error);
-                alert("Hubo un error al intentar verificar tu World ID.");
-            }
+        // Función para actualizar el saldo
+        function updateBalance() {
+            document.getElementById("virtual-balance").textContent = virtualBalance + " WLD";
         }
 
         // Agregar el evento para el botón de verificación
         document.getElementById("verify-worldid").addEventListener("click", function() {
             verificarLogin();
-            verifyWithWorldID();  // Verificación World ID también
         });
-
-        // Función para realizar una apuesta
-        function placeBet() {
-            const betAmount = document.getElementById("bet-amount").value;
-            if (betAmount && betAmount > 0) {
-                alert(`¡Apuesta realizada! Has apostado ${betAmount} WLD.`);
-            } else {
-                alert("Por favor, ingresa una cantidad válida para apostar.");
-            }
-        }
     </script>
 </body>
 </html>
