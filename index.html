@@ -1,142 +1,163 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bienvenida a CharlyCoin</title>
-    <link rel="stylesheet" href="style.css"> <!-- Asegúrate de que este archivo esté correctamente vinculado -->
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #1e1e2f;
-            color: #ffffff;
-            text-align: center;
-            margin: 0;
-            padding: 0;
-        }
-        .container {
-            max-width: 600px;
-            margin: 50px auto;
-            padding: 20px;
-            background: #2c2c3e;
-            border-radius: 10px;
-            box-shadow: 0px 0px 15px rgba(255, 255, 255, 0.1);
-        }
-        input, button {
-            width: 80%;
-            padding: 10px;
-            margin: 10px 0;
-            border: none;
-            border-radius: 5px;
-        }
-        button {
-            background: #f39c12;
-            color: white;
-            cursor: pointer;
-            font-weight: bold;
-        }
-        button:hover { background: #e67e22; }
-        #cryptoInfo {
-            display: none;
-            margin-top: 20px;
-            background: #3a3a55;
-            padding: 15px;
-            border-radius: 10px;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
-            background: #3a3a55;
-            border-radius: 10px;
-            overflow: hidden;
-        }
-        th, td {
-            padding: 10px;
-            text-align: center;
-            border-bottom: 1px solid #444;
-        }
-        th {
-            background: #f39c12;
-            color: #000;
-        }
-        h3 { color: #f39c12; margin-top: 20px; }
-        .binance-link {
-            display: block;
-            margin-top: 20px;
-            color: #f39c12;
-            font-weight: bold;
-            text-decoration: none;
-        }
-        .grafica-link {
-            display: block;
-            margin-top: 20px;
-            color: #e67e22;
-            font-weight: bold;
-            text-decoration: none;
-        }
-        .grafica-link:hover {
-            color: #f39c12;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Bienvenida a CharlyCoin</title>
+  <link rel="stylesheet" href="style.css"/>
+  <script src="https://unpkg.com/@worldcoin/id/dist/world-id.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #1e1e2f;
+      color: #ffffff;
+      text-align: center;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 600px;
+      margin: 50px auto;
+      padding: 20px;
+      background: #2c2c3e;
+      border-radius: 10px;
+      box-shadow: 0px 0px 15px rgba(255, 255, 255, 0.1);
+    }
+    input, button {
+      width: 80%;
+      padding: 10px;
+      margin: 10px 0;
+      border: none;
+      border-radius: 5px;
+    }
+    button {
+      background: #f39c12;
+      color: white;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    button:hover { background: #e67e22; }
+    #cryptoInfo {
+      display: none;
+      margin-top: 20px;
+      background: #3a3a55;
+      padding: 15px;
+      border-radius: 10px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      background: #3a3a55;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    th, td {
+      padding: 10px;
+      text-align: center;
+      border-bottom: 1px solid #444;
+    }
+    th {
+      background: #f39c12;
+      color: #000;
+    }
+    h3 { color: #f39c12; margin-top: 20px; }
+    .binance-link {
+      display: block;
+      margin-top: 20px;
+      color: #f39c12;
+      font-weight: bold;
+      text-decoration: none;
+    }
+    .grafica-link {
+      display: block;
+      margin-top: 20px;
+      color: #e67e22;
+      font-weight: bold;
+      text-decoration: none;
+    }
+    .grafica-link:hover { color: #f39c12; }
 
-        /* Estilo para la imagen */
-        .gif-container img {
-            width: 100%;
-            height: auto;
-            max-width: 400px; /* Ajusta el tamaño máximo si es necesario */
-            margin: 0 auto;
-        }
+    .gif-container img {
+      width: 100%;
+      height: auto;
+      max-width: 400px;
+      margin: 0 auto;
+    }
 
-        /* Estilo para los enlaces */
-        .next-button, .grafica-link, .binance-link {
-            color: #ffffff; /* Asegúrate de que los enlaces sean legibles */
-            text-decoration: none;
-            font-size: 16px;
-            margin: 10px 0;
-            display: inline-block;
-            padding: 10px;
-            border-radius: 5px;
-            background: #f39c12;
-            transition: background-color 0.3s ease;
-        }
-        
-        /* Cambio de color de los enlaces al pasar el ratón */
-        .next-button:hover, .grafica-link:hover, .binance-link:hover {
-            background: #e67e22;
-        }
+    .next-button, .grafica-link, .binance-link {
+      color: #ffffff;
+      text-decoration: none;
+      font-size: 16px;
+      margin: 10px 0;
+      display: inline-block;
+      padding: 10px;
+      border-radius: 5px;
+      background: #f39c12;
+      transition: background-color 0.3s ease;
+    }
 
-        /* Estilo específico para el botón World ID */
-        .world-id-button {
-            background-color: #28a745;
-            color: white;
-            padding: 12px 20px;
-            text-decoration: none;
-            border-radius: 5px;
-            font-size: 16px;
-            display: inline-block;
-            margin-top: 20px;
-            transition: background-color 0.3s;
-        }
+    .next-button:hover, .grafica-link:hover, .binance-link:hover {
+      background: #e67e22;
+    }
 
-        .world-id-button:hover {
-            background-color: #218838;
-        }
-    </style>
+    .world-id-button {
+      background-color: #28a745;
+      color: white;
+      padding: 12px 20px;
+      text-decoration: none;
+      border-radius: 5px;
+      font-size: 16px;
+      display: inline-block;
+      margin-top: 20px;
+      transition: background-color 0.3s;
+    }
+
+    .world-id-button:hover {
+      background-color: #218838;
+    }
+
+    .locked {
+      opacity: 0.5;
+      pointer-events: none;
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <div class="gif-container">
-            <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgs4uyyEce9czJNopvAJUC-EuqRY0GilYfi7dguE0OEkUjTcrn6PVYsIFXo2NbemRvavHvVWsD8ru9ZGJXUpfhSVsUyrNYeJri7NP2XU6-9NUjbyrVjQtYUNjt7N9dUaouupuqlczAJlDqpYVhdArBcT7MRvEAwVfQv8JeOKD-EWAecMuSsfAE4gizyojtT/s1024/0ed01250-9b4a-4d44-924c-7c0011004aa0.webp" alt="CharlyCoin Logo">
-        </div>
-        
-        <!-- Botón para redirigir al link de Worldcoin -->
-        <a href="https://worldcoin.org/verify?t=wld&i=641219dc-c1af-4544-99fa-1e4b121d418d&k=cPAYJT83nqoau4ztdtPHiSeTxePvhrgzMvwzcBJnNyI%3D" class="world-id-button" target="_blank">Verificar World ID</a>
-        
-        <!-- Enlaces de navegación -->
-        <a href="./buscador.html" class="next-button">Valor de las Criptomonedas</a>
-        <a href="./next_page.html" class="grafica-link">WLD Gráfica en Vivo</a>
-        <a href="./reclamarchun.html" class="next-button">RECLAMA CHUN</a>
-        <a href="./wdd.html" class="next-button">MULTIPLICA TU WDD</a>
+  <div class="container">
+    <div class="gif-container">
+      <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgs4uyyEce9czJNopvAJUC-EuqRY0GilYfi7dguE0OEkUjTcrn6PVYsIFXo2NbemRvavHvVWsD8ru9ZGJXUpfhSVsUyrNYeJri7NP2XU6-9NUjbyrVjQtYUNjt7N9dUaouupuqlczAJlDqpYVhdArBcT7MRvEAwVfQv8JeOKD-EWAecMuSsfAE4gizyojtT/s1024/0ed01250-9b4a-4d44-924c-7c0011004aa0.webp" alt="CharlyCoin Logo" />
     </div>
+
+    <div id="world-id-container"></div>
+
+    <div id="contenidoProtegido" class="locked">
+      <a href="./buscador.html" class="next-button">Valor de las Criptomonedas</a>
+      <a href="./next_page.html" class="grafica-link">WLD Gráfica en Vivo</a>
+      <a href="./reclamarchun.html" class="next-button">RECLAMA CHUN</a>
+      <a href="./wdd.html" class="next-button">MULTIPLICA TU WDD</a>
+    </div>
+  </div>
+
+  <script>
+    let isVerified = false;
+
+    new WorldIDWidget({
+      enableTelemetry: false,
+      signal: "charlycoin-session",
+      app_name: "CharlyCoin App",
+      theme: "dark",
+      container_id: "world-id-container",
+      on_success: function (proof) {
+        console.log("✅ Verificado:", proof);
+        isVerified = true;
+        document.getElementById("contenidoProtegido").classList.remove("locked");
+        alert("Autenticación exitosa. ¡Bienvenido a CharlyCoin!");
+      },
+      on_error: function (error) {
+        console.error("❌ Error de World ID:", error);
+      },
+    });
+  </script>
 </body>
 </html>
