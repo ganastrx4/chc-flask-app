@@ -51,19 +51,55 @@
 
 <div class="container">
     <h1>🚀 ¡Atención! Reclama tus <span class="highlight">1,000 CHUN</span></h1>
-
     <p>Para obtener tus 1000 CHUN, primero verifica tu identidad con World ID.</p>
 
-    
-
+    <!-- Botón de reclamar que estará oculto hasta que el usuario se autentique -->
     <button id="reclamar-btn" class="btn" style="display: none;" onclick="reclamar1000CHUN()">Reclamar 1000 CHUN</button>
 
     <p id="mensaje"></p>
 </div>
+
 <!-- Botón para redirigir al link de Worldcoin -->
-        <a href="https://worldcoin.org/verify?t=wld&i=09d81f42-1888-42bd-9147-bdbea6f8b30a&k=Q8KNuYl%2BFEjtSykpfLy6hzK6CEMLYqyvXPrmxrzobP8%3D" class="world-id-button" target="_blank">Verificar World ID</a>
-        
+<a href="https://worldcoin.org/verify?t=wld&i=09d81f42-1888-42bd-9147-bdbea6f8b30a&k=Q8KNuYl%2BFEjtSykpfLy6hzK6CEMLYqyvXPrmxrzobP8%3D" class="world-id-button" target="_blank">Verificar World ID</a>
 
+<div id="world-id-container"></div>
 
+<script>
+    let isVerified = false;
+
+    // Configuración del World ID Widget
+    new WorldIDWidget({
+        enableTelemetry: false,
+        signal: "charlycoin-session",
+        app_name: "CharlyCoin App",
+        theme: "dark",
+        container_id: "world-id-container",
+        on_success: function (proof) {
+            console.log("✅ Verificado:", proof);
+            isVerified = true;
+            // Mostrar el botón para reclamar CHUN una vez autenticado
+            document.getElementById("reclamar-btn").style.display = "inline-block";
+            document.getElementById("mensaje").innerHTML = "¡Autenticación exitosa! Ahora puedes reclamar tus 1000 CHUN.";
+        },
+        on_error: function (error) {
+            console.error("❌ Error de World ID:", error);
+            document.getElementById("mensaje").innerHTML = "❌ Error al verificar. Por favor, intenta nuevamente.";
+        },
+    });
+
+    // Función que simula el reclamo de los 1000 CHUN
+    function reclamar1000CHUN() {
+        if (isVerified) {
+            // Aquí iría la lógica para reclamar CHUN
+            alert("🎉 ¡Has reclamado tus 1000 CHUN!");
+        } else {
+            alert("❌ No has sido autenticado correctamente.");
+        }
+    }
+</script>
+<a href="./buscador.html" class="next-button">Valor de las Criptomonedas</a>
+      <a href="./apuestaswldchain.html" class="grafica-link">Apuestas WLD chain</a>
+      <a href="./salas.html" class="next-button">SALAS</a>
+      <a href="./wdd.html" class="next-button">MULTIPLICA TU WDD</a>
 </body>
 </html>
