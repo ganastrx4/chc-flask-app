@@ -82,7 +82,17 @@
 
     <div class="link-container">
         <p>¡Obtén NUEVO TOKEN WDD GRATIS!</p>
-        <a href="#wdd-page" class="link-to-section">Ver la página de WDD</a>
+        <div class="d-flex justify-content-center align-items-center mt-3">
+            <a href="./wdd.html" class="btn btn-warning btn-lg">Ver la página de WDD</a>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-center align-items-center mt-4">
+        <a href="./buscador.html" class="btn btn-warning btn-lg">🔍 Ver precios de CRIPTOMONEDAS</a>
+    </div>
+
+    <div class="d-flex justify-content-center align-items-center mt-4">
+        <a href="./reclamarchun.html" class="btn btn-warning btn-lg">🌐 Reclamar CHUN</a>
     </div>
 
     <script>
@@ -168,36 +178,7 @@
 
         // Cargar datos iniciales de la gráfica
         fetchChartData("1m");
-
-        // Lógica para navegar entre secciones sin recargar la página
-        $(".link-to-section").click(function(e) {
-            e.preventDefault();  // Prevenir el comportamiento por defecto del enlace
-            let target = $(this).attr("href");
-            $("html, body").animate({
-                scrollTop: $(target).offset().top
-            }, 500);
-        });
     </script>
 
-    <div class="separator" style="clear: both; text-align: center;">
-        <a href="https://join.worldcoin.org/1JL2CKB" imageanchor="1" rel="nofollow" style="margin-left: 1em; margin-right: 1em;" target="_blank">
-            <img border="0" data-original-height="126" data-original-width="229" height="126" src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjP0RyUPYn_GyC5Z6BV3D9k8KGsxu-3VBNK-Ns0_iH7rUeV-_Zp0P4c2i9SOZGYPQphRhs2U-AaLO24acTySo8qqQU1bZGvZAUUy0p3pwAky2oYVEVHccROi50EWIv5K8IVomnEat89BdSGWWo3j7S0ktr9KKmATgYezuc6O8ojKUh62rXSaBzO05yVFZ6L/s1600/wld.JPG" width="229" />
-        </a>
-    </div><br />
-
-    <div id="wdd-page" class="link-container">
-        <p>¡Obtén NUEVO TOKEN WDD GRATIS!</p>
-        <div class="d-flex justify-content-center align-items-center mt-3">
-            <a href="#" class="btn btn-warning btn-lg">Ver la página de WDD</a>
-        </div>
-    </div>
-
-    <div class="d-flex justify-content-center align-items-center mt-4">
-        <a href="#buscador" class="btn btn-warning btn-lg">🔍 Ver precios de CRIPTOMONEDAS</a>
-    </div>
-
-    <div class="d-flex justify-content-center align-items-center mt-4">
-        <a href="#reclamarchun" class="btn btn-warning btn-lg">🌐 Reclamar CHUN</a>
-    </div>
 </body>
 </html>
