@@ -21,6 +21,8 @@
             <input type="number" id="bet-amount" placeholder="Cantidad en WLD" />
             <button onclick="placeBet()" class="btn">Apostar</button>
         </div>
+        <!-- Contenedor para el widget de Worldcoin -->
+        <div id="world-id-button"></div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@worldcoin/idkit"></script>
@@ -33,7 +35,7 @@
                 const result = await IDKit.open({
                     action: "play_game",  // Acción para el juego
                     signal: "unique_user",  // Signal único para verificar usuario
-                    app_id: "tu-app-id",  // Reemplazar con tu propio app_id de Worldcoin
+                    app_id: "app_7686f9027d3e3c0b53d987a3caf1e111",  // Tu app_id de Worldcoin
                     onSuccess: async (response) => {
                         document.getElementById("user-status").textContent = "Autenticado";
                         document.getElementById("game-section").style.display = "block";  // Mostrar sección de apuestas
@@ -56,17 +58,15 @@
                 alert("Por favor, ingresa una cantidad válida para apostar.");
             }
         }
-    </script>
 
-    <script>
         // Crear el widget de Worldcoin para verificar al usuario
         new WorldIDWidget({
-            action_id: "app_7686f9027d3e3c0b53d987a3caf1e111",  // Cambiar con tu action_id real
-            signal: "user_login",  // Acción de inicio de sesión
+            action_id: "app_7686f9027d3e3c0b53d987a3caf1e111",  // ID de tu aplicación en Worldcoin
+            signal: "user_login",  // Acción para inicio de sesión
             enableTelemetry: true,
             app_name: "CharlyCoin",  // Nombre de tu aplicación
-            theme: "light",
-            containerId: "world-id-button",  // Este ID debe estar en tu HTML
+            theme: "light",  // Estilo visual del widget
+            containerId: "world-id-button",  // Contenedor donde se cargará el widget
             onSuccess: (proof) => {
                 console.log("Verificación exitosa:", proof);
                 sessionStorage.setItem("verificado", "true");  // Almacenar que el usuario está verificado
