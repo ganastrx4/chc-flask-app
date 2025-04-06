@@ -19,15 +19,87 @@
     <div class="container">
         <h1>🎰 Minijuego de Apuestas - Word Coin</h1>
         
-        <!-- Ingreso de la dirección de Ethereum para autenticación -->
-        <p>Ingresa tu dirección para autenticarte:</p>
-        <input type="text" id="loginInput" placeholder="Dirección Ethereum" value="0x2cfc85d8e48f8eab294be644d9e25c3030863003" />
-        <button id="verify-worldid" class="btn">Verificar con World ID</button>
-        
-        <p id="user-status">Estado: No autenticado</p>
+        <!-- BOTÓN SIGN IN WITH WORLD ID -->
+<div id="world-id-button"></div>
 
-        <!-- Sección del juego (oculta hasta que se verifique) -->
-        <div id="game-section" style="display:none;">
+<!-- Formulario para verificación manual -->
+<form id="verifyForm">
+    <label for="worldId">World ID:</label>
+    <input type="text" id="worldId" name="worldId" required>
+    <button type="submit">Verificar World ID</button>
+</form>
+
+<!-- Enlaces de navegación -->
+<a href="./buscador.html" class="next-button">Valor de las Criptomonedas</a>
+<a href="./next_page.html" class="grafica-link">WLD Gráfica en Vivo</a>
+<a href="./reclamarchun.html" class="next-button">RECLAMA CHUN</a>
+<a href="./wdd.html" class="next-button">MULTIPLICA TU WDD</a>
+
+<!-- Script de World ID -->
+<script src="https://cdn.jsdelivr.net/npm/@worldcoin/id"></script>
+<script>
+    function enviarAFomularioGoogle(worldId) {
+        const formUrl = 'https://docs.google.com/forms/d/e/1FAIpQLSe2MihEZP0H6OQZUEonJo03fGlzeyGRz7m7mA82qkBWKH0gZg/formResponse';
+        const formData = new FormData();
+        formData.append('entry.2005620554', worldId); // Campo del formulario de Google
+
+        fetch(formUrl, {
+            method: 'POST',
+            mode: 'no-cors', // Necesario para que no bloquee la redirección
+            body: formData
+        }).then(() => {
+            console.log("World ID enviado al formulario.");
+        }).catch(error => {
+            console.error("Error al enviar al formulario:", error);
+        });
+    }
+
+    new WorldIDWidget({
+        action_id: "app_7686f9027d3e3c0b53d987a3caf1e111",
+        signal: "user_login",
+        enableTelemetry: true,
+        app_name: "CharlyCoin",
+        theme: "light",
+        containerId: "world-id-button",
+        onSuccess: (proof) => {
+            console.log("Verificación exitosa:", proof);
+            alert("¡Verificación exitosa!");
+
+            // Enviar al formulario de Google
+            if (proof && proof.merkle_root) {
+                enviarAFomularioGoogle(proof.merkle_root);
+            }
+        },
+        onError: (error) => {
+            console.error("Error en la verificación:", error);
+            alert("Error en la verificación");
+        }
+    });
+
+    // Verificación manual
+    document.getElementById('verifyForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+
+        const worldId = document.getElementById('worldId').value;
+        enviarAFomularioGoogle(worldId);
+
+        fetch('/api/verify', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ world_id: worldId })
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log('Respuesta de la verificación:', data);
+            alert('Verificación completada');
+        })
+        .catch(error => {
+            console.error('Error en la verificación:', error);
+        });
+    });
+</script>
+
+        <div id="game-section">
             <h3>Apostar</h3>
             <p>Saldo Virtual: <span id="virtual-balance">1000 WLD</span></p>
             <input type="number" id="bet-amount" placeholder="Cantidad en WLD" min="1" />
