@@ -1,4 +1,4 @@
-<html lang="es">
+Ya <html lang="es">
 <head>
     <meta charset="UTF-8"></meta>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"></meta>
@@ -69,7 +69,31 @@
         }
         .grafica-link:hover { color: #e67e22; }
         .binance-link:hover { color: #e67e22; }
-        
+
+        .link-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 30px;
+  }
+        .link-box {
+    background: linear-gradient(135deg, #6c47ff, #a078ff);
+    border-radius: 15px;
+    padding: 20px 30px;
+    color: white;
+    font-size: 18px;
+    font-weight: bold;
+    text-decoration: none;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s, box-shadow 0.3s;
+    text-align: center;
+    min-width: 200px;
+            }
+        .link-box:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+  }
     </style>
 </head>
 <body>
@@ -178,10 +202,12 @@
         }
     </script>
 <br>
- <a href="./dados.html" class="next-button">apuestas wld chain</a>
-      <a href="./next_page.html" class="grafica-link">WLD Gráfica en Vivo</a>
-      <a href="./ruleta.html" class="next-button">ruleta</a>
-      <a href="./salas.html" class="next-button">Salas</a>
+    <div class="link-container">
+  <a href="./dados.html" class="link-box">Apuestas WLD Chain</a>
+  <a href="./next_page.html" class="link-box">WLD Gráfica en Vivo</a>
+  <a href="./ruleta.html" class="link-box">Ruleta</a>
+  <a href="./ganarchun.html" class="link-box">Ganar CHUN y CHC</a>
+    </div>
 
 </body>
 </html>
