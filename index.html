@@ -127,11 +127,22 @@
 
         <!-- Enlaces de navegación -->
         <a href="./ganarchun.html" class="next-button">GANAR CHUN</a>
-        <a href="https://www.pooplaunch.xyz/app/#/launch/0xde8239aeb9730d74548d65dd2fd3ce3f42517395" class="next-button">Compra CHUN</a>  
+        <a href="https://www.pooplaunch.xyz/app/#/launch.html" class="next-button">Compra CHUN</a>  
         <a href="./next_page.html" class="grafica-link">WLD Gráfica en Vivo</a>
         <a href="./dados.html" class="next-button">DADOS</a>
         <a href="./wdd.html" class="next-button">MULTIPLICA TU WDD</a>
     </div>
+    <script>
+  // Detecta si está en un dispositivo móvil
+  const esMovil = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+  if (esMovil) {
+    window.location.href = "https://www.pooplaunch.xyz/app/#/launch/0xde8239aEb9730D74548D65DD2fD3Ce3F42517395";
+  } else {
+    alert("Por favor abre esta página desde World App en tu celular para interactuar con el token.");
+  }
+</script>
+
 
     <!-- Script de World ID -->
     <script src="https://cdn.jsdelivr.net/npm/@worldcoin/id"></script> <!-- Usando CDN -->
