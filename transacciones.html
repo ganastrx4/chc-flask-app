@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>MiAppWLD - Transacciones WLD</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      color: #333;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+      color: #0066cc;
+    }
+    .transaccion {
+      background: #fff;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      padding: 15px;
+      margin-bottom: 10px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .transaccion p {
+      margin: 5px 0;
+    }
+    .error {
+      color: red;
+      font-weight: bold;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Transacciones de tu billetera WLD</h1>
+  <div id="transacciones">
+    Cargando transacciones...
+  </div>
+
+  <script>
+    const direccion = '0xdc178d65c502f9589bb1a35af08b5723f85ec168';
+    const claveAPI = 'BXQZYS9QMU8WXVXQ6XTTE2CH6VV54NXHJB';
+    const url = `https://api.worldscan.org/api?module=account&action=txlist&address=${direccion}&startblock=0&endblock=99999999&page=1&offset=10&sort=desc&apikey=${claveAPI}`;
+
+    fetch(url)
+      .then(response => response.json())
+      .then(data => {
+        const contenedor = document.getElementById('transacciones');
+        contenedor.innerHTML = '';
+        if (data.status === '1' && data.result.length > 0) {
+          data.result.forEach(tx => {
+            const div = document.createElement('div');
+            div.className = 'transaccion';
+            div.innerHTML = `
+              <p><strong>Hash:</strong> ${tx.hash}</p>
+              <p><strong>De:</strong> ${tx.from}</p>
+              <p><strong>Para:</strong> ${tx.to}</p>
+              <p><strong>Monto:</strong> ${parseFloat(tx.value / 1e18).toFixed(6)} WLD</p>
+              <p><strong>Fecha:</strong> ${new Date(tx.timeStamp * 1000).toLocaleString()}</p>
+            `;
+            contenedor.appendChild(div);
+          });
+        } else {
+          contenedor.innerHTML = '<p class="error">No se encontraron transacciones.</p>';
+        }
+      })
+      .catch(error => {
+        document.getElementById('transacciones').innerHTML = '<p class="error">Error al cargar transacciones.</p>';
+        console.error(error);
+      });
+  </script>
+
+</body>
+</html>
