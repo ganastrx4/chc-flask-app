@@ -2,149 +2,74 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-  <title>Estadísticas y Predicción de WLD</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>WLD Precio Light</title>
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-financial@3.3.0/dist/chartjs-chart-financial.min.js"></script>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
   <style>
     body {
       font-family: 'Arial', sans-serif;
-      background-color: #f4f4f4;
+      background-color: #f7f7f7;
       padding: 20px;
     }
     .container {
-      max-width: 850px;
+      max-width: 500px;
       margin: auto;
       background: white;
-      padding: 20px;
+      padding: 15px;
       border-radius: 10px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
     }
-    h1, h2, p, button {
-      font-size: 0.9rem;
-    }
-    #price {
-      font-size: 1.4rem;
-      font-weight: bold;
-      color: #007bff;
-    }
-    .btn-timeframe {
-      margin: 5px;
-      font-weight: bold;
-      font-size: 0.8rem;
-    }
-    canvas {
-      max-width: 100%;
-      margin-top: 20px;
-    }
-    .loading {
-      font-size: 0.9rem;
-      font-weight: bold;
-      color: #dc3545;
-    }
-    .link-container {
-      margin-top: 30px;
-      padding: 10px;
-      background-color: #f0f8ff;
-      border-radius: 8px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    h1 {
+      font-size: 1.2rem;
       text-align: center;
     }
-    .link-container a {
-      color: #007bff;
-      font-size: 0.9rem;
-      font-weight: bold;
-      text-decoration: none;
+    #price {
+      font-size: 1.5rem;
+      color: #28a745;
+      text-align: center;
     }
-    .link-container a:hover {
-      color: #0056b3;
+    canvas {
+      margin-top: 15px;
+      width: 100% !important;
+      height: 250px !important;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1 class="mb-3">📊 Estadísticas de WLD</h1>
-    <h2 class="mt-3">💰 Precio en Tiempo Real</h2>
-    <p>Precio actual: <span id="price">Cargando...</span> USDT</p>
-
-    <h2 class="mt-4">📉 Gráfico de Velas</h2>
-    <p class="loading" id="loadingMsg">Cargando datos...</p>
-
-    <div class="mb-3">
-      <button class="btn btn-primary btn-timeframe" onclick="fetchChartData('1m')">1 Min</button>
-      <button class="btn btn-primary btn-timeframe" onclick="fetchChartData('5m')">5 Min</button>
-      <button class="btn btn-primary btn-timeframe" onclick="fetchChartData('15m')">15 Min</button>
-      <button class="btn btn-primary btn-timeframe" onclick="fetchChartData('1h')">1 Hora</button>
-    </div>
-
-    <canvas id="priceChart"></canvas>
-  </div>
-
-  <div class="link-container">
-    <p>¡Obtén NUEVO TOKEN WDD GRATIS!</p>
-    <div class="d-flex justify-content-center align-items-center mt-3">
-      <a href="./wdd.html" class="btn btn-warning btn-lg">Ver la página de WDD</a>
-    </div>
-  </div>
-
-  <div class="link-container">
-    <div class="d-flex justify-content-center align-items-center mt-4">
-      <a href="./buscador.html" class="btn btn-warning btn-lg">🔍 Ver precios de CRIPTOMONEDAS</a>
-    </div>
-  </div>
-
-  <div class="link-container">
-    <div class="d-flex justify-content-center align-items-center mt-4">
-      <a href="./reclamarchun.html" class="btn btn-warning btn-lg">🌐 Reclamar CHUN</a>
-    </div>
+    <h1>Precio de WLD/USDT</h1>
+    <div id="price">Cargando...</div>
+    <canvas id="lightChart"></canvas>
   </div>
 
   <script>
-    let priceChart;
-    let timeframe = "1m";
+    let chart;
 
-    function fetchPrice() {
+    function fetchPriceAndData() {
+      // Precio actual
       $.getJSON("https://api.binance.com/api/v3/ticker/price?symbol=WLDUSDT", function (data) {
         let price = parseFloat(data.price).toFixed(4);
-        $("#price").text(price);
+        $("#price").text(`${price} USDT`);
       });
-    }
 
-    function fetchChartData(tf) {
-      timeframe = tf;
-      $("#loadingMsg").text("Cargando datos...");
+      // Datos de gráfico (últimos 10 puntos de cierre)
+      $.getJSON("https://api.binance.com/api/v3/klines?symbol=WLDUSDT&interval=5m&limit=10", function (data) {
+        const labels = data.map(c => new Date(c[0]).toLocaleTimeString());
+        const prices = data.map(c => parseFloat(c[4]));
 
-      $.getJSON(`https://api.binance.com/api/v3/klines?symbol=WLDUSDT&interval=${tf}&limit=20`, function (data) {
-        let candlesticks = data.map(candle => ({
-          x: new Date(candle[0]),
-          o: parseFloat(candle[1]),
-          h: parseFloat(candle[2]),
-          l: parseFloat(candle[3]),
-          c: parseFloat(candle[4])
-        }));
-
-        updateChart(candlesticks);
-        $("#loadingMsg").text("");
-      });
-    }
-
-    function updateChart(candlesticks) {
-      if (!priceChart) {
-        let ctx = document.getElementById('priceChart').getContext('2d');
-        priceChart = new Chart(ctx, {
-          type: 'candlestick',
+        const config = {
+          type: 'line',
           data: {
+            labels: labels,
             datasets: [{
-              label: `WLD/USDT (${timeframe})`,
-              data: candlesticks,
-              borderColor: '#00aaff',
-              color: {
-                up: '#00ff00',
-                down: '#ff0000',
-                unchanged: '#999999'
-              }
+              label: 'WLD Precio',
+              data: prices,
+              borderColor: '#007bff',
+              backgroundColor: 'rgba(0,123,255,0.1)',
+              tension: 0.3,
+              fill: true,
+              pointRadius: 2
             }]
           },
           options: {
@@ -153,21 +78,24 @@
               legend: { display: false }
             },
             scales: {
-              x: { time: { unit: 'minute' }, type: 'time' },
+              x: { display: false },
               y: { beginAtZero: false }
             }
           }
-        });
-      } else {
-        priceChart.data.datasets[0].data = candlesticks;
-        priceChart.data.datasets[0].label = `WLD/USDT (${timeframe})`;
-        priceChart.update();
-      }
+        };
+
+        if (!chart) {
+          chart = new Chart(document.getElementById("lightChart"), config);
+        } else {
+          chart.data.labels = labels;
+          chart.data.datasets[0].data = prices;
+          chart.update();
+        }
+      });
     }
 
-    setInterval(fetchPrice, 5000);
-    fetchPrice();
-    fetchChartData("1m");
+    fetchPriceAndData();
+    setInterval(fetchPriceAndData, 30000); // cada 30s
   </script>
 </body>
 </html>
