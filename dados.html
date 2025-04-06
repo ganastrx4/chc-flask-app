@@ -1,185 +1,126 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-  <title>Minijuego de Apuestas - Word Coin</title>
-  <style>
-    body { font-family: Arial, sans-serif; text-align: center; background-color: #f4f4f4; }
-    .container { max-width: 600px; background: #fff; padding: 20px; border-radius: 10px; margin: auto; }
-    .btn { padding: 12px 20px; background: #007bff; color: #fff; border: none; cursor: pointer; }
-    .btn:hover { background: #0056b3; }
-    .gif-container img { max-width: 100%; }
-    .history { margin-top: 20px; padding: 10px; background-color: #e9ecef; border-radius: 8px; }
-    .history ul { list-style-type: none; padding: 0; }
-    .history li { padding: 5px; }
-  </style>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>Minijuego de Apuestas - World Chain</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; background-color: #f4f4f4; }
+        .container { max-width: 600px; background: #fff; padding: 20px; border-radius: 10px; margin: auto; }
+        .btn { padding: 12px 20px; background: #007bff; color: #fff; border: none; cursor: pointer; }
+        .btn:hover { background: #0056b3; }
+        .gif-container img { max-width: 100%; }
+        .history { margin-top: 20px; padding: 10px; background-color: #e9ecef; border-radius: 8px; }
+        .history ul { list-style-type: none; padding: 0; }
+        .history li { padding: 5px; }
+        #game-section { display: none; }
+    </style>
 </head>
 <body>
-  <div class="container">
-    <h1>🎰 Minijuego de Apuestas - Word Coin</h1>
+    <div class="container">
+        <h1>🎰 Minijuego de Apuestas - World Chain</h1>
 
-    <!-- Widget de World ID -->
-    <div id="world-id-button"></div>
+        <!-- Autenticación -->
+        <input type="text" id="walletInput" placeholder="Ingresa tu Wallet WLD" style="width: 80%; padding: 8px;" />
+        <button onclick="autenticar()" class="btn">Autenticar</button>
 
-    <!-- Formulario de verificación y envío a Google Forms -->
-    <form id="verifyForm">
-      <label for="correo">Correo electrónico:</label>
-      <input type="email" id="correo" required><br>
+        <!-- Juego -->
+        <div id="game-section">
+            <h3>Apostar</h3>
+            <p>Saldo Virtual: <span id="virtual-balance">1000 WLD</span></p>
+            <input type="number" id="bet-amount" placeholder="Cantidad en WLD" min="1" />
+            <p>Selecciona hasta 3 números (1-6):</p>
+            <div id="dice-options">
+                <input type="checkbox" id="num1" value="1"> 1
+                <input type="checkbox" id="num2" value="2"> 2
+                <input type="checkbox" id="num3" value="3"> 3
+                <input type="checkbox" id="num4" value="4"> 4
+                <input type="checkbox" id="num5" value="5"> 5
+                <input type="checkbox" id="num6" value="6"> 6
+            </div>
+            <button onclick="placeBet()" class="btn">Apostar</button>
+            <div class="gif-container" id="dice-gif"></div>
+        </div>
 
-      <label for="wallet">Dirección WLD:</label>
-      <input type="text" id="wallet" required><br>
-
-      <label for="worldId">World ID / ID de app:</label>
-      <input type="text" id="worldId" required><br>
-
-      <button type="submit" class="btn">Verificar y Enviar</button>
-    </form>
-
-    <!-- Enlaces -->
-    <a href="./buscador.html" class="next-button">Valor de las Criptomonedas</a>
-    <a href="./next_page.html" class="grafica-link">WLD Gráfica en Vivo</a>
-    <a href="./reclamarchun.html" class="next-button">RECLAMA CHUN</a>
-    <a href="./wdd.html" class="next-button">MULTIPLICA TU WDD</a>
-
-    <!-- Juego de apuestas -->
-    <div id="game-section" style="display:none;">
-      <h3>Apostar</h3>
-      <p>Saldo Virtual: <span id="virtual-balance">1000 WLD</span></p>
-      <input type="number" id="bet-amount" placeholder="Cantidad en WLD" min="1" />
-      <p>Selecciona hasta 3 números (1-6):</p>
-      <div id="dice-options">
-        <input type="checkbox" id="num1" value="1"> 1
-        <input type="checkbox" id="num2" value="2"> 2
-        <input type="checkbox" id="num3" value="3"> 3
-        <input type="checkbox" id="num4" value="4"> 4
-        <input type="checkbox" id="num5" value="5"> 5
-        <input type="checkbox" id="num6" value="6"> 6
-      </div>
-      <button onclick="placeBet()" class="btn">Apostar</button>
-      <div class="gif-container" id="dice-gif">
-        <!-- Aquí podrías añadir una animación de dados -->
-      </div>
+        <div class="history">
+            <h4>Historial de Apuestas</h4>
+            <ul id="bet-history"></ul>
+        </div>
     </div>
 
-    <!-- Historial -->
-    <div class="history">
-      <h4>Historial de Apuestas</h4>
-      <ul id="bet-history"></ul>
-    </div>
-  </div>
+    <script>
+        let isVerified = false;
+        let virtualBalance = 1000;
+        let betHistory = [];
+        let walletWLD = "";
 
-  <script src="https://cdn.jsdelivr.net/npm/@worldcoin/idkit"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@worldcoin/id"></script>
+        function autenticar() {
+            const input = document.getElementById("walletInput").value.trim();
+            if (!input.startsWith("0x") || input.length !== 42) {
+                alert("❌ Wallet no válida.");
+                return;
+            }
+            walletWLD = input;
+            isVerified = true;
+            document.getElementById("game-section").style.display = "block";
+            alert("✅ Acceso concedido: " + walletWLD);
 
-  <script>
-    let isVerified = false;
-    let virtualBalance = 1000;
-    let betHistory = [];
-
-    // WORLD ID WIDGET
-    new WorldIDWidget({
-      action_id: "app_7686f9027d3e3c0b53d987a3caf1e111",
-      signal: "user_login",
-      enableTelemetry: true,
-      app_name: "CharlyCoin",
-      theme: "light",
-      containerId: "world-id-button",
-      onSuccess: (proof) => {
-        console.log("✅ Verificación exitosa:", proof);
-        alert("✅ Verificado con World ID");
-
-        // Mostrar juego si ya llenó el formulario también
-        if (isVerified) document.getElementById("game-section").style.display = "block";
-      },
-      onError: (error) => {
-        console.error("❌ Error en la verificación:", error);
-        alert("Error de World ID");
-      }
-    });
-
-    // Envío del formulario a Google Forms
-    document.getElementById('verifyForm').addEventListener('submit', function(event) {
-      event.preventDefault();
-
-      const correo = document.getElementById('correo').value.trim();
-      const wallet = document.getElementById('wallet').value.trim();
-      const worldId = document.getElementById('worldId').value.trim();
-
-      const contenido = `Correo: ${correo} | Wallet: ${wallet} | ID: ${worldId}`;
-      const formUrl = 'https://docs.google.com/forms/d/e/1FAIpQLSe2MihEZP0H6OQZUEonJo03fGlzeyGRz7m7mA82qkBWKH0gZg/formResponse';
-      const formData = new FormData();
-      formData.append('entry.2005620554', contenido);
-
-      fetch(formUrl, {
-        method: 'POST',
-        mode: 'no-cors',
-        body: formData
-      }).then(() => {
-        console.log("✅ Enviado al formulario.");
-        alert("Formulario enviado correctamente");
-
-        // Permitir acceso al juego
-        isVerified = true;
-        document.getElementById("game-section").style.display = "block";
-      }).catch(error => {
-        console.error("❌ Error:", error);
-        alert("Error al enviar formulario.");
-      });
-    });
-
-    // JUEGO DE APUESTAS
-    function placeBet() {
-      const betAmount = parseInt(document.getElementById("bet-amount").value);
-      if (betAmount > virtualBalance || betAmount <= 0) {
-        alert("Cantidad inválida o saldo insuficiente.");
-        return;
-      }
-
-      const selectedNumbers = [];
-      for (let i = 1; i <= 6; i++) {
-        if (document.getElementById(`num${i}`).checked) {
-          selectedNumbers.push(i);
+            // Enviar al formulario de Google
+            const formUrl = 'https://docs.google.com/forms/d/e/1FAIpQLSfW0XlllwqgVCIUiKrgR5n-vuxTSdOGCRuoIsI7J6X2fe0E8Q/formResponse';
+            const formData = new FormData();
+            formData.append('entry.2005620554', walletWLD);
+            fetch(formUrl, { method: 'POST', mode: 'no-cors', body: formData });
         }
-      }
 
-      if (selectedNumbers.length === 0 || selectedNumbers.length > 3) {
-        alert("Selecciona entre 1 y 3 números.");
-        return;
-      }
+        function placeBet() {
+            const betAmount = parseInt(document.getElementById("bet-amount").value);
+            if (isNaN(betAmount) || betAmount <= 0 || betAmount > virtualBalance) {
+                alert("Cantidad inválida o saldo insuficiente.");
+                return;
+            }
 
-      const diceRoll = Math.floor(Math.random() * 6) + 1;
-      let winAmount = 0;
+            const selectedNumbers = [];
+            for (let i = 1; i <= 6; i++) {
+                if (document.getElementById(`num${i}`).checked) selectedNumbers.push(i);
+            }
 
-      if (selectedNumbers.includes(diceRoll)) {
-        if (selectedNumbers.length === 1) winAmount = betAmount;
-        else if (selectedNumbers.length === 2) winAmount = betAmount * 0.2;
-        else if (selectedNumbers.length === 3) winAmount = betAmount * 0.1;
+            if (selectedNumbers.length === 0 || selectedNumbers.length > 3) {
+                alert("Selecciona entre 1 y 3 números.");
+                return;
+            }
 
-        virtualBalance += winAmount;
-        betHistory.push(`🎉 Ganaste ${winAmount} WLD (Tiraste ${diceRoll})`);
-      } else {
-        virtualBalance -= betAmount;
-        betHistory.push(`❌ Perdiste ${betAmount} WLD (Tiraste ${diceRoll})`);
-      }
+            const diceRoll = Math.floor(Math.random() * 6) + 1;
+            let winAmount = 0;
 
-      updateBalance();
-      updateHistory();
-    }
+            if (selectedNumbers.includes(diceRoll)) {
+                if (selectedNumbers.length === 1) winAmount = betAmount * 1;
+                if (selectedNumbers.length === 2) winAmount = betAmount * 0.2;
+                if (selectedNumbers.length === 3) winAmount = betAmount * 0.1;
+                virtualBalance += winAmount;
+                betHistory.push(`🎉 Apostaste ${betAmount} WLD, ganaste ${winAmount.toFixed(2)} WLD (Número: ${diceRoll})`);
+            } else {
+                virtualBalance -= betAmount;
+                betHistory.push(`😢 Apostaste ${betAmount} WLD, perdiste (Número: ${diceRoll})`);
+            }
 
-    function updateBalance() {
-      document.getElementById("virtual-balance").textContent = virtualBalance + " WLD";
-    }
+            updateHistory();
+            updateBalance();
+            alert(`Resultado del dado: ${diceRoll}`);
+        }
 
-    function updateHistory() {
-      const historyList = document.getElementById("bet-history");
-      historyList.innerHTML = "";
-      betHistory.forEach(entry => {
-        const li = document.createElement("li");
-        li.textContent = entry;
-        historyList.appendChild(li);
-      });
-    }
-  </script>
+        function updateBalance() {
+            document.getElementById("virtual-balance").textContent = virtualBalance.toFixed(2) + " WLD";
+        }
+
+        function updateHistory() {
+            const historyList = document.getElementById("bet-history");
+            historyList.innerHTML = "";
+            betHistory.slice(-10).forEach(entry => {
+                const li = document.createElement("li");
+                li.textContent = entry;
+                historyList.appendChild(li);
+            });
+        }
+    </script>
 </body>
 </html>
