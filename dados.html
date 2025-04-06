@@ -94,8 +94,8 @@
 
             if (selectedNumbers.includes(diceRoll)) {
                 if (selectedNumbers.length === 1) winAmount = betAmount * 1;
-                if (selectedNumbers.length === 2) winAmount = betAmount * 0.2;
-                if (selectedNumbers.length === 3) winAmount = betAmount * 0.1;
+                if (selectedNumbers.length === 2) winAmount = betAmount * 0.5;
+                if (selectedNumbers.length === 3) winAmount = betAmount * 0.3;
                 virtualBalance += winAmount;
                 betHistory.push(`🎉 Apostaste ${betAmount} WLD, ganaste ${winAmount.toFixed(2)} WLD (Número: ${diceRoll})`);
             } else {
