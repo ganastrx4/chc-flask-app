@@ -1,206 +1,36 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Bienvenida a CharlyCoin</title>
-  <link rel="stylesheet" href="style.css"/>
-  <script src="https://unpkg.com/@worldcoin/id/dist/world-id.js"></script>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #1e1e2f;
-      color: #ffffff;
-      text-align: center;
-      margin: 0;
-      padding: 0;
-    }
-    .container {
-      max-width: 600px;
-      margin: 50px auto;
-      padding: 20px;
-      background: #2c2c3e;
-      border-radius: 10px;
-      box-shadow: 0px 0px 15px rgba(255, 255, 255, 0.1);
-    }
-    input, button {
-      width: 80%;
-      padding: 10px;
-      margin: 10px 0;
-      border: none;
-      border-radius: 5px;
-    }
-    button {
-      background: #f39c12;
-      color: white;
-      cursor: pointer;
-      font-weight: bold;
-    }
-    button:hover { background: #e67e22; }
-    #cryptoInfo {
-      display: none;
-      margin-top: 20px;
-      background: #3a3a55;
-      padding: 15px;
-      border-radius: 10px;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 10px;
-      background: #3a3a55;
-      border-radius: 10px;
-      overflow: hidden;
-    }
-    th, td {
-      padding: 10px;
-      text-align: center;
-      border-bottom: 1px solid #444;
-    }
-    th {
-      background: #f39c12;
-      color: #000;
-    }
-    h3 { color: #f39c12; margin-top: 20px; }
-    .binance-link {
-      display: block;
-      margin-top: 20px;
-      color: #f39c12;
-      font-weight: bold;
-      text-decoration: none;
-    }
-    .grafica-link {
-      display: block;
-      margin-top: 20px;
-      color: #e67e22;
-      font-weight: bold;
-      text-decoration: none;
-    }
-    .grafica-link:hover { color: #f39c12; }
-
-    .gif-container img {
-      width: 100%;
-      height: auto;
-      max-width: 400px;
-      margin: 0 auto;
-    }
-
-    .next-button, .grafica-link, .binance-link {
-      color: #ffffff;
-      text-decoration: none;
-      font-size: 16px;
-      margin: 10px 0;
-      display: inline-block;
-      padding: 10px;
-      border-radius: 5px;
-      background: #f39c12;
-      transition: background-color 0.3s ease;
-    }
-
-    .next-button:hover, .grafica-link:hover, .binance-link:hover {
-      background: #e67e22;
-    }
-
-    .world-id-button {
-      background-color: #28a745;
-      color: white;
-      padding: 12px 20px;
-      text-decoration: none;
-      border-radius: 5px;
-      font-size: 16px;
-      display: inline-block;
-      margin-top: 20px;
-      transition: background-color 0.3s;
-    }
-
-    .world-id-button:hover {
-      background-color: #218838;
-    }
-
-    .locked {
-      opacity: 0.5;
-      pointer-events: none;
-    }
-  </style>
+  <meta charset="UTF-8">
+  <title>Login con World ID</title>
+  <script src="https://unpkg.com/@worldcoin/id/dist/world-id.umd.js"></script>
 </head>
 <body>
-  USA esta direccion solo pára autentificarte 0x2cfc85d8e48f8eab294be644d9e25c3030863003  copiala  y pegala en el input de abajo
-  <div class="container">
-    <div class="gif-container">
-      <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgs4uyyEce9czJNopvAJUC-EuqRY0GilYfi7dguE0OEkUjTcrn6PVYsIFXo2NbemRvavHvVWsD8ru9ZGJXUpfhSVsUyrNYeJri7NP2XU6-9NUjbyrVjQtYUNjt7N9dUaouupuqlczAJlDqpYVhdArBcT7MRvEAwVfQv8JeOKD-EWAecMuSsfAE4gizyojtT/s1024/0ed01250-9b4a-4d44-924c-7c0011004aa0.webp" alt="CharlyCoin Logo" />
-    </div>
-    <a href="https://worldcoin.org/verify?t=wld&i=09d81f42-1888-42bd-9147-bdbea6f8b30a&k=Q8KNuYl%2BFEjtSykpfLy6hzK6CEMLYqyvXPrmxrzobP8%3D" class="world-id-button" target="_blank">Verificar World ID</a>
-    <div id="world-id-container"></div>
 
-    <!-- NUEVO: Login manual con dirección WLD o ID de WorldApp -->
-    <div style="margin-top: 30px;">
-      <h3>O inicia sesión con tu dirección WLD o ID de WorldApp</h3>
-      <input type="text" id="loginInput" placeholder="Dirección WLD o ID de WorldApp" />
-      <button onclick="verificarLogin()">Iniciar Sesión</button>
-    </div>
+  <h2>Iniciar sesión con World ID</h2>
 
-    <div id="contenidoProtegido" class="locked">
-      <a href="./apuestaswldchain.html" class="next-button">APUESTAS wld</a>
-      <a href="./next_page.html" class="grafica-link">WLD Gráfica en Vivo</a>
-      <a href="./reclamarchun.html" class="next-button">RECLAMA CHUN</a>
-      <a href="./wdd.html" class="next-button">MULTIPLICA TU WDD</a>
-    </div>
-  </div>
+  <div id="world-id-container"></div>
 
   <script>
-    let isVerified = false;
+    window.onload = function () {
+      const app_id = "app_7686f9027d3e3c0b53d987a3caf1e111";
 
-    new WorldIDWidget({
-      enableTelemetry: false,
-      signal: "charlycoin-session",
-      app_name: "CharlyCoin App",
-      theme: "dark",
-      container_id: "world-id-container",
-      on_success: function (proof) {
-        console.log("✅ Verificado:", proof);
-        isVerified = true;
-        document.getElementById("contenidoProtegido").classList.remove("locked");
-        alert("Autenticación exitosa. ¡Bienvenido a CharlyCoin!");
-      },
-      on_error: function (error) {
-        console.error("❌ Error de World ID:", error);
-      },
-    });
+      window.worldID.init("#world-id-container", {
+        action_id: "login",
+        signal: "", // Puedes usar el email o ID del usuario si lo deseas
+        app_id: app_id,
+        onSuccess: (proof) => {
+          console.log("Usuario verificado con éxito:");
+          console.log(proof);
 
-    function verificarLogin() {
-      const input = document.getElementById("loginInput").value.trim().toLowerCase();
-      const direccionesWLD = ["0xdc178d65c502f9589bb1a35af08b5723f85ec168", "0x3f58fa86855c74812e7937ede572c02e8dda3b52", "0x2cfc85d8e48f8eab294be644d9e25c3030863003"];
-      const idsWorldApp = ["charly4k"];
-
-      if (direccionesWLD.includes(input) || idsWorldApp.includes(input)) {
-        isVerified = true;
-        document.getElementById("contenidoProtegido").classList.remove("locked");
-        alert("🎉 Bienvenido, acceso concedido.");
-        
-        // Enviar datos al formulario de Google
-        enviarFormulario(input);
-      } else {
-        alert("❌ Dirección o ID no autorizado.");
-      }
-    }
-
-    function enviarFormulario(walletAddress) {
-      // Enviar la dirección al formulario de Google
-      fetch("https://docs.google.com/forms/d/e/1FAIpQLSfW0XlllwqgVCIUiKrgR5n-vuxTSdOGCRuoIsI7J6X2fe0E8Q/formResponse", {
-        method: "POST",
-        mode: "no-cors",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded"
+          // Aquí puedes enviar `proof` a tu servidor para verificarlo
         },
-        body: new URLSearchParams({
-          "entry.2005620554": walletAddress // Aquí usamos el entry correspondiente
-        })
-      }).then(response => {
-        console.log("✅ Dirección enviada al formulario.");
-      }).catch(error => {
-        console.error("❌ Error al enviar al formulario: ", error);
+        onError: (error) => {
+          console.error("Error durante la verificación:", error);
+        }
       });
-    }
+    };
   </script>
+
 </body>
 </html>
