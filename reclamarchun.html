@@ -1,105 +1,141 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta content="width=device-width, initial-scale=1.0" name="viewport">
-    <title>¡Reclama tus CHUN!</title>
-    <script src="https://cdn.jsdelivr.net/npm/@worldcoin/id"></script>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            text-align: center;
-            padding: 20px;
-        }
-        .container {
-            max-width: 600px;
-            background: #fff;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            margin: auto;
-        }
-        h1 {
-            color: #333;
-        }
-        .highlight {
-            color: #27ae60;
-            font-weight: bold;
-        }
-        .btn {
-            display: inline-block;
-            padding: 12px 20px;
-            background: #007bff;
-            color: #fff;
-            text-decoration: none;
-            font-size: 18px;
-            border-radius: 5px;
-            margin-top: 15px;
-            border: none;
-            cursor: pointer;
-        }
-        .btn:hover {
-            background: #0056b3;
-        }
-        #world-id-container {
-            margin-top: 20px;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>¡Reclama tus CHUN!</title>
+  <script src="https://cdn.jsdelivr.net/npm/@worldcoin/id"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      text-align: center;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 600px;
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      margin: auto;
+    }
+
+    h1 {
+      color: #333;
+    }
+
+    .highlight {
+      color: #27ae60;
+      font-weight: bold;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 12px 20px;
+      background: #007bff;
+      color: #fff;
+      text-decoration: none;
+      font-size: 18px;
+      border-radius: 5px;
+      margin-top: 15px;
+      border: none;
+      cursor: pointer;
+    }
+
+    .btn:hover {
+      background: #0056b3;
+    }
+
+    #world-id-container {
+      margin-top: 20px;
+    }
+
+    /* Estilos para las ligas en cajas */
+    .links-container {
+      margin-top: 30px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .link-box {
+      display: block;
+      width: 90%;
+      max-width: 500px;
+      padding: 15px;
+      background-color: #ffffff;
+      color: #333;
+      text-decoration: none;
+      border: 2px solid #007bff;
+      border-radius: 10px;
+      font-size: 18px;
+      font-weight: bold;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      transition: all 0.3s ease;
+    }
+
+    .link-box:hover {
+      background-color: #007bff;
+      color: #fff;
+      transform: translateY(-3px);
+    }
+  </style>
 </head>
 <body>
 
-<div class="container">
+  <div class="container">
     <h1>🚀 ¡Atención! Reclama tus <span class="highlight">1,000 CHUN</span></h1>
     <p>Para obtener tus 1000 CHUN, primero verifica tu identidad con World ID.</p>
 
-    <!-- Botón de reclamar que estará oculto hasta que el usuario se autentique -->
     <button id="reclamar-btn" class="btn" style="display: none;" onclick="reclamar1000CHUN()">Reclamar 1000 CHUN</button>
-
     <p id="mensaje"></p>
-</div>
+  </div>
 
-<!-- Botón para redirigir al link de Worldcoin -->
-<a href="https://worldcoin.org/verify?t=wld&i=09d81f42-1888-42bd-9147-bdbea6f8b30a&k=Q8KNuYl%2BFEjtSykpfLy6hzK6CEMLYqyvXPrmxrzobP8%3D" class="world-id-button" target="_blank">Verificar World ID</a>
+  <!-- Botón de verificación -->
+  <a href="https://worldcoin.org/verify?t=wld&i=09d81f42-1888-42bd-9147-bdbea6f8b30a&k=Q8KNuYl%2BFEjtSykpfLy6hzK6CEMLYqyvXPrmxrzobP8%3D" class="btn" target="_blank">Verificar World ID</a>
 
-<div id="world-id-container"></div>
+  <div id="world-id-container"></div>
 
-<script>
+  <script>
     let isVerified = false;
 
-    // Configuración del World ID Widget
     new WorldIDWidget({
-        enableTelemetry: false,
-        signal: "charlycoin-session",
-        app_name: "CharlyCoin App",
-        theme: "dark",
-        container_id: "world-id-container",
-        on_success: function (proof) {
-            console.log("✅ Verificado:", proof);
-            isVerified = true;
-            // Mostrar el botón para reclamar CHUN una vez autenticado
-            document.getElementById("reclamar-btn").style.display = "inline-block";
-            document.getElementById("mensaje").innerHTML = "¡Autenticación exitosa! Ahora puedes reclamar tus 1000 CHUN.";
-        },
-        on_error: function (error) {
-            console.error("❌ Error de World ID:", error);
-            document.getElementById("mensaje").innerHTML = "❌ Error al verificar. Por favor, intenta nuevamente.";
-        },
+      enableTelemetry: false,
+      signal: "charlycoin-session",
+      app_name: "CharlyCoin App",
+      theme: "dark",
+      container_id: "world-id-container",
+      on_success: function (proof) {
+        console.log("✅ Verificado:", proof);
+        isVerified = true;
+        document.getElementById("reclamar-btn").style.display = "inline-block";
+        document.getElementById("mensaje").innerHTML = "¡Autenticación exitosa! Ahora puedes reclamar tus 1000 CHUN.";
+      },
+      on_error: function (error) {
+        console.error("❌ Error de World ID:", error);
+        document.getElementById("mensaje").innerHTML = "❌ Error al verificar. Por favor, intenta nuevamente.";
+      },
     });
 
-    // Función que simula el reclamo de los 1000 CHUN
     function reclamar1000CHUN() {
-        if (isVerified) {
-            // Aquí iría la lógica para reclamar CHUN
-            alert("🎉 ¡Has reclamado tus 1000 CHUN!");
-        } else {
-            alert("❌ No has sido autenticado correctamente.");
-        }
+      if (isVerified) {
+        alert("🎉 ¡Has reclamado tus 1000 CHUN!");
+      } else {
+        alert("❌ No has sido autenticado correctamente.");
+      }
     }
-</script>
-<a href="./buscador.html" class="next-button">Valor de las Criptomonedas</a>
-      <a href="./dados.html" class="grafica-link">Apuestas WLD chain</a>
-      <a href="./ganarchun.html" class="next-button">Gana CHC y CHUN</a>
-      <a href="./wdd.html" class="next-button">MULTIPLICA TU WDD</a>
+  </script>
+
+  <!-- Cajas de ligas -->
+  <div class="links-container">
+    <a href="./buscador.html" class="link-box">Valor de las Criptomonedas</a>
+    <a href="./dados.html" class="link-box">Apuestas WLD chain</a>
+    <a href="./ganarchun.html" class="link-box">Gana CHC y CHUN</a>
+    <a href="./wdd.html" class="link-box">MULTIPLICA TU WDD</a>
+  </div>
+
 </body>
 </html>
