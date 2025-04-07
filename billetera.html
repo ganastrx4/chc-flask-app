@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Verifica tu Billetera</title>
+  <style>
+    body {
+      text-align: center;
+      padding: 40px;
+      font-family: Arial, sans-serif;
+    }
+    input {
+      padding: 10px;
+      width: 80%;
+      max-width: 400px;
+      font-size: 16px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>INGRESA TU BILLETERA WLD DE WORLDAPP</h2>
+  <input type="text" id="walletInput" placeholder="0x... tu billetera WLD" />
+  <br>
+  <button onclick="verificarWallet()">Continuar</button>
+
+  <script>
+    function verificarWallet() {
+      const wallet = document.getElementById("walletInput").value.trim();
+      const esValida = /^0x[a-fA-F0-9]{40}$/.test(wallet);
+      if (esValida) {
+        // Guardar en localStorage si deseas usar después
+        localStorage.setItem("walletWLD", wallet);
+        window.location.href = "ganarchun.html";
+      } else {
+        alert("❌ Dirección inválida. Asegúrate de que empiece con 0x y tenga 42 caracteres.");
+      }
+    }
+  </script>
+
+</body>
+</html>
