@@ -35,21 +35,33 @@
 </head>
 <body>
 
-  <h2>INGRESA TU BILLETERA WLD DE WORLDAPP</h2>
-  <input type="text" id="walletInput" placeholder="0x... tu billetera WLD" />
-  <br>
+  <h2>Verificando tu Billetera WLD...</h2>
   <button onclick="verificarWallet()">Continuar</button>
 
   <script>
+    // Este script recuperará la billetera automáticamente desde World App
     function verificarWallet() {
-      const wallet = document.getElementById("walletInput").value.trim();
-      const esValida = /^0x[a-fA-F0-9]{40}$/.test(wallet);
-      if (esValida) {
-        // Guardar en localStorage si deseas usar después
-        localStorage.setItem("walletWLD", wallet);
-        window.location.href = "ganarchun.html";
+      if (window.WorldApp && window.WorldApp.getAddressBook) {
+        window.WorldApp.getAddressBook()
+          .then((addressBook) => {
+            // Si el libro de direcciones tiene al menos una dirección, usa la primera
+            const wallet = addressBook[0] ? addressBook[0].address : null;
+            
+            if (wallet) {
+              // Guardar la dirección en localStorage
+              localStorage.setItem("walletWLD", wallet);
+              // Redirigir a la página de siguiente paso
+              window.location.href = "ganarchun.html";
+            } else {
+              alert("❌ No se encontró ninguna billetera registrada.");
+            }
+          })
+          .catch((error) => {
+            alert("❌ Error al acceder a tu billetera. Intenta nuevamente.");
+            console.error("Error al acceder al Address Book:", error);
+          });
       } else {
-        alert("❌ Dirección inválida. Asegúrate de que empiece con 0x y tenga 42 caracteres.");
+        alert("❌ World App no está disponible. Asegúrate de estar autenticado.");
       }
     }
   </script>
