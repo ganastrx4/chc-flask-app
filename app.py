@@ -1,7 +1,20 @@
 from flask import Flask, request, jsonify
 import requests
+from flask import Flask, request, jsonify
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app)  # Por si necesitas aceptar peticiones externas
+
+@app.route('/guardar-verificacion', methods=['POST'])
+def guardar_verificacion():
+    data = request.get_json()
+    print("✅ Datos recibidos desde World ID:", data)
+
+    # Aquí puedes guardar el usuario en la base de datos, marcarlo como verificado, etc.
+    
+    return jsonify({"status": "ok"})
+
 
 @app.route('/api/verify', methods=['POST'])
 def verify_world_id():
