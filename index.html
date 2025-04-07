@@ -101,6 +101,56 @@
     </style>
 </head>
 <body>
+    <!-- World ID Widget -->
+<script src="https://unpkg.com/@worldcoin/idkit@latest/dist/index.umd.js"></script>
+
+<div id="world-id-container"></div>
+
+<script>
+  window.addEventListener("DOMContentLoaded", function () {
+    IDKit.load({
+      app_id: "app_7686f9027d3e3c0b53d987a3caf1e111", // Tu App ID
+      action: "login", // Acción registrada en tu panel
+      signal: "", // puedes dejarlo vacío
+      enableTelemetry: true,
+      verification_level: "device", // usa "orb" si quieres forzar escaneo iris
+      
+      // Esta función se llama cuando el usuario completa la verificación
+      onSuccess: (result) => {
+        console.log("✅ Usuario verificado:", result);
+
+        // Enviar los datos al backend (Flask)
+        fetch("/guardar-verificacion", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(result)
+        })
+        .then(res => {
+          if (res.ok) {
+            alert("✅ Verificación exitosa");
+          } else {
+            alert("❌ Falló al guardar verificación");
+          }
+        });
+      },
+
+      // Esta función recibe el "proof", que puedes usar para validar en backend también
+      handleVerify: (proof) => {
+        console.log("📡 Proof recibido:", proof);
+        return true; // o enviar el proof al backend si quieres verificarlo más
+      }
+    }).then(widget => {
+      const container = document.getElementById("world-id-container");
+      const button = document.createElement("button");
+      button.textContent = "Verificarse con World ID";
+      button.onclick = () => widget.open();
+      container.appendChild(button);
+    });
+  });
+</script>
+
     <div class="container">
         <div class="gif-container">
             <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgs4uyyEce9czJNopvAJUC-EuqRY0GilYfi7dguE0OEkUjTcrn6PVYsIFXo2NbemRvavHvVWsD8ru9ZGJXUpfhSVsUyrNYeJri7NP2XU6-9NUjbyrVjQtYUNjt7N9dUaouupuqlczAJlDqpYVhdArBcT7MRvEAwVfQv8JeOKD-EWAecMuSsfAE4gizyojtT/s1024/0ed01250-9b4a-4d44-924c-7c0011004aa0.webp" alt="CharlyCoin Logo">
