@@ -65,8 +65,6 @@
 </div>
 
 <div id="usuario-info">
-  <input type="text" id="walletDestino" placeholder="Billetera destino" value="0xdc178d65c502f9589bb1a35af08b5723f85ec168" readonly />
-  <input type="text" id="walletUsuario" placeholder="Tu billetera WorldChain" />
   <input type="email" id="correo" placeholder="Tu correo (para enviarte CHUN)" />
   <input type="text" id="urlPromocion" placeholder="URL de tu blog, video o sitio a promocionar" />
   <button onclick="guardarDatos()">Comprar Publicidad</button>
@@ -74,19 +72,7 @@
 
 <hr>
 
-<input type="text" id="walletCobro" placeholder="Tu billetera WorldChain para cobrar" />
-<button onclick="cobrar()">Cobrar CHC y CHUN</button>
-
-<hr>
-
-<input type="text" id="walletBono" placeholder="Tu billetera WorldChain para bono" />
-<button onclick="cobrarBono()">Cobrar tu CHC y CHUN bono único por Humano Verificado</button>
-<p class="bono-text">Este bono solo puede cobrarse una vez. Verifica tu ID y espera más bonos.</p>
-
-<hr>
-
 <button onclick="pararMineria()">Parar Mineria</button>
-<input type="text" id="walletMineria" placeholder="Tu billetera para recibir CHC ganados" />
 <button onclick="continuarMineria()">Continuar Mineria</button>
 
 <script>
@@ -120,16 +106,15 @@
   redireccionAleatoria();
 
   function guardarDatos() {
-    const walletUsuario = document.getElementById('walletUsuario').value;
     const correo = document.getElementById('correo').value;
     const urlPromocion = document.getElementById('urlPromocion').value;
 
-    if (!walletUsuario || !correo || !urlPromocion) {
+    if (!correo || !urlPromocion) {
       alert('Por favor, completa todos los campos.');
       return;
     }
 
-    const mensaje = `Publicidad Solicitada:\nWallet Usuario: ${walletUsuario}\nCorreo: ${correo}\nURL Promocion: ${urlPromocion}`;
+    const mensaje = `Publicidad Solicitada:\nCorreo: ${correo}\nURL Promocion: ${urlPromocion}`;
     enviarMensajeTelegram(mensaje);
     alert('Tu solicitud ha sido enviada por Telegram. Recibirás confirmación en breve.');
   }
@@ -137,10 +122,8 @@
   function pararMineria() {
     clearInterval(interval);
     minando = false;
-    const wallet = document.getElementById('walletMineria').value;
-    const mensaje = `Minería detenida. Ganancia: ${tiempoTotal} CHC\nWallet: ${wallet}`;
     alert(`Ganaste ${tiempoTotal} CHC! Gracias por usar la página.`);
-    enviarMensajeTelegram(mensaje);
+    enviarMensajeTelegram(`Minería detenida. Ganancia: ${tiempoTotal} CHC`);
   }
 
   function continuarMineria() {
@@ -162,20 +145,6 @@
   }
 
   interval = setInterval(contarTiempo, 1000);
-
-  function cobrar() {
-    const wallet = document.getElementById('walletCobro').value;
-    if (!wallet) return alert("Ingresa tu billetera para cobrar.");
-    enviarMensajeTelegram(`Solicitud de cobro CHC/CHUN para la billetera: ${wallet}`);
-    alert("Tu pago se está procesando.");
-  }
-
-  function cobrarBono() {
-    const wallet = document.getElementById('walletBono').value;
-    if (!wallet) return alert("Ingresa tu billetera para el bono.");
-    enviarMensajeTelegram(`Bono único solicitado para la billetera: ${wallet}`);
-    alert("Tu pago se está procesando.");
-  }
 
   function enviarMensajeTelegram(mensaje) {
     const url = `https://api.telegram.org/bot${telegramToken}/sendMessage`;
