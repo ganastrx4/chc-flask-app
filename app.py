@@ -1,6 +1,5 @@
 from flask import Flask, request, jsonify
 import requests
-from flask import Flask, request, jsonify
 from flask_cors import CORS
 
 app = Flask(__name__)
@@ -52,7 +51,7 @@ def wdd():
 
 @app.route('/bienvenida')
 def bienvenida():
-    return render_template('bienvenida.html')
+    return render_template('ganarchun.html')
 
 @app.route('/salas')
 def next_page():
