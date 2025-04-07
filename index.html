@@ -99,6 +99,7 @@
             background: #e67e22;
         }
     </style>
+    <script src="https://unpkg.com/@worldcoin/idkit@latest/dist/IDKit.umd.min.js"></script>
 </head>
 <body>
 
@@ -134,6 +135,7 @@
             action: "login",
             signal: "",
             credential_types: ["orb", "device"],
+            onSuccess={onSuccess}
             onSuccess: async (proof) => {
                 console.log("Prueba recibida:", proof);
                 
