@@ -101,55 +101,6 @@
     </style>
 </head>
 <body>
-    <!-- World ID Widget -->
-<script src="https://unpkg.com/@worldcoin/idkit@latest/dist/index.umd.js"></script>
-
-<div id="world-id-container"></div>
-
-<script>
-  window.addEventListener("DOMContentLoaded", function () {
-    IDKit.load({
-      app_id: "app_7686f9027d3e3c0b53d987a3caf1e111", // Tu App ID
-      action: "login", // Acción registrada en tu panel
-      signal: "", // puedes dejarlo vacío
-      enableTelemetry: true,
-      verification_level: "device", // usa "orb" si quieres forzar escaneo iris
-      
-      // Esta función se llama cuando el usuario completa la verificación
-      onSuccess: (result) => {
-        console.log("✅ Usuario verificado:", result);
-
-        // Enviar los datos al backend (Flask)
-        fetch("/guardar-verificacion", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify(result)
-        })
-        .then(res => {
-          if (res.ok) {
-            alert("✅ Verificación exitosa");
-          } else {
-            alert("❌ Falló al guardar verificación");
-          }
-        });
-      },
-
-      // Esta función recibe el "proof", que puedes usar para validar en backend también
-      handleVerify: (proof) => {
-        console.log("📡 Proof recibido:", proof);
-        return true; // o enviar el proof al backend si quieres verificarlo más
-      }
-    }).then(widget => {
-      const container = document.getElementById("world-id-container");
-      const button = document.createElement("button");
-      button.textContent = "Verificarse con World ID";
-      button.onclick = () => widget.open();
-      container.appendChild(button);
-    });
-  });
-</script>
 
     <div class="container">
         <div class="gif-container">
@@ -175,13 +126,13 @@
         </button>
     </a>
 
-    <!-- Script de World ID (IDKit CDN) -->
+    <!-- Script de World ID (IDKit moderno solo HTML) -->
     <script src="https://cdn.worldcoin.org/idkit/idkit.umd.min.js"></script>
     <script>
         window.IDKit.init({
-            app_id: "app_7686f9027d3e3c0b53d987a3caf1e111", // Tu App ID de Worldcoin
-            action: "login", // Nombre de tu acción configurada
-            signal: "", // Puedes usar identificadores únicos si quieres
+            app_id: "app_7686f9027d3e3c0b53d987a3caf1e111",
+            action: "login",
+            signal: "",
             credential_types: ["orb", "device"],
             onSuccess: async (proof) => {
                 console.log("Prueba recibida:", proof);
@@ -199,19 +150,20 @@
 
                 const result = await response.json();
                 if (result.verified) {
-                    alert("¡Verificación exitosa!");
+                    alert("✅ ¡Verificación exitosa!");
                 } else {
-                    alert("Verificación fallida: " + (result.detail || "Intenta de nuevo."));
+                    alert("❌ Verificación fallida: " + (result.detail || "Intenta de nuevo."));
                 }
             },
             onError: (error) => {
                 console.error("Error en la verificación:", error);
-                alert("Error al verificar con World ID");
+                alert("⚠️ Error al verificar con World ID");
             }
         });
 
         // Montar el botón en el div
         window.IDKit.mount("#world-id");
     </script>
+
 </body>
 </html>
