@@ -83,7 +83,7 @@ const VerifyPage = () => {
       <h1>Verificación con Worldcoin</h1>
       <IDKitWidget
         app_id="app_7686f9027d3e3c0b53d987a3caf1e111"
-        action="user_login"
+        action="login"
         verification_level={VerificationLevel.Device}
         handleVerify={verifyProof}
         onSuccess={onSuccess}
