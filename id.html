@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Iniciar sesión con World ID</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      background: #1a1a2e;
+      color: #fff;
+      font-family: 'Segoe UI', sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .login-box {
+      background: #16213e;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 0 15px rgba(255,255,255,0.1);
+      text-align: center;
+      max-width: 400px;
+      width: 100%;
+    }
+    h2 {
+      color: #f9ca24;
+      margin-bottom: 20px;
+    }
+    #world-id-button {
+      margin: 20px 0;
+    }
+  </style>
+</head>
+<body>
+
+<div class="login-box">
+  <h2>Inicia sesión con World ID</h2>
+
+  <!-- Aquí se monta el botón de World ID -->
+  <div id="world-id-button"></div>
+
+  <!-- (Opcional) input de respaldo, si se necesita usar el world_id a mano -->
+  <form id="verifyForm">
+    <input type="hidden" id="worldId" value="">
+    <button type="submit" style="display: none;">Verificar</button>
+  </form>
+</div>
+
+<!-- Script oficial de World ID -->
+<script src="https://cdn.jsdelivr.net/npm/@worldcoin/id"></script>
+<script>
+  new WorldIDWidget({
+    action_id: "app_7686f9027d3e3c0b53d987a3caf1e111",
+    signal: "login",
+    enableTelemetry: true,
+    app_name: "CharlyCoin",
+    theme: "light",
+    containerId: "world-id-button",
+    onSuccess: (proof) => {
+      console.log("✅ Verificación exitosa:", proof);
+      alert("✅ ¡Bienvenido a CharlyCoin!");
+      // Aquí puedes redirigir si quieres:
+      // window.location.href = "./billetera.html";
+    },
+    onError: (error) => {
+      console.error("❌ Error en la verificación:", error);
+      alert("❌ Hubo un error al verificar.");
+    }
+  });
+
+  // Este form es opcional si quieres hacer una validación manual
+  document.getElementById('verifyForm').addEventListener('submit', function(event) {
+    event.preventDefault();
+    const worldId = document.getElementById('worldId').value;
+
+    fetch('/api/verify', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ world_id: worldId })
+    })
+    .then(response => response.json())
+    .then(data => {
+      console.log('Respuesta de la verificación:', data);
+      alert('Verificación completada');
+    })
+    .catch(error => {
+      console.error('Error en la verificación:', error);
+    });
+  });
+</script>
+
+</body>
+</html>
