@@ -35,5 +35,6 @@ jobs:
       
       # 5. Mensaje de despliegue exitoso con URL de ngrok
       - name: Deployment complete
+      run: |
         echo "✅ App desplegada en: https://ganastrx4.github.io/chc-flask-app"
 
