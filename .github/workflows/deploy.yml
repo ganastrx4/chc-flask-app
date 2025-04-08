@@ -3,37 +3,37 @@ name: Deploy Flask App (Local + ngrok)
 on:
   push:
     branches:
-      - main  # Cambia esto si usas otra rama para producción
+      - main  
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Check-out del código
+      
       - name: Checkout code
         uses: actions/checkout@v2
       
-      # 2. Configuración de Python
+      
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: '3.8'  # Cambia la versión de Python si es necesario
+          python-version: '3.8'  
       
-      # 3. Instalar dependencias
+      
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
       
-      # 4. Configurar las variables de entorno
+      
       - name: Set environment variables
         run: |
           echo "WORLD_APP_CLIENT_ID=${{ secrets.WORLD_APP_CLIENT_ID }}" >> $GITHUB_ENV
           echo "WORLD_APP_CLIENT_SECRET=${{ secrets.WORLD_APP_CLIENT_SECRET }}" >> $GITHUB_ENV
           echo "WORLD_APP_REDIRECT_URI=${{ secrets.WORLD_APP_REDIRECT_URI }}" >> $GITHUB_ENV
       
-      # 5. Mensaje de despliegue exitoso con URL de ngrok
+      
       - name: Deployment complete
       run: |
         echo "✅ App desplegada en: https://ganastrx4.github.io/chc-flask-app"
