@@ -137,15 +137,18 @@
             console.log("Prueba recibida:", proof);
 
             // 🔁 CAMBIA ESTA URL por la que te da NGROK
-            const response = await fetch("https://45de-189-217-219-41.ngrok-free.app/verify?" + new URLSearchParams({
-    ...proof,  // Pasar los datos recibidos en la prueba
-    action: "login"
-}), {
-    method: "GET",
+               const response = await fetch("https://45de-189-217-219-41.ngrok-free.app/verify", {
+    method: "POST",
     headers: {
         "Content-Type": "application/json"
-    }
+    },
+    body: JSON.stringify({
+        ...proof,  // Pasar los datos recibidos en la prueba
+        action: "login"
+    })
 });
+
+
 
 
             const result = await response.json();
