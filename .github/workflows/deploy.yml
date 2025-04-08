@@ -27,9 +27,10 @@ jobs:
       
       # 4. Configurar las variables de entorno
       - name: Set environment variables
-        run: echo "WORLD_APP_CLIENT_ID=${{ secrets.WORLD_APP_CLIENT_ID }}" >> $GITHUB_ENV
-        run: echo "WORLD_APP_CLIENT_SECRET=${{ secrets.WORLD_APP_CLIENT_SECRET }}" >> $GITHUB_ENV
-        run: echo "WORLD_APP_REDIRECT_URI=${{ secrets.WORLD_APP_REDIRECT_URI }}" >> $GITHUB_ENV
+        run: |
+          echo "WORLD_APP_CLIENT_ID=${{ secrets.WORLD_APP_CLIENT_ID }}" >> $GITHUB_ENV
+          echo "WORLD_APP_CLIENT_SECRET=${{ secrets.WORLD_APP_CLIENT_SECRET }}" >> $GITHUB_ENV
+          echo "WORLD_APP_REDIRECT_URI=${{ secrets.WORLD_APP_REDIRECT_URI }}" >> $GITHUB_ENV
 
       # 5. Desplegar la app (si usas un servicio como Heroku o Render)
       - name: Deploy Flask app
@@ -38,4 +39,3 @@ jobs:
           # Por ejemplo, si estás usando Heroku, el comando sería algo así:
           git remote add heroku https://git.heroku.com/tu-app-heroku.git
           git push heroku main
-
