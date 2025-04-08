@@ -1,106 +1,213 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Verifica tu Billetera</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Publicidad con World ID</title>
   <style>
     body {
-      text-align: center;
-      padding: 40px;
       font-family: Arial, sans-serif;
+      background-color: #f4f4f9;
+      margin: 20px;
+      padding: 0;
+      color: #333;
     }
-    input {
-      padding: 10px;
-      width: 80%;
-      max-width: 400px;
-      font-size: 16px;
-      border-radius: 5px;
-      border: 1px solid #ccc;
+
+    h1 {
+      color: #1a1a1a;
+      text-align: center;
     }
+
+    #authButton,
     button {
-      margin-top: 20px;
-      padding: 10px 20px;
-      font-size: 16px;
-      background-color: #4CAF50;
+      background-color: #4caf50;
       color: white;
+      padding: 10px 20px;
+      margin: 10px 0;
       border: none;
       border-radius: 5px;
       cursor: pointer;
+      font-size: 16px;
+      transition: background 0.3s ease;
     }
+
+    #authButton:hover,
     button:hover {
       background-color: #45a049;
+    }
+
+    input[type="text"] {
+      width: calc(100% - 24px);
+      padding: 10px;
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 16px;
+    }
+
+    iframe {
+      width: 100%;
+      height: 300px;
+      border: 1px solid #ccc;
+      margin-top: 20px;
     }
   </style>
 </head>
 <body>
 
- <div class="container">
-        <div class="gif-container">
-            <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgs4uyyEce9czJNopvAJUC-EuqRY0GilYfi7dguE0OEkUjTcrn6PVYsIFXo2NbemRvavHvVWsD8ru9ZGJXUpfhSVsUyrNYeJri7NP2XU6-9NUjbyrVjQtYUNjt7N9dUaouupuqlczAJlDqpYVhdArBcT7MRvEAwVfQv8JeOKD-EWAecMuSsfAE4gizyojtT/s1024/0ed01250-9b4a-4d44-924c-7c0011004aa0.webp" alt="CharlyCoin Logo">
-        </div>
-        <div class="loading-bar">
-            <div class="progress-bar"></div>
-        </div>
+  <h1>Publicidad con World ID</h1>
 
-        <!-- BOTÓN SIGN IN WITH WORLD ID -->
-        <div id="world-id-button"></div>
+  <!-- Autenticación con World ID -->
+  <button id="authButton">Autenticarse con World ID</button>
+  <p id="userStatus">No autenticado</p>
 
-        <!-- Formulario para verificación de World ID -->
-        <form id="verifyForm">
-            <label for="worldId">World ID:</label>
-            <input type="text" id="worldId" name="worldId" required>
-            <button type="submit">Verificar World ID</button>
-        </form>
+  <!-- Campo para ingresar publicidad y botón para pagar -->
+  <div id="publicidad-info">
+    <input type="text" id="publicidad" placeholder="Introduce el enlace de tu publicidad" />
+    <button onclick="pagarYGuardarPublicidad()">Pagar y Guardar</button>
+  </div>
 
-        <!-- Enlaces de navegación -->
-        <a href="./buscador.html" class="next-button">Valor de las Criptomonedas</a>
-        <a href="./next_page.html" class="grafica-link">WLD Gráfica en Vivo</a>
-        <a href="./reclamarchun.html" class="next-button">RECLAMA CHUN</a>
-        <a href="./wdd.html" class="next-button">MULTIPLICA TU WDD</a>
-    </div>
+  <!-- Espacio para mostrar las redirecciones -->
+  <iframe id="iframeRedireccion" src="" frameborder="0"></iframe>
 
-    <!-- Script de World ID -->
-    <script src="https://cdn.jsdelivr.net/npm/@worldcoin/id"></script> <!-- Usando CDN -->
-    <script>
-        new WorldIDWidget({
-            action_id: "app_7686f9027d3e3c0b53d987a3caf1e111",
-            signal: "login",
-            enableTelemetry: true,
-            app_name: "CharlyCoin",
-            theme: "light",
-            containerId: "world-id-button",
-            onSuccess: (proof) => {
-                console.log("Verificación exitosa:", proof);
-                alert("¡Verificación exitosa!");
-            },
-            onError: (error) => {
-                console.error("Error en la verificación:", error);
-                alert("Error en la verificación");
-            }
+  <script>
+    let userWallet = null;
+    let isAuthenticated = false;
+    let fondosAcumulados = 0;
+    let urls = [];
+
+    // Dirección del contrato destino y monto a pagar en WLD (0.5 WLD en Wei)
+    const contratoDestino = '0xdc178d65c502f9589bb1a35af08b5723f85ec168';
+    const montoPago = '500000000000000000'; // 0.5 WLD (18 decimales)
+
+    // === AUTENTICACIÓN CON WORLD ID ===
+    async function authenticateWithWorldID() {
+      try {
+        const response = await window.ethereum.request({
+          method: 'eth_requestAccounts'
         });
 
-        document.getElementById('verifyForm').addEventListener('submit', function(event) {
-            event.preventDefault();
+        if (response.length > 0) {
+          userWallet = response[0];
+          isAuthenticated = true;
+          document.getElementById('userStatus').innerText = `Conectado: ${userWallet}`;
+          alert('Autenticación exitosa con World ID');
+        }
+      } catch (error) {
+        console.error('Error en autenticación:', error);
+        alert('Error al autenticar con World ID');
+      }
+    }
 
-            const worldId = document.getElementById('worldId').value;
+    document.getElementById('authButton').addEventListener('click', authenticateWithWorldID);
 
-            fetch('/api/verify', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ world_id: worldId })
-            })
-            .then(response => response.json())
-            .then(data => {
-                console.log('Respuesta de la verificación:', data);
-                alert('Verificación completada');
-            })
-            .catch(error => {
-                console.error('Error en la verificación:', error);
-            });
+    // === PAGO Y GUARDADO DE PUBLICIDAD ===
+    async function pagarYGuardarPublicidad() {
+      if (!isAuthenticated || !userWallet) {
+        alert('Debes autenticarte primero con World ID.');
+        return;
+      }
+
+      const publicidad = document.getElementById('publicidad').value;
+
+      if (!publicidad) {
+        alert('Introduce un enlace válido para la publicidad.');
+        return;
+      }
+
+      try {
+        // Enviar la transacción usando Metamask o WorldApp
+        const transaction = await window.ethereum.request({
+          method: 'eth_sendTransaction',
+          params: [{
+            from: userWallet,
+            to: contratoDestino,
+            value: montoPago
+          }]
         });
-    </script>
+
+        alert(`Pago confirmado: ${transaction}`);
+
+        // Si el pago es exitoso, añadimos la publicidad a la lista
+        urls.push(publicidad);
+        alert('Publicidad guardada correctamente.');
+        actualizarFondos();
+
+        // Enviar notificación a Telegram
+        enviarMensajeTelegram(`Nueva publicidad añadida: ${publicidad}`);
+
+      } catch (error) {
+        console.error('Error en la transacción:', error);
+        alert('Error al procesar el pago.');
+      }
+    }
+
+    // === REDIRECCIÓN DE PUBLICIDAD ===
+    function redireccionAleatoria() {
+      if (urls.length === 0) return;
+      const indiceAleatorio = Math.floor(Math.random() * urls.length);
+      const urlRedireccion = urls[indiceAleatorio];
+      document.getElementById('iframeRedireccion').src = urlRedireccion;
+      setTimeout(redireccionAleatoria, 30000); // Redirige cada 30 segundos
+    }
+
+    // === SORTEO DIARIO DE 1% ===
+    async function realizarSorteo() {
+      if (fondosAcumulados <= 0 || urls.length === 0) return;
+
+      const ganancia = fondosAcumulados * 0.01;
+      const ganador = urls[Math.floor(Math.random() * urls.length)];
+
+      try {
+        const transaction = await window.ethereum.request({
+          method: 'eth_sendTransaction',
+          params: [{
+            from: userWallet,
+            to: contratoDestino,
+            value: ganancia.toString()
+          }]
+        });
+
+        alert(`🎉 Sorteo realizado: Se enviaron ${ganancia / 1e18} WLD al ganador: ${ganador}`);
+        enviarMensajeTelegram(`🎉 Sorteo: ${ganancia / 1e18} WLD enviados al ganador: ${ganador}`);
+
+      } catch (error) {
+        console.error('Error en el sorteo:', error);
+      }
+    }
+
+    // === ACUMULAR FONDOS ===
+    function actualizarFondos() {
+      fondosAcumulados += parseInt(montoPago);
+    }
+
+    // === ENVIAR MENSAJE A TELEGRAM ===
+    async function enviarMensajeTelegram(mensaje) {
+      const telegramToken = '8010490851:AAGXRC8_OlcfCeL53VgJ_ALqmbRuT691Wlk';
+      const chatId = '7613604212';
+
+      const url = `https://api.telegram.org/bot${telegramToken}/sendMessage`;
+      const data = {
+        chat_id: chatId,
+        text: mensaje
+      };
+
+      try {
+        await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+      } catch (error) {
+        console.error('Error enviando mensaje a Telegram:', error);
+      }
+    }
+
+    // Iniciar redirección automática
+    redireccionAleatoria();
+
+    // Iniciar el sorteo cada 24 horas
+    setInterval(realizarSorteo, 24 * 60 * 60 * 1000);
+  </script>
 </body>
 </html>
