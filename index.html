@@ -128,48 +128,31 @@
     </button>
 </a>
 
-<!-- Script de World ID conectado con tu backend Flask -->
+
+<div id="world-id-button"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@worldcoin/id"></script>
 <script>
-    window.IDKit.init({
-        app_id: "app_7686f9027d3e3c0b53d987a3caf1e111",
-        action: "login",
-        signal: "",
-        credential_types: ["orb", "device"],
-        onSuccess: async (proof) => {
-            console.log("Prueba recibida:", proof);
-
-            // 🔁 CAMBIA ESTA URL por la que te da NGROK
-               const response = await fetch("https://0372-189-217-219-41.ngrok-free.app/verify", {
-    method: "POST",
-    headers: {
-        "Content-Type": "application/json"
+  new WorldIDWidget({
+    action_id: "app_7686f9027d3e3c0b53d987a3caf1e111", // Tu app_id real
+    signal: "login", // Aquí va el identificador de acción
+    enableTelemetry: true,
+    app_name: "CharlyCoin",
+    theme: "dark",
+    containerId: "world-id-button",
+    onSuccess: (proof) => {
+      console.log("✅ Verificado:", proof);
+      alert("✅ Verificación exitosa. Bienvenido a CharlyCoin 🚀");
+      // Puedes guardar el resultado local o redirigir
+      window.location.href = "index.html";
     },
-    body: JSON.stringify({
-        ...proof,  // Pasar los datos recibidos en la prueba
-        action: "login"
-    })
-});
-
-
-
-
-            const result = await response.json();
-            if (result.verified) {
-                alert("✅ ¡Verificación exitosa!");
-                // 👉 Opcional: redirigir al usuario
-                window.location.href = "./billetera.html";
-            } else {
-                alert("❌ Verificación fallida: " + (result.detail || "Intenta de nuevo."));
-            }
-        },
-        onError: (error) => {
-            console.error("Error en la verificación:", error);
-            alert("⚠️ Error al verificar con World ID");
-        }
-    });
-
-    window.IDKit.mount("#world-id");
+    onError: (err) => {
+      console.error("❌ Error:", err);
+      alert("❌ Error al verificar con World ID");
+    }
+  });
 </script>
+
 
 </body>
 </html>
