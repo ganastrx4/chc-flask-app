@@ -35,36 +35,72 @@
 </head>
 <body>
 
-  <h2>Verificando tu Billetera WLD...</h2>
-  <button onclick="verificarWallet()">Continuar</button>
+ <div class="container">
+        <div class="gif-container">
+            <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgs4uyyEce9czJNopvAJUC-EuqRY0GilYfi7dguE0OEkUjTcrn6PVYsIFXo2NbemRvavHvVWsD8ru9ZGJXUpfhSVsUyrNYeJri7NP2XU6-9NUjbyrVjQtYUNjt7N9dUaouupuqlczAJlDqpYVhdArBcT7MRvEAwVfQv8JeOKD-EWAecMuSsfAE4gizyojtT/s1024/0ed01250-9b4a-4d44-924c-7c0011004aa0.webp" alt="CharlyCoin Logo">
+        </div>
+        <div class="loading-bar">
+            <div class="progress-bar"></div>
+        </div>
 
-  <script>
-    // Este script recuperará la billetera automáticamente desde World App
-    function verificarWallet() {
-      if (window.WorldApp && window.WorldApp.getAddressBook) {
-        window.WorldApp.getAddressBook()
-          .then((addressBook) => {
-            // Si el libro de direcciones tiene al menos una dirección, usa la primera
-            const wallet = addressBook[0] ? addressBook[0].address : null;
-            
-            if (wallet) {
-              // Guardar la dirección en localStorage
-              localStorage.setItem("walletWLD", wallet);
-              // Redirigir a la página de siguiente paso
-              window.location.href = "ganarchun.html";
-            } else {
-              alert("❌ No se encontró ninguna billetera registrada.");
+        <!-- BOTÓN SIGN IN WITH WORLD ID -->
+        <div id="world-id-button"></div>
+
+        <!-- Formulario para verificación de World ID -->
+        <form id="verifyForm">
+            <label for="worldId">World ID:</label>
+            <input type="text" id="worldId" name="worldId" required>
+            <button type="submit">Verificar World ID</button>
+        </form>
+
+        <!-- Enlaces de navegación -->
+        <a href="./buscador.html" class="next-button">Valor de las Criptomonedas</a>
+        <a href="./next_page.html" class="grafica-link">WLD Gráfica en Vivo</a>
+        <a href="./reclamarchun.html" class="next-button">RECLAMA CHUN</a>
+        <a href="./wdd.html" class="next-button">MULTIPLICA TU WDD</a>
+    </div>
+
+    <!-- Script de World ID -->
+    <script src="https://cdn.jsdelivr.net/npm/@worldcoin/id"></script> <!-- Usando CDN -->
+    <script>
+        new WorldIDWidget({
+            action_id: "app_7686f9027d3e3c0b53d987a3caf1e111",
+            signal: "login",
+            enableTelemetry: true,
+            app_name: "CharlyCoin",
+            theme: "light",
+            containerId: "world-id-button",
+            onSuccess: (proof) => {
+                console.log("Verificación exitosa:", proof);
+                alert("¡Verificación exitosa!");
+            },
+            onError: (error) => {
+                console.error("Error en la verificación:", error);
+                alert("Error en la verificación");
             }
-          })
-          .catch((error) => {
-            alert("❌ Error al acceder a tu billetera. Intenta nuevamente.");
-            console.error("Error al acceder al Address Book:", error);
-          });
-      } else {
-        alert("❌ World App no está disponible. Asegúrate de estar autenticado.");
-      }
-    }
-  </script>
+        });
 
+        document.getElementById('verifyForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const worldId = document.getElementById('worldId').value;
+
+            fetch('/api/verify', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ world_id: worldId })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Respuesta de la verificación:', data);
+                alert('Verificación completada');
+            })
+            .catch(error => {
+                console.error('Error en la verificación:', error);
+            });
+        });
+    </script>
 </body>
 </html>
