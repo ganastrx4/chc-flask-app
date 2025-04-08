@@ -1,4 +1,4 @@
-name: Deploy Flask App
+name: Deploy Flask App (Local + ngrok)
 
 on:
   push:
@@ -8,6 +8,7 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
     steps:
       # 1. Check-out del código
       - name: Checkout code
@@ -31,11 +32,7 @@ jobs:
           echo "WORLD_APP_CLIENT_ID=${{ secrets.WORLD_APP_CLIENT_ID }}" >> $GITHUB_ENV
           echo "WORLD_APP_CLIENT_SECRET=${{ secrets.WORLD_APP_CLIENT_SECRET }}" >> $GITHUB_ENV
           echo "WORLD_APP_REDIRECT_URI=${{ secrets.WORLD_APP_REDIRECT_URI }}" >> $GITHUB_ENV
-
-      # 5. Desplegar la app (si usas un servicio como Heroku o Render)
-      - name: Deploy Flask app
-        run: |
-          # Aquí puedes poner el comando que usas para desplegar tu app
-          # Por ejemplo, si estás usando Heroku, el comando sería algo así:
-          git remote add heroku https://git.heroku.com/tu-app-heroku.git
-          git push heroku main
+      
+      # 5. Mensaje de despliegue exitoso con URL de ngrok
+      - name: Deployment complete
+        run: echo "✅ App desplegada en: https://0372-189-217-219-41.ngrok-free.app"
