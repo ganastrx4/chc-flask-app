@@ -134,24 +134,28 @@
 <div id="world-id-button"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@worldcoin/id"></script>
+
+<!-- World ID Script -->
+<script src="https://cdn.worldcoin.org/idkit/idkit.umd.min.js"></script>
 <script>
-  new WorldIDWidget({
-    action_id: "app_7686f9027d3e3c0b53d987a3caf1e111", // Tu app_id real
-    signal: "login", // Aquí va el identificador de acción
-    enableTelemetry: true,
-    app_name: "CharlyCoin",
-    theme: "dark",
-    containerId: "world-id-button",
-    onSuccess: (proof) => {
-      console.log("✅ Verificado:", proof);
-      alert("✅ Verificación exitosa. Bienvenido a CharlyCoin 🚀");
-      // Puedes guardar el resultado local o redirigir
-      window.location.href = "index.html";
-    },
-    onError: (err) => {
-      console.error("❌ Error:", err);
-      alert("❌ Error al verificar con World ID");
-    }
+  window.addEventListener('DOMContentLoaded', function () {
+    const container = document.createElement('div');
+    container.id = 'world-id-button';
+    document.querySelector('.container').appendChild(container);
+
+    new IDKitWidget({
+      app_id: "app_7686f9027d3e3c0b53d987a3caf1e111", // Usa tu app_id
+      action: "login", // Puede ser cualquier string representando tu acción
+      signal: "wld-comparativa-login",
+      onSuccess: (response) => {
+        console.log("✅ Verificado:", response);
+        alert("✅ Verificación exitosa con World ID");
+      },
+      onError: (error) => {
+        console.error("❌ Error al verificar:", error);
+        alert("❌ Ocurrió un error con World ID");
+      },
+    }).mount("#world-id-button");
   });
 </script>
 
