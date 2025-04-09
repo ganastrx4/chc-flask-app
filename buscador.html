@@ -90,7 +90,25 @@
     <div class="container">
         <h1>Buscador de Criptomonedas</h1>
         <input id="cryptoInput" placeholder="Ejemplo: WLD, CHC, CHUN, BTC, ETH, BNB" type="text" />
-        <button id="searchBtn">Buscar</button>
+        <button id="searchBtn">Buscar</button><div id="wldInfo" style="margin-top: 30px; display: none;">
+    <h2>💎 Comparativa WLD</h2>
+    <table>
+        <tr><th>Pareja</th><th>Precio</th></tr>
+        <tr><td>WLD/USDT</td><td id="wldUSDT">$-</td></tr>
+        <tr><td>WLD/MXN</td><td id="wldMXN">$-</td></tr>
+        <tr><td>WLD/BTC</td><td id="wldBTC">-</td></tr>
+        <tr><td>WLD/XRP</td><td id="wldXRP">-</td></tr>
+        <tr><td>WLD/ETH</td><td id="wldETH">-</td></tr>
+        <tr><td>WLD/SOL</td><td id="wldSOL">-</td></tr>
+    </table>
+    <br>
+    <input type="text" id="compareWith" placeholder="Comparar WLD con... Ej: ARB, AVAX, DOGE" />
+    <button onclick="compareWLD()">Comparar</button>
+    <div id="wldCompareResult" style="margin-top: 10px;"></div>
+</div>
+
+
+        
         <div id="cryptoInfo">
             <h2 id="cryptoName"></h2>
             <p><strong>💲 Precio en USDT:</strong> $<span id="priceUSD"></span></p>
@@ -197,6 +215,70 @@
                 `);
             });
         }
+
+        async function fetchPrice(symbol) {
+    try {
+        const response = await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${symbol}`);
+        const data = await response.json();
+        return parseFloat(data.price);
+    } catch (e) {
+        return null;
+    }
+}
+
+async function updateWLDInfo() {
+    const [wldUsdt, usdtMxn, btcUsdt, xrpUsdt, ethUsdt, solUsdt, wldBtc, wldXrp, wldEth, wldSol] = await Promise.all([
+        fetchPrice("WLDUSDT"),
+        fetchPrice("MXNUSDT"),
+        fetchPrice("BTCUSDT"),
+        fetchPrice("XRPUSDT"),
+        fetchPrice("ETHUSDT"),
+        fetchPrice("SOLUSDT"),
+        fetchPrice("WLDBTC"),
+        fetchPrice("WLDXRP"),
+        fetchPrice("WLDETH"),
+        fetchPrice("WLDSOL")
+    ]);
+
+    const wldMxn = wldUsdt * usdtMxn;
+
+    $('#wldUSDT').text(`$${wldUsdt.toFixed(4)}`);
+    $('#wldMXN').text(`$${wldMxn.toFixed(2)}`);
+    $('#wldBTC').text(`${wldBtc || "N/A"}`);
+    $('#wldXRP').text(`${wldXrp || "N/A"}`);
+    $('#wldETH').text(`${wldEth || "N/A"}`);
+    $('#wldSOL').text(`${wldSol || "N/A"}`);
+    
+    $('#wldInfo').show();
+}
+
+function compareWLD() {
+    const otherSymbol = $('#compareWith').val().trim().toUpperCase();
+    if (!otherSymbol) {
+        alert("⚠️ Escribe una criptomoneda para comparar.");
+        return;
+    }
+
+    Promise.all([
+        fetchPrice("WLDUSDT"),
+        fetchPrice(`${otherSymbol}USDT`)
+    ]).then(([wldPrice, otherPrice]) => {
+        if (!wldPrice || !otherPrice) {
+            $('#wldCompareResult').html("❌ No se pudo obtener el precio.");
+            return;
+        }
+
+        const ratio = (wldPrice / otherPrice).toFixed(4);
+        $('#wldCompareResult').html(`1 WLD = ${ratio} ${otherSymbol}`);
+    });
+}
+
+// Llamamos automáticamente a mostrar info WLD al cargar
+$(document).ready(() => {
+    updateWLDInfo();
+});
+
     </script>
+    
 </body>
 </html>
