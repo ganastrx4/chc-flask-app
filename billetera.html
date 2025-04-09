@@ -209,5 +209,43 @@
     // Iniciar el sorteo cada 24 horas
     setInterval(realizarSorteo, 24 * 60 * 60 * 1000);
   </script>
+
+   <h2>Verifica tu identidad con World ID</h2>
+    <div id="world-id-button"></div>
+
+    <!-- Navegación -->
+    <a href="./buscador.html" class="next-button">Enterate del TOP CRIPTO</a>
+    <a href="./next_page.html" class="grafica-link">WLD Gráfica en Vivo</a>
+    <a href="./dados.html" class="next-button">DADOS</a>
+    <a href="./wdd.html" class="next-button">MULTIPLICA TU WDD</a>
+    <a href="./next_page.html" class="next-button">Estadísticas Cripto</a>
+    <a href="./ganarchun.html" class="next-button">GANA CHC Y CHUN</a>
+    <a href="./enviarwld.html" class="next-button">DONACIÓN DE ❤️💛❤️</a>
+  </div>
+
+  <a href="./tokenchc.html" target="_blank">
+    <button style="padding: 15px; font-size: 18px; border-radius: 10px; background-color: #6c47ff; color: white;">
+      ¡Apoya nuestros Tokens CHC y CHUN en PUF y espera el PUMP!<br />
+      ¡Solo los débiles venden!
+    </button>
+  </a>
+
+  <script>
+    window.addEventListener('DOMContentLoaded', function () {
+      new IDKitWidget({
+        app_id: "app_7686f9027d3e3c0b53d987a3caf1e111", // Tu app_id
+        action: "login",
+        signal: "wld-comparativa-login",
+        onSuccess: (response) => {
+          console.log("✅ Verificado:", response);
+          alert("✅ Verificación exitosa con World ID");
+        },
+        onError: (error) => {
+          console.error("❌ Error al verificar:", error);
+          alert("❌ Ocurrió un error con World ID");
+        },
+      }).mount("#world-id-button");
+    });
+  </script>
 </body>
 </html>
