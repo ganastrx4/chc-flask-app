@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <title>Buscador de Criptomonedas</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <style>
@@ -35,9 +35,7 @@
             cursor: pointer;
             font-weight: bold;
         }
-        button:hover {
-            background: #e67e22;
-        }
+        button:hover { background: #e67e22; }
         #cryptoInfo {
             display: none;
             margin-top: 20px;
@@ -62,43 +60,29 @@
             background: #f39c12;
             color: #000;
         }
-        h3 {
-            color: #f39c12;
-            margin-top: 20px;
-        }
-        .binance-link, .grafica-link {
-            display: block;
-            margin-top: 20px;
-            color: #f39c12;
-            font-weight: bold;
-            text-decoration: none;
-        }
-        .grafica-link:hover, .binance-link:hover {
-            color: #e67e22;
-        }
+        h3 { color: #f39c12; margin-top: 20px; }
+
         .link-container {
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
-            gap: 20px;
+            gap: 10px;
             margin-top: 30px;
         }
-        .link-box {
-            background: linear-gradient(135deg, #6c47ff, #a078ff);
-            border-radius: 15px;
-            padding: 20px 30px;
-            color: white;
-            font-size: 18px;
-            font-weight: bold;
+        .next-button, .grafica-link, .binance-link, .link-box {
+            color: #ffffff;
             text-decoration: none;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-            transition: transform 0.3s, box-shadow 0.3s;
-            text-align: center;
-            min-width: 200px;
+            font-size: 16px;
+            margin: 5px;
+            padding: 10px 20px;
+            border-radius: 5px;
+            background: #f39c12;
+            transition: background-color 0.3s ease;
+            display: inline-block;
+            font-weight: bold;
         }
-        .link-box:hover {
-            transform: scale(1.05);
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        .next-button:hover, .grafica-link:hover, .binance-link:hover, .link-box:hover {
+            background: #e67e22;
         }
     </style>
 </head>
@@ -126,13 +110,14 @@
 
         <h3>🆕 Nuevos</h3>
         <table id="new"></table>
-    </div>
 
-    <div class="link-container">
-        <a href="./dados.html" class="link-box">Apuestas WLD Chain</a>
-        <a href="./next_page.html" class="link-box">WLD Gráfica en Vivo</a>
-        <a href="./ruleta.html" class="link-box">Ruleta</a>
-        <a href="./ganarchun.html" class="link-box">Ganar CHUN y CHC</a>
+        <div class="link-container">
+            <a href="./dados.html" class="link-box">Apuestas WLD Chain</a>
+            <a href="./next_page.html" class="link-box">WLD Gráfica en Vivo</a>
+            <a href="./ruleta.html" class="link-box">Ruleta</a>
+            <a href="./ganarchun.html" class="link-box">Ganar CHUN y CHC</a>
+            <a href="./index.html" class="link-box">🏠 Volver a Inicio</a>
+        </div>
     </div>
 
     <script>
