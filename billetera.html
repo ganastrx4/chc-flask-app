@@ -6,87 +6,170 @@
   <title>Publicidad con World ID</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background-color: #f4f4f9;
-      margin: 20px;
-      padding: 0;
-      color: #333;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(to right, #f2f4f7, #e6ecf2);
+      margin: 0;
+      padding: 20px;
+      color: #222;
     }
 
     h1 {
-      color: #1a1a1a;
       text-align: center;
+      color: #4a4a4a;
+      margin-bottom: 30px;
     }
 
-    #authButton,
-    button {
+    #authButton, button {
       background-color: #4caf50;
       color: white;
-      padding: 10px 20px;
+      padding: 12px 24px;
       margin: 10px 0;
       border: none;
-      border-radius: 5px;
-      cursor: pointer;
+      border-radius: 8px;
       font-size: 16px;
+      cursor: pointer;
       transition: background 0.3s ease;
     }
 
-    #authButton:hover,
-    button:hover {
-      background-color: #45a049;
+    #authButton:hover, button:hover {
+      background-color: #388e3c;
+    }
+
+    #userStatus {
+      font-weight: bold;
+      color: #333;
+      margin-bottom: 20px;
+      text-align: center;
     }
 
     input[type="text"] {
-      width: calc(100% - 24px);
-      padding: 10px;
-      margin-bottom: 10px;
+      width: 100%;
+      padding: 12px;
       border: 1px solid #ccc;
-      border-radius: 5px;
+      border-radius: 8px;
       font-size: 16px;
+      margin-bottom: 10px;
+      box-sizing: border-box;
     }
 
     iframe {
       width: 100%;
       height: 300px;
-      border: 1px solid #ccc;
+      border: 2px solid #ccc;
+      border-radius: 8px;
       margin-top: 20px;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background-color: #ffffffdd;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+
+    .nav-links {
+      margin-top: 30px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-around;
+      gap: 10px;
+    }
+
+    .nav-links a {
+      background-color: #6c47ff;
+      color: white;
+      padding: 12px 16px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: bold;
+      transition: background 0.3s ease;
+    }
+
+    .nav-links a:hover {
+      background-color: #5433cc;
+    }
+
+    #world-id-button {
+      margin: 20px auto;
+      text-align: center;
+    }
+
+    .promo-button {
+      display: block;
+      margin: 30px auto 10px;
+      padding: 15px 25px;
+      font-size: 18px;
+      border-radius: 12px;
+      background-color: #ff3366;
+      color: white;
+      border: none;
+      text-align: center;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    .promo-button:hover {
+      background-color: #e6004c;
     }
   </style>
 </head>
 <body>
 
-  <h1>Publicidad con World ID</h1>
+  <div class="container">
+    <h1>Publicidad con World ID</h1>
 
-  <!-- Autenticación con World ID -->
-  <button id="authButton">Autenticarse con World ID</button>
-  <p id="userStatus">No autenticado</p>
+    <!-- Autenticación -->
+    <div style="text-align: center;">
+      <button id="authButton">Autenticarse con World ID</button>
+      <p id="userStatus">No autenticado</p>
+    </div>
 
-  <!-- Campo para ingresar publicidad y botón para pagar -->
-  <div id="publicidad-info">
+    <!-- Publicidad -->
     <input type="text" id="publicidad" placeholder="Introduce el enlace de tu publicidad" />
     <button onclick="pagarYGuardarPublicidad()">Pagar y Guardar</button>
+
+    <!-- Visualización -->
+    <iframe id="iframeRedireccion" src="" frameborder="0"></iframe>
+
+    <!-- World ID -->
+    <h2 style="text-align: center;">Verifica tu identidad con World ID</h2>
+    <div id="world-id-button"></div>
+
+    <!-- Navegación -->
+    <div class="nav-links">
+      <a href="./buscador.html">TOP CRIPTO</a>
+      <a href="./next_page.html">Gráfica en Vivo</a>
+      <a href="./dados.html">DADOS</a>
+      <a href="./wdd.html">MULTIPLICA TU WDD</a>
+      <a href="./next_page.html">Estadísticas Cripto</a>
+      <a href="./ganarchun.html">GANA CHC Y CHUN</a>
+      <a href="./enviarwld.html">DONACIÓN ❤️💛❤️</a>
+    </div>
+
+    <!-- Token Button -->
+    <a href="./tokenchc.html" target="_blank">
+      <button class="promo-button">
+        ¡Apoya nuestros Tokens CHC y CHUN en PUF y espera el PUMP!<br />
+        ¡Solo los débiles venden!
+      </button>
+    </a>
   </div>
 
-  <!-- Espacio para mostrar las redirecciones -->
-  <iframe id="iframeRedireccion" src="" frameborder="0"></iframe>
-
+  <!-- Lógica -->
   <script>
     let userWallet = null;
     let isAuthenticated = false;
     let fondosAcumulados = 0;
     let urls = [];
 
-    // Dirección del contrato destino y monto a pagar en WLD (0.5 WLD en Wei)
     const contratoDestino = '0xdc178d65c502f9589bb1a35af08b5723f85ec168';
-    const montoPago = '500000000000000000'; // 0.5 WLD (18 decimales)
+    const montoPago = '500000000000000000'; // 0.5 WLD
 
-    // === AUTENTICACIÓN CON WORLD ID ===
     async function authenticateWithWorldID() {
       try {
-        const response = await window.ethereum.request({
-          method: 'eth_requestAccounts'
-        });
-
+        const response = await window.ethereum.request({ method: 'eth_requestAccounts' });
         if (response.length > 0) {
           userWallet = response[0];
           isAuthenticated = true;
@@ -101,7 +184,6 @@
 
     document.getElementById('authButton').addEventListener('click', authenticateWithWorldID);
 
-    // === PAGO Y GUARDADO DE PUBLICIDAD ===
     async function pagarYGuardarPublicidad() {
       if (!isAuthenticated || !userWallet) {
         alert('Debes autenticarte primero con World ID.');
@@ -109,49 +191,36 @@
       }
 
       const publicidad = document.getElementById('publicidad').value;
-
       if (!publicidad) {
         alert('Introduce un enlace válido para la publicidad.');
         return;
       }
 
       try {
-        // Enviar la transacción usando Metamask o WorldApp
         const transaction = await window.ethereum.request({
           method: 'eth_sendTransaction',
-          params: [{
-            from: userWallet,
-            to: contratoDestino,
-            value: montoPago
-          }]
+          params: [{ from: userWallet, to: contratoDestino, value: montoPago }]
         });
 
         alert(`Pago confirmado: ${transaction}`);
-
-        // Si el pago es exitoso, añadimos la publicidad a la lista
         urls.push(publicidad);
-        alert('Publicidad guardada correctamente.');
         actualizarFondos();
-
-        // Enviar notificación a Telegram
+        alert('Publicidad guardada correctamente.');
         enviarMensajeTelegram(`Nueva publicidad añadida: ${publicidad}`);
-
       } catch (error) {
         console.error('Error en la transacción:', error);
         alert('Error al procesar el pago.');
       }
     }
 
-    // === REDIRECCIÓN DE PUBLICIDAD ===
     function redireccionAleatoria() {
       if (urls.length === 0) return;
       const indiceAleatorio = Math.floor(Math.random() * urls.length);
       const urlRedireccion = urls[indiceAleatorio];
       document.getElementById('iframeRedireccion').src = urlRedireccion;
-      setTimeout(redireccionAleatoria, 30000); // Redirige cada 30 segundos
+      setTimeout(redireccionAleatoria, 30000);
     }
 
-    // === SORTEO DIARIO DE 1% ===
     async function realizarSorteo() {
       if (fondosAcumulados <= 0 || urls.length === 0) return;
 
@@ -161,79 +230,46 @@
       try {
         const transaction = await window.ethereum.request({
           method: 'eth_sendTransaction',
-          params: [{
-            from: userWallet,
-            to: contratoDestino,
-            value: ganancia.toString()
-          }]
+          params: [{ from: userWallet, to: contratoDestino, value: ganancia.toString() }]
         });
 
-        alert(`🎉 Sorteo realizado: Se enviaron ${ganancia / 1e18} WLD al ganador: ${ganador}`);
-        enviarMensajeTelegram(`🎉 Sorteo: ${ganancia / 1e18} WLD enviados al ganador: ${ganador}`);
-
+        alert(`🎉 Sorteo realizado: ${ganancia / 1e18} WLD al ganador: ${ganador}`);
+        enviarMensajeTelegram(`🎉 Sorteo: ${ganancia / 1e18} WLD enviados a ${ganador}`);
       } catch (error) {
         console.error('Error en el sorteo:', error);
       }
     }
 
-    // === ACUMULAR FONDOS ===
     function actualizarFondos() {
       fondosAcumulados += parseInt(montoPago);
     }
 
-    // === ENVIAR MENSAJE A TELEGRAM ===
     async function enviarMensajeTelegram(mensaje) {
       const telegramToken = '8010490851:AAGXRC8_OlcfCeL53VgJ_ALqmbRuT691Wlk';
       const chatId = '7613604212';
-
       const url = `https://api.telegram.org/bot${telegramToken}/sendMessage`;
-      const data = {
-        chat_id: chatId,
-        text: mensaje
-      };
 
       try {
         await fetch(url, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(data)
+          body: JSON.stringify({ chat_id: chatId, text: mensaje })
         });
       } catch (error) {
         console.error('Error enviando mensaje a Telegram:', error);
       }
     }
 
-    // Iniciar redirección automática
+    // Iniciar ciclo de redirección
     redireccionAleatoria();
-
-    // Iniciar el sorteo cada 24 horas
     setInterval(realizarSorteo, 24 * 60 * 60 * 1000);
   </script>
 
-   <h2>Verifica tu identidad con World ID</h2>
-    <div id="world-id-button"></div>
-
-    <!-- Navegación -->
-    <a href="./buscador.html" class="next-button">Enterate del TOP CRIPTO</a>
-    <a href="./next_page.html" class="grafica-link">WLD Gráfica en Vivo</a>
-    <a href="./dados.html" class="next-button">DADOS</a>
-    <a href="./wdd.html" class="next-button">MULTIPLICA TU WDD</a>
-    <a href="./next_page.html" class="next-button">Estadísticas Cripto</a>
-    <a href="./ganarchun.html" class="next-button">GANA CHC Y CHUN</a>
-    <a href="./enviarwld.html" class="next-button">DONACIÓN DE ❤️💛❤️</a>
-  </div>
-
-  <a href="./tokenchc.html" target="_blank">
-    <button style="padding: 15px; font-size: 18px; border-radius: 10px; background-color: #6c47ff; color: white;">
-      ¡Apoya nuestros Tokens CHC y CHUN en PUF y espera el PUMP!<br />
-      ¡Solo los débiles venden!
-    </button>
-  </a>
-
+  <!-- World ID Kit -->
   <script>
     window.addEventListener('DOMContentLoaded', function () {
       new IDKitWidget({
-        app_id: "app_7686f9027d3e3c0b53d987a3caf1e111", // Tu app_id
+        app_id: "app_7686f9027d3e3c0b53d987a3caf1e111",
         action: "login",
         signal: "wld-comparativa-login",
         onSuccess: (response) => {
