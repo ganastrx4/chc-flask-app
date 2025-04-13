@@ -49,6 +49,26 @@
     window.addEventListener("load", () => {
         conectarTronLink();
     });
+        function esDispositivoMovil() {
+    return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+}
+
+function abrirTronLinkMovil() {
+    // No hay un `deep link` oficial público, pero puedes abrir la app manualmente con un mensaje
+    if (esDispositivoMovil()) {
+        alert("Por favor abre TronLink manualmente desde tu teléfono y vuelve a esta página.");
+        // Opcional: redirigir a la web oficial
+        window.location.href = "https://www.tronlink.org/";
+    }
+}
+
+        window.addEventListener("load", async () => {
+    abrirTronLinkMovil();
+    await conectarTronLink(); // esta es tu función de conexión
+});
+
     </script>
+    
+
 </body>
 </html>
