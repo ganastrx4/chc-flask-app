@@ -73,37 +73,47 @@
     <script>
         $(document).ready(function() {
             $('#searchBtn').click(async function() {
-                let term = $('#termInput').val().trim();
-                if (!term) {
-                    alert('⚠️ Ingresa un término de psicología.');
-                    return;
-                }
+    let term = $('#termInput').val().trim();
+    if (!term) {
+        alert('⚠️ Ingresa un término de psicología.');
+        return;
+    }
 
-                let formattedTerm = term.replace(/ /g, "_"); // Reemplaza espacios por guiones bajos
-                let definition = await getDefinition(formattedTerm);
+    const variants = [
+        term,
+        term.replace(/ /g, "_"),
+        term.replace(/ /g, "-"),
+        encodeURIComponent(term) // Esto convierte espacios en %20
+    ];
 
-                if (!definition) {
-                    // Si no encuentra la frase completa, intenta con cada palabra por separado
-                    let words = term.split(" ");
-                    for (let word of words) {
-                        definition = await getDefinition(word);
-                        if (definition) {
-                            $('#term').text(word);
-                            $('#description').text(definition);
-                            $('#definition').show();
-                            return;
-                        }
-                    }
-                }
+    let definition = null;
 
-                if (definition) {
-                    $('#term').text(term);
-                    $('#description').text(definition);
-                    $('#definition').show();
-                } else {
-                    alert('❌ Término no encontrado.');
-                }
-            });
+    // Intenta con varias variantes del término completo
+    for (let variant of variants) {
+        definition = await getDefinition(variant);
+        if (definition) {
+            $('#term').text(term);
+            $('#description').text(definition);
+            $('#definition').show();
+            return;
+        }
+    }
+
+    // Si no se encontró nada, entonces sí busca palabra por palabra (último recurso)
+    const words = term.split(" ");
+    for (let word of words) {
+        definition = await getDefinition(word);
+        if (definition) {
+            $('#term').text(word);
+            $('#description').text(definition);
+            $('#definition').show();
+            return;
+        }
+    }
+
+    alert('❌ Término no encontrado.');
+});
+
 
             loadPopularTopics();
         });
