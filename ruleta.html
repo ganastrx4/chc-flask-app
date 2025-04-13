@@ -2,7 +2,6 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pagar con TronLink</title>
     <script src="https://cdn.jsdelivr.net/npm/@tronlink/ext"></script>
 </head>
@@ -11,30 +10,24 @@
     <button id="payBtn">Pagar 1 TRX</button>
 
     <script>
-        document.getElementById('payBtn').addEventListener('click', function() {
-            // Verificar si TronLink está disponible
-            if (typeof window.tronLink !== 'undefined') {
-                // Usar TronLink para hacer un pago
-                window.tronLink.request({
-                    method: 'tron_sendTransaction',
-                    params: [
-                        {
-                            to: 'TXh7y1cokZhKaVL54irBgM99oXiohayeRo', // Dirección de tu wallet TRX
-                            value: '1000000', // Monto en SUN (1 TRX = 1,000,000 SUN)
-                            data: 'Pago de prueba' // Opcional: mensaje o descripción
-                        }
-                    ]
-                })
-                .then(result => {
-                    console.log('Transacción exitosa:', result);
-                    alert('¡Pago realizado con éxito!');
-                })
-                .catch(error => {
-                    console.error('Error en la transacción:', error);
-                    alert('Hubo un error al realizar el pago.');
-                });
+        document.getElementById('payBtn').addEventListener('click', async () => {
+            if (window.tronWeb && window.tronWeb.defaultAddress.base58) {
+                const from = window.tronWeb.defaultAddress.base58;
+                const to = "TXh7y1cokZhKaVL54irBgM99oXiohayeRo"; // Tu dirección TRX
+                const amount = window.tronWeb.toSun(1); // 1 TRX en SUN
+
+                try {
+                    const tx = await window.tronWeb.transactionBuilder.sendTrx(to, amount, from);
+                    const signedTx = await window.tronWeb.trx.sign(tx);
+                    const result = await window.tronWeb.trx.sendRawTransaction(signedTx);
+                    console.log("Transacción enviada:", result);
+                    alert("¡Pago realizado con éxito!");
+                } catch (error) {
+                    console.error("Error al enviar TRX:", error);
+                    alert("Hubo un error al realizar el pago.");
+                }
             } else {
-                alert('Por favor, instala TronLink para realizar pagos.');
+                alert("Por favor, inicia sesión en TronLink.");
             }
         });
     </script>
