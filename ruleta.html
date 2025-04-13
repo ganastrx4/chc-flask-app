@@ -2,33 +2,41 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Pagar con TronLink</title>
+    <title>Saldo TronLink</title>
     <script src="https://cdn.jsdelivr.net/npm/@tronlink/ext"></script>
 </head>
 <body>
-    <h1>Realizar Pago con TronLink</h1>
-    <button id="payBtn">Pagar 1 TRX</button>
+    <h1>Juego con TronLink</h1>
+    <p id="saldo">Consultando saldo...</p>
+    <button id="jugarBtn" disabled>Jugar (1 TRX)</button>
 
     <script>
-        document.getElementById('payBtn').addEventListener('click', async () => {
+        async function verificarSaldo() {
             if (window.tronWeb && window.tronWeb.defaultAddress.base58) {
-                const from = window.tronWeb.defaultAddress.base58;
-                const to = "TXh7y1cokZhKaVL54irBgM99oXiohayeRo"; // Tu dirección TRX
-                const amount = window.tronWeb.toSun(1); // 1 TRX en SUN
+                const address = window.tronWeb.defaultAddress.base58;
 
                 try {
-                    const tx = await window.tronWeb.transactionBuilder.sendTrx(to, amount, from);
-                    const signedTx = await window.tronWeb.trx.sign(tx);
-                    const result = await window.tronWeb.trx.sendRawTransaction(signedTx);
-                    console.log("Transacción enviada:", result);
-                    alert("¡Pago realizado con éxito!");
+                    const saldoSun = await window.tronWeb.trx.getBalance(address);
+                    const saldoTRX = window.tronWeb.fromSun(saldoSun);
+                    document.getElementById("saldo").innerText = `Saldo: ${saldoTRX} TRX`;
+
+                    if (saldoTRX >= 1) {
+                        document.getElementById("jugarBtn").disabled = false;
+                    } else {
+                        document.getElementById("jugarBtn").disabled = true;
+                        alert("Saldo insuficiente para jugar.");
+                    }
                 } catch (error) {
-                    console.error("Error al enviar TRX:", error);
-                    alert("Hubo un error al realizar el pago.");
+                    console.error("Error al consultar saldo:", error);
+                    document.getElementById("saldo").innerText = "Error al consultar saldo.";
                 }
             } else {
-                alert("Por favor, inicia sesión en TronLink.");
+                document.getElementById("saldo").innerText = "Conecta TronLink para ver el saldo.";
             }
+        }
+
+        window.addEventListener("load", () => {
+            setTimeout(verificarSaldo, 1500); // Espera un momento a que TronLink se inicie
         });
     </script>
 </body>
