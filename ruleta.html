@@ -1,113 +1,117 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Ruleta WLD</title>
-  <script src="https://cdn.jsdelivr.net/npm/ethers/dist/ethers.min.js"></script>
-  <script src="https://cdn.worldcoin.org/app/v1.0/sdk.js"></script>
-  <style>
-    body { text-align: center; font-family: Arial; }
-    .ruleta { width: 200px; height: 200px; border-radius: 50%; border: 5px solid black; margin: 20px auto; position: relative; overflow: hidden; }
-    .sector { position: absolute; width: 100%; height: 100%; clip-path: polygon(50% 50%, 100% 0, 100% 100%); transform-origin: 50% 50%; }
-    #botonApostar { margin-top: 20px; padding: 10px 20px; font-size: 18px; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ruleta de la Suerte</title>
+    <style>
+        body {
+            text-align: center;
+            font-family: Arial, sans-serif;
+            background-color: #1e1e2f;
+            color: #ffffff;
+        }
+        .ruleta {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            border: 5px solid black;
+            position: relative;
+            margin: 20px auto;
+            overflow: hidden;
+        }
+        .sector {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            clip-path: polygon(50% 50%, 100% 0, 100% 100%);
+            transform-origin: 50% 50%;
+        }
+        #botonGirar {
+            padding: 10px 20px;
+            font-size: 18px;
+            cursor: pointer;
+            background-color: #f39c12;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+        #botonGirar:hover {
+            background-color: #e67e22;
+        }
+        #resultado {
+            margin-top: 20px;
+            font-size: 20px;
+            font-weight: bold;
+        }
+        .apuesta {
+            margin: 20px 0;
+        }
+        select, input {
+            padding: 10px;
+            margin: 10px;
+            border-radius: 5px;
+            border: none;
+        }
+    </style>
 </head>
 <body>
-  <h1>Ruleta de la Suerte WLD</h1>
+    <h1>Ruleta de la Suerte</h1>
+    <div class="apuesta">
+        <label for="colorSelect">Elige un color:</label>
+        <select id="colorSelect">
+            <option value="red">Rojo</option>
+            <option value="blue">Azul</option>
+            <option value="green">Verde</option>
+            <option value="yellow">Amarillo</option>
+            <option value="purple">Morado</option>
+            <option value="orange">Naranja</option>
+            <option value="cyan">Cian</option>
+            <option value="pink">Rosa</option>
+            <option value="brown">Marrón</option>
+            <option value="gray">Gris</option>
+        </select>
+        <br>
+        <label for="cantidad">Cantidad a apostar (0.1 - 10 WLD):</label>
+        <input type="number" id="cantidad" min="0.1" max="10" step="0.1" value="0.1">
+    </div>
+    <div class="ruleta" id="ruleta"></div>
+    <button id="botonGirar" onclick="girarRuleta()">Girar Ruleta</button>
+    <p id="resultado"></p>
 
-  <!-- World ID Verification -->
-  <div id="world-id-container"></div>
+    <script>
+        let apuestas = [];
 
-  <select id="colorElegido">
-    <option value="red">Rojo</option>
-    <option value="blue">Azul</option>
-    <option value="green">Verde</option>
-  </select>
-
-  <input type="number" id="cantidadWLD" placeholder="Cantidad WLD" step="0.01" min="0.01">
-  <button id="botonApostar" disabled>Apostar</button>
-
-  <div class="ruleta" id="ruleta"></div>
-  <p id="resultado"></p>
-
-  <script>
-    const walletAdmin = "0xdc178d65c502f9589bb1a35af08b5723f85ec168";
-    const apiKey = "chun";
-    const jugadores = [];
-    let bote = 0;
-
-    // Inicializa World ID
-    window.worldID.init({
-      action_id: "app_7686f9027d3e3c0b53d987a3caf1e111",
-      signal: "charly4k",
-      container_id: "world-id-container",
-      enable_telemetry: true,
-      on_success: () => {
-        document.getElementById("botonApostar").disabled = false;
-        alert("Autenticado correctamente con World ID.");
-      },
-    });
-
-    // Crear sectores de la ruleta
-    const colores = ["red", "blue", "green"];
-    function generarRuleta() {
-      const ruleta = document.getElementById("ruleta");
-      colores.forEach((color, i) => {
-        const sector = document.createElement("div");
-        sector.classList.add("sector");
-        sector.style.backgroundColor = color;
-        sector.style.transform = `rotate(${i * 120}deg)`;
-        ruleta.appendChild(sector);
-      });
-    }
-
-    // Apuesta
-    document.getElementById("botonApostar").onclick = async () => {
-      const color = document.getElementById("colorElegido").value;
-      const cantidad = parseFloat(document.getElementById("cantidadWLD").value);
-      if (!color || isNaN(cantidad) || cantidad <= 0) return alert("Apuesta inválida");
-
-      // Enviar WLD a la wallet del juego (reemplaza con contrato si usas uno)
-      if (typeof window.ethereum !== "undefined") {
-        const provider = new ethers.providers.Web3Provider(window.ethereum);
-        await provider.send("eth_requestAccounts", []);
-        const signer = provider.getSigner();
-        const tx = await signer.sendTransaction({
-          to: walletAdmin,
-          value: ethers.utils.parseEther(cantidad.toString())
-        });
-        await tx.wait();
-        jugadores.push({ address: await signer.getAddress(), color, cantidad });
-        bote += cantidad;
-        alert("Apuesta registrada.");
-      } else {
-        alert("Instala una wallet compatible con World Chain.");
-      }
-    };
-
-    // Gira ruleta cada minuto
-    function iniciarRuletaAutomatica() {
-      setInterval(() => {
-        const giro = Math.floor(Math.random() * 360);
-        document.getElementById("ruleta").style.transform = `rotate(${giro}deg)`;
-        const ganadorColor = colores[Math.floor((giro % 360) / 120)];
-        const ganadores = jugadores.filter(j => j.color === ganadorColor);
-        const resultado = document.getElementById("resultado");
-        if (ganadores.length > 0) {
-          const premio = (bote * 0.8) / ganadores.length;
-          resultado.innerText = `¡Ganaron los del color ${ganadorColor}! Premio: ${premio.toFixed(4)} WLD`;
-          // Aquí puedes mostrar o enviar info para repartir los premios
-        } else {
-          resultado.innerText = `Cayó ${ganadorColor}, nadie ganó.`;
+        function generarRuleta() {
+            const ruleta = document.getElementById("ruleta");
+            const colores = ["red", "blue", "green", "yellow", "purple", "orange", "cyan", "pink", "brown", "gray"];
+            
+            colores.forEach((color, i) => {
+                const sector = document.createElement("div");
+                sector.classList.add("sector");
+                sector.style.backgroundColor = color;
+                sector.style.transform = `rotate(${i * 36}deg)`;
+                ruleta.appendChild(sector);
+            });
         }
-        jugadores.length = 0;
-        bote = 0;
-      }, 60000); // cada 60 segundos
-    }
 
-    generarRuleta();
-    iniciarRuletaAutomatica();
-  </script>
+        function girarRuleta() {
+            const giro = Math.floor(Math.random() * 360);
+            document.getElementById("ruleta").style.transform = `rotate(${giro}deg)`;
+            
+            const colorSeleccionado = document.getElementById("colorSelect").value;
+            const resultado = Math.random() < 0.5 ? "¡Ganaste!" : "Perdiste";
+            document.getElementById("resultado").innerText = resultado;
+
+            // Lógica de apuesta (esto se puede enviar al backend para registrar la apuesta)
+            const cantidadApostada = parseFloat(document.getElementById("cantidad").value);
+            apuestas.push({ color: colorSeleccionado, cantidad: cantidadApostada });
+
+            // Aquí enviaríamos la apuesta al backend para registrar el depósito en la wallet
+            console.log("Apuesta registrada:", apuestas);
+        }
+
+        generarRuleta();
+    </script>
 </body>
 </html>
