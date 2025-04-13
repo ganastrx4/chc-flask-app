@@ -10,34 +10,26 @@
     <p id="saldo">Consultando saldo...</p>
     <button id="jugarBtn" disabled>Jugar (1 TRX)</button>
 
-    <script>
-        async function verificarSaldo() {
-            if (window.tronWeb && window.tronWeb.defaultAddress.base58) {
-                const address = window.tronWeb.defaultAddress.base58;
+   <script>
+    window.addEventListener("load", async () => {
+        if (window.tronWeb && window.tronWeb.ready) {
+            const address = window.tronWeb.defaultAddress.base58;
+            console.log("Wallet conectada:", address);
 
-                try {
-                    const saldoSun = await window.tronWeb.trx.getBalance(address);
-                    const saldoTRX = window.tronWeb.fromSun(saldoSun);
-                    document.getElementById("saldo").innerText = `Saldo: ${saldoTRX} TRX`;
+            const saldo = await tronWeb.trx.getBalance(address);
+            const saldoTRX = tronWeb.fromSun(saldo);
+            console.log("Saldo:", saldoTRX, "TRX");
 
-                    if (saldoTRX >= 1) {
-                        document.getElementById("jugarBtn").disabled = false;
-                    } else {
-                        document.getElementById("jugarBtn").disabled = true;
-                        alert("Saldo insuficiente para jugar.");
-                    }
-                } catch (error) {
-                    console.error("Error al consultar saldo:", error);
-                    document.getElementById("saldo").innerText = "Error al consultar saldo.";
-                }
+            if (saldoTRX >= 1) {
+                alert("Puedes jugar con " + saldoTRX + " TRX");
             } else {
-                document.getElementById("saldo").innerText = "Conecta TronLink para ver el saldo.";
+                alert("No tienes suficiente TRX para jugar.");
             }
+        } else {
+            alert("Por favor, conecta TronLink.");
         }
+    });
+</script>
 
-        window.addEventListener("load", () => {
-            setTimeout(verificarSaldo, 1500); // Espera un momento a que TronLink se inicie
-        });
-    </script>
 </body>
 </html>
