@@ -8,69 +8,68 @@
     body {
       font-family: 'Segoe UI', sans-serif;
       text-align: center;
-      background-color: #f4f4f4;
+      background: linear-gradient(to right, #f5f7fa, #c3cfe2);
       margin: 0;
-      padding: 20px;
+      padding: 0;
     }
     .container {
-      max-width: 600px;
-      background: #ffffff;
+      max-width: 700px;
+      background: #fff;
       padding: 30px;
       border-radius: 15px;
-      margin: auto;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      margin: 40px auto;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
     }
-    .btn {
-      padding: 12px 20px;
+    .btn, .nav-button {
+      display: inline-block;
+      padding: 12px 25px;
+      margin: 10px 5px;
       background: #4a00e0;
       color: #fff;
       border: none;
-      border-radius: 8px;
+      border-radius: 10px;
+      font-size: 16px;
       cursor: pointer;
-      font-size: 16px;
-      margin: 5px;
-      transition: background 0.3s ease;
+      text-decoration: none;
+      transition: background 0.3s;
     }
-    .btn:hover {
-      background: #3700b3;
+    .btn:hover, .nav-button:hover {
+      background: #3b00b3;
     }
-    input[type="text"], input[type="number"] {
-      padding: 10px;
-      width: 80%;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      margin: 10px 0;
-      font-size: 16px;
-    }
+    .gif-container img { max-width: 100%; }
     .history {
       margin-top: 20px;
+      padding: 15px;
+      background-color: #f1f1f1;
+      border-radius: 8px;
+    }
+    #game-section { display: none; }
+    input[type="text"], input[type="number"] {
       padding: 10px;
-      background-color: #e9ecef;
+      margin: 10px 0;
+      border: 1px solid #ccc;
       border-radius: 8px;
+      width: 80%;
+      font-size: 16px;
     }
-    .history ul {
-      list-style-type: none;
-      padding: 0;
+    #dice-options input {
+      margin: 0 8px;
     }
-    .history li {
-      padding: 5px;
-      font-size: 15px;
+    .nav-links {
+      margin-top: 40px;
     }
-    #game-section {
-      display: none;
-    }
-    .nav-link {
-      display: inline-block;
-      padding: 10px 18px;
-      margin: 6px;
-      background-color: #009688;
+    .token-button {
+      margin-top: 30px;
+      padding: 18px;
+      font-size: 18px;
+      border-radius: 12px;
+      background-color: #6c47ff;
       color: white;
-      text-decoration: none;
-      border-radius: 8px;
-      font-weight: bold;
+      border: none;
+      cursor: pointer;
     }
-    .nav-link:hover {
-      background-color: #00695c;
+    .token-button:hover {
+      background-color: #5935d2;
     }
   </style>
 </head>
@@ -78,25 +77,22 @@
   <div class="container">
     <h1>🎰 Minijuego de Apuestas - World Chain</h1>
 
-    <!-- Autenticación -->
     <input type="text" id="walletInput" placeholder="Ingresa tu Wallet WLD" />
     <button onclick="autenticar()" class="btn">Autenticar</button>
 
-    <!-- Juego -->
     <div id="game-section">
       <h3>Apostar</h3>
       <p>Saldo Virtual: <span id="virtual-balance">1000 WLD</span></p>
       <input type="number" id="bet-amount" placeholder="Cantidad en WLD" min="1" />
       <p>Selecciona hasta 3 números (1-6):</p>
       <div id="dice-options">
-        <label><input type="checkbox" id="num1" value="1"> 1</label>
-        <label><input type="checkbox" id="num2" value="2"> 2</label>
-        <label><input type="checkbox" id="num3" value="3"> 3</label>
-        <label><input type="checkbox" id="num4" value="4"> 4</label>
-        <label><input type="checkbox" id="num5" value="5"> 5</label>
-        <label><input type="checkbox" id="num6" value="6"> 6</label>
+        <input type="checkbox" id="num1" value="1"> 1
+        <input type="checkbox" id="num2" value="2"> 2
+        <input type="checkbox" id="num3" value="3"> 3
+        <input type="checkbox" id="num4" value="4"> 4
+        <input type="checkbox" id="num5" value="5"> 5
+        <input type="checkbox" id="num6" value="6"> 6
       </div>
-      <br />
       <button onclick="placeBet()" class="btn">Apostar</button>
       <div class="gif-container" id="dice-gif"></div>
     </div>
@@ -109,17 +105,20 @@
     <h2>Verifica tu identidad con World ID</h2>
     <div id="world-id-button"></div>
 
-    <!-- Navegación limpia sin dados.html -->
-    <a href="./buscador.html" class="nav-link">Enterate del TOP CRIPTO</a>
-    <a href="./next_page.html" class="nav-link">WLD Gráfica en Vivo</a>
-    <a href="./wdd.html" class="nav-link">MULTIPLICA TU WDD</a>
-    <a href="./next_page.html" class="nav-link">Estadísticas Cripto</a>
-    <a href="./ganarchun.html" class="nav-link">GANA CHC Y CHUN</a>
-    <a href="./enviarwld.html" class="nav-link">DONACIÓN DE ❤️💛❤️</a>
-    
-    <br /><br />
+    <div class="nav-links">
+      <a href="./buscador.html" class="nav-button">TOP CRIPTO</a>
+      <a href="./next_page.html" class="nav-button">WLD Gráfica en Vivo</a>
+      <a href="./wdd.html" class="nav-button">MULTIPLICA TU WDD</a>
+      <a href="./next_page.html" class="nav-button">Estadísticas Cripto</a>
+      <a href="./ganarchun.html" class="nav-button">GANA CHC Y CHUN</a>
+      <a href="./enviarwld.html" class="nav-button">DONACIÓN DE ❤️💛❤️</a>
+    </div>
+
     <a href="./tokenchc.html" target="_blank">
-      <button class="btn" style="background-color:#6c47ff;">¡Apoya nuestros Tokens CHC y CHUN en PUF y espera el PUMP!<br />¡Solo los débiles venden!</button>
+      <button class="token-button">
+        ¡Apoya nuestros Tokens CHC y CHUN en PUF y espera el PUMP!<br />
+        ¡Solo los débiles venden!
+      </button>
     </a>
   </div>
 
