@@ -1,39 +1,178 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-  <title>CharlyCoin Login</title>
-  <script src="https://cdn.worldcoin.org/idkit.js"></script>
+  <meta charset="UTF-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>¡Reclama tus CHUN!</title>
+  <script src="https://cdn.jsdelivr.net/npm/@worldcoin/id"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      text-align: center;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 600px;
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      margin: auto;
+    }
+
+    h1 {
+      color: #333;
+    }
+
+    .highlight {
+      color: #27ae60;
+      font-weight: bold;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 12px 20px;
+      background: #007bff;
+      color: #fff;
+      text-decoration: none;
+      font-size: 18px;
+      border-radius: 5px;
+      margin-top: 15px;
+      border: none;
+      cursor: pointer;
+    }
+
+    .btn:hover {
+      background: #0056b3;
+    }
+
+    #world-id-container {
+      margin-top: 20px;
+    }
+
+    .links-container {
+      margin-top: 30px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .link-box {
+      display: block;
+      width: 90%;
+      max-width: 500px;
+      padding: 15px;
+      background-color: #ffffff;
+      color: #333;
+      text-decoration: none;
+      border: 2px solid #007bff;
+      border-radius: 10px;
+      font-size: 18px;
+      font-weight: bold;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      transition: all 0.3s ease;
+    }
+
+    .link-box:hover {
+      background-color: #007bff;
+      color: #fff;
+      transform: translateY(-3px);
+    }
+  </style>
 </head>
 <body>
-  <h1>Iniciar sesión con World ID</h1>
 
-  <div id="world-id"></div>
+  <div class="container">
+    <h1>🚀 ¡Atención! Reclama tus <span class="highlight">1,000 CHUN</span></h1>
+    <p>Para obtener tus 1000 CHUN, primero verifica tu identidad con World ID.</p>
+
+    <button id="reclamar-btn" class="btn" style="display: none;" onclick="reclamar1000CHUN()">Reclamar 1000 CHUN</button>
+    <p id="mensaje"></p>
+  </div>
+
+  <!-- Botón de verificación Worldcoin -->
+  <a href="https://worldcoin.org/verify?t=wld&i=531c7872-959a-4429-b227-2277334e7279&k=GqtoC8aFGiI%2B%2Fil0hyLx1ofIItyp1VdLlG38tiOkgto%3D" class="btn" target="_blank">Verificar World ID</a>
+
+  <div id="world-id-container"></div>
 
   <script>
-  function generarSignalUnico() {
-    const timestamp = Date.now();
-    const aleatorio = Math.random().toString(36).substring(2, 10);
-    return `wld-login-${timestamp}-${aleatorio}`;
-  }
+    let isVerified = false;
 
-  window.addEventListener('DOMContentLoaded', function () {
-    const signalDinamico = generarSignalUnico();
+    const signalDinamico = `charlycoin-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
 
-    new IDKitWidget({
-      app_id: "app_7686f9027d3e3c0b53d987a3caf1e111", // Tu app_id
-      action: "login",
+    new WorldIDWidget({
+      enableTelemetry: false,
       signal: signalDinamico,
-      onSuccess: (response) => {
-        console.log("✅ Verificado con signal:", signalDinamico, response);
-        alert("✅ Verificación exitosa con World ID");
+      app_name: "CharlyCoin App",
+      theme: "dark",
+      container_id: "world-id-container",
+      on_success: function (proof) {
+        console.log("✅ Verificado (Widget clásico):", proof);
+        isVerified = true;
+        document.getElementById("reclamar-btn").style.display = "inline-block";
+        document.getElementById("mensaje").innerHTML = "¡Autenticación exitosa! Ahora puedes reclamar tus 1000 CHUN.";
       },
-      onError: (error) => {
-        console.error("❌ Error al verificar:", error);
-        alert("❌ Ocurrió un error con World ID");
+      on_error: function (error) {
+        console.error("❌ Error de World ID:", error);
+        document.getElementById("mensaje").innerHTML = "❌ Error al verificar. Por favor, intenta nuevamente.";
       },
-    }).mount("#world-id-button");
-  });
-</script>
+    });
 
+    function reclamar1000CHUN() {
+      if (isVerified) {
+        alert("🎉 ¡Has reclamado tus 1000 CHUN!");
+      } else {
+        alert("❌ No has sido autenticado correctamente.");
+      }
+    }
+  </script>
+
+  <!-- Cajas de ligas -->
+  <div class="links-container">
+    <a href="./buscador.html" class="link-box">Valor de las Criptomonedas</a>
+    <a href="./dados.html" class="link-box">Apuestas WLD chain</a>
+    <a href="./ganarchun.html" class="link-box">Gana CHC y CHUN</a>
+    <a href="./wdd.html" class="link-box">MULTIPLICA TU WDD</a>
+  </div>
+
+  <h2>Verifica tu identidad con World ID</h2>
+  <div id="world-id-button"></div>
+
+  <!-- Navegación -->
+  <a href="./buscador.html" class="next-button">Enterate del TOP CRIPTO</a>
+  <a href="./next_page.html" class="grafica-link">WLD Gráfica en Vivo</a>
+  <a href="./dados.html" class="next-button">DADOS</a>
+  <a href="./wdd.html" class="next-button">MULTIPLICA TU WDD</a>
+  <a href="./next_page.html" class="next-button">Estadísticas Cripto</a>
+  <a href="./ganarchun.html" class="next-button">GANA CHC Y CHUN</a>
+  <a href="./enviarwld.html" class="next-button">DONACIÓN DE ❤️💛❤️</a>
+
+  <a href="./tokenchc.html" target="_blank">
+    <button style="padding: 15px; font-size: 18px; border-radius: 10px; background-color: #6c47ff; color: white;">
+      ¡Apoya nuestros Tokens CHC y CHUN en PUF y espera el PUMP!<br />
+      ¡Solo los débiles venden!
+    </button>
+  </a>
+
+  <script>
+    window.addEventListener('DOMContentLoaded', function () {
+      new IDKitWidget({
+        app_id: "app_7686f9027d3e3c0b53d987a3caf1e111",
+        action: "login",
+        signal: signalDinamico,
+        onSuccess: (response) => {
+          console.log("✅ Verificado (IDKit):", signalDinamico, response);
+          alert("✅ Verificación exitosa con World ID");
+        },
+        onError: (error) => {
+          console.error("❌ Error al verificar:", error);
+          alert("❌ Ocurrió un error con World ID");
+        },
+      }).mount("#world-id-button");
+    });
+  </script>
 </body>
 </html>
