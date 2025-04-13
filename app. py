@@ -1,0 +1,27 @@
+from flask import Flask, request, jsonify
+import requests
+
+app = Flask(__name__)
+
+@app.route('/verify', methods=['POST'])
+def verify():
+    data = request.get_json()
+
+    verification_response = requests.post(
+        "https://developer.worldcoin.org/api/v1/verify",
+        json={
+            "app_id": "app_7686f9027d3e3c0b53d987a3caf1e111",
+            "signal": data['signal'],
+            "proof": data['proof'],
+            "nullifier_hash": data['nullifier_hash'],
+            "merkle_root": data['merkle_root']
+        }
+    )
+
+    if verification_response.status_code == 200:
+        return jsonify({"success": True})
+    else:
+        return jsonify({"success": False, "error": verification_response.json()}), 400
+
+if __name__ == '__main__':
+    app.run(debug=True)
