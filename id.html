@@ -2,35 +2,42 @@
 <html>
 <head>
   <title>CharlyCoin Login</title>
-  <script src="https://unpkg.com/@worldcoin/idkit@1.1.0/dist/index.umd.js"></script>
+  <script src="https://cdn.worldcoin.org/idkit.js"></script>
 </head>
 <body>
-  <h2>Autenticación con World ID</h2>
-  <div id="world-id-button"></div>
+  <h1>Iniciar sesión con World ID</h1>
+
+  <div id="world-id"></div>
 
   <script>
-    const signal = 'user_login_' + Date.now(); // señal única por sesión
+    const signal = "login_" + Date.now();
 
-    new window.WorldIDWidget.WorldIDWidget({
+    new WorldIDWidget({
       action_id: "app_7686f9027d3e3c0b53d987a3caf1e111",
       signal: signal,
-      enableTelemetry: true,
-      app_name: "CharlyCoin",
-      theme: "light",
-      containerId: "world-id-button",
-      onSuccess: async (proofData) => {
-        console.log("Prueba recibida:", proofData);
-        // Enviamos la prueba al backend para verificarla
-        const response = await fetch('/verify', {
+      enable_telemetry: true,
+      container_id: "world-id",
+      on_success: (response) => {
+        fetch('http://localhost:5000/verify', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ ...proofData, signal })
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            proof: response.proof,
+            nullifier_hash: response.nullifier_hash,
+            merkle_root: response.merkle_root,
+            signal: signal
+          })
+        })
+        .then(res => res.json())
+        .then(data => {
+          alert(data.success ? "Verificación exitosa!" : "Falló la verificación");
         });
-        const result = await response.json();
-        alert("Resultado de verificación: " + result.status);
       },
-      onError: (error) => {
-        console.error("Error en verificación:", error);
+      on_error: (err) => {
+        console.error(err);
+        alert("Error de autenticación");
       }
     });
   </script>
