@@ -1,97 +1,85 @@
 <!DOCTYPE html>
 <html lang="es">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Reclama tus CHUN</title>
-  <script src="https://cdn.worldcoin.org/app/v1.0/sdk.js" defer></script>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f4f4f4;
-      text-align: center;
-      padding: 20px;
-    }
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Reclama tus CHUN</title>
+    <script src="https://cdn.jsdelivr.net/npm/@worldcoin/idkit@0.2.2/dist/index.umd.js"></script>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        text-align: center;
+        padding: 20px;
+      }
 
-    .container {
-      max-width: 600px;
-      background: #fff;
-      padding: 20px;
-      border-radius: 10px;
-      margin: auto;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
+      .container {
+        max-width: 600px;
+        background: #fff;
+        padding: 20px;
+        border-radius: 10px;
+        margin: auto;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
 
-    #world-id-container {
-      margin-top: 30px;
-    }
+      .btn {
+        padding: 12px 20px;
+        background: #007bff;
+        color: white;
+        font-size: 18px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        margin-top: 20px;
+        display: none;
+      }
 
-    .btn {
-      padding: 12px 20px;
-      background: #007bff;
-      color: white;
-      font-size: 18px;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      margin-top: 20px;
-      display: none;
-    }
+      .btn:hover {
+        background-color: #0056b3;
+      }
 
-    .btn:hover {
-      background-color: #0056b3;
-    }
+      #mensaje {
+        margin-top: 20px;
+        font-weight: bold;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>¡Reclama tus 1,000 CHUN!</h1>
+      <p>Verifica tu identidad con World ID para continuar.</p>
 
-    #mensaje {
-      margin-top: 20px;
-      font-weight: bold;
-    }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <h1>¡Reclama tus 1,000 CHUN!</h1>
-    <p>Verifica tu identidad con World ID para continuar.</p>
+      <div id="world-id-container"></div>
+      <button class="btn" id="reclamar-btn" onclick="reclamar()">Reclamar 1000 CHUN</button>
+      <p id="mensaje"></p>
+    </div>
 
-    <div id="world-id-container"></div>
+    <script>
+      let isVerified = false;
 
-    <button class="btn" id="reclamar-btn" onclick="reclamar()">Reclamar 1000 CHUN</button>
-    <p id="mensaje"></p>
-  </div>
-
-  <script>
-    let isVerified = false;
-
-    window.onload = () => {
-      const dynamicSignal = `chun_${Date.now()}_${Math.floor(Math.random() * 1000000)}`;
-
-      window.worldID.init('world-id-container', {
-        enableTelemetry: false,
+      window.IDKit.init({
         app_id: "app_7686f9027d3e3c0b53d987a3caf1e111", // Tu App ID de Worldcoin
-        action_id: "ingreso", // Tu Action ID
-        signal: dynamicSignal,
-        theme: "light",
+        action: "ingreso", // Action ID definida en la plataforma
+        signal: "chun_" + Date.now(),
         onSuccess: (proof) => {
           console.log("Verificación exitosa:", proof);
           isVerified = true;
-          document.getElementById('reclamar-btn').style.display = 'inline-block';
-          document.getElementById('mensaje').innerText = "¡Identidad verificada correctamente!";
+          document.getElementById("reclamar-btn").style.display = "inline-block";
+          document.getElementById("mensaje").innerText = "¡Identidad verificada correctamente!";
         },
         onError: (err) => {
           console.error("Error al verificar:", err);
-          document.getElementById('mensaje').innerText = "Error al verificar. Intenta de nuevo.";
-        }
+          document.getElementById("mensaje").innerText = "Error al verificar. Intenta de nuevo.";
+        },
       });
-    };
 
-    function reclamar() {
-      if (isVerified) {
-        alert("¡Felicidades! Has reclamado tus 1000 CHUN.");
-        // Aquí puedes enviar los CHUN al usuario, llamar a una API, etc.
-      } else {
-        alert("Debes verificar tu identidad primero.");
+      function reclamar() {
+        if (isVerified) {
+          alert("¡Felicidades! Has reclamado tus 1000 CHUN.");
+        } else {
+          alert("Debes verificar tu identidad primero.");
+        }
       }
-    }
-  </script>
-</body>
+    </script>
+  </body>
 </html>
