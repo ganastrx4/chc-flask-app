@@ -63,12 +63,14 @@
     let isVerified = false;
 
     window.onload = () => {
-      const dynamicSignal = "chun_" + Date.now();
+      // Generar un signal único para cada sesión
+      const dynamicSignal = `chun_${Date.now()}_${Math.floor(Math.random() * 1000000)}`;
 
+      // Inicializar el widget de World ID
       window.worldID.init('world-id-container', {
         enableTelemetry: false,
-        app_id: "app_7686f9027d3e3c0b53d987a3caf1e111",
-        action_id: "ingreso",
+        app_id: "app_7686f9027d3e3c0b53d987a3caf1e111", // Tu App ID de Worldcoin
+        action_id: "ingreso", // Tu Action ID
         signal: dynamicSignal,
         theme: "light",
         onSuccess: (proof) => {
