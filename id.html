@@ -70,7 +70,7 @@
       window.worldID.init('world-id-container', {
         enableTelemetry: false,
         app_id: "app_7686f9027d3e3c0b53d987a3caf1e111", // Tu App ID de Worldcoin
-        action_id: "ingreso", // Tu Action ID
+        action_id: "user_login", // Tu Action ID
         signal: dynamicSignal,
         theme: "light",
         onSuccess: (proof) => {
@@ -94,82 +94,76 @@
       }
     }
   </script>
-  <script>
-    window.addEventListener('DOMContentLoaded', function () {
-      const widget = new IDKitWidget({
-        app_id: "app_7686f9027d3e3c0b53d987a3caf1e111",
-        action: "ingreso",
-        signal: "wld-comparativa-login",
-        onSuccess: async (response) => {
-          console.log("✅ Verificado:", response);
-          try {
-            const res = await fetch("https://1977-189-217-212-76.ngrok-free.app/api/verify", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify(response),
-            });
+ <script>
+    let isVerified = false;
 
-            const result = await res.json();
+    window.onload = () => {
+      // Generar un signal único para cada sesión
+      const dynamicSignal = `chun_${Date.now()}_${Math.floor(Math.random() * 1000000)}`;
 
-            if (result.success) {
-              alert("✅ Verificación exitosa con World ID");
-            } else {
-              alert("❌ Verificación fallida");
-            }
-          } catch (error) {
-            console.error("❌ Error al verificar en backend:", error);
-            alert("❌ Ocurrió un error al verificar");
-          }
+      // Inicializar el widget de World ID
+      window.worldID.init('world-id-container', {
+        enableTelemetry: false,
+        app_id: "app_7686f9027d3e3c0b53d987a3caf1e111", // Tu App ID de Worldcoin
+        action_id: "login", // Tu Action ID
+        signal: dynamicSignal,
+        theme: "light",
+        onSuccess: (proof) => {
+          console.log("Verificación exitosa:", proof);
+          isVerified = true;
+          document.getElementById('reclamar-btn').style.display = 'inline-block';
+          document.getElementById('mensaje').innerText = "¡Identidad verificada correctamente!";
         },
-        onError: (error) => {
-          console.error("❌ Error al verificar:", error);
-          alert("❌ Ocurrió un error con World ID");
-        },
+        onError: (err) => {
+          console.error("Error al verificar:", err);
+          document.getElementById('mensaje').innerText = "Error al verificar. Intenta de nuevo.";
+        }
       });
+    };
 
-      widget.mount("#world-id-button");
-    });
+    function reclamar() {
+      if (isVerified) {
+        alert("¡Felicidades! Has reclamado tus 1000 CHUN.");
+      } else {
+        alert("Debes verificar tu identidad primero.");
+      }
+    }
   </script>
 
   <script>
-    window.addEventListener('DOMContentLoaded', function () {
-      const widget = new IDKitWidget({
-        app_id: "app_7686f9027d3e3c0b53d987a3caf1e111",
-        action: "login",
-        signal: "wld-comparativa-login",
-        onSuccess: async (response) => {
-          console.log("✅ Verificado:", response);
-          try {
-            const res = await fetch("https://1977-189-217-212-76.ngrok-free.app/api/verify", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify(response),
-            });
+    let isVerified = false;
 
-            const result = await res.json();
+    window.onload = () => {
+      // Generar un signal único para cada sesión
+      const dynamicSignal = `chun_${Date.now()}_${Math.floor(Math.random() * 1000000)}`;
 
-            if (result.success) {
-              alert("✅ Verificación exitosa con World ID");
-            } else {
-              alert("❌ Verificación fallida");
-            }
-          } catch (error) {
-            console.error("❌ Error al verificar en backend:", error);
-            alert("❌ Ocurrió un error al verificar");
-          }
+      // Inicializar el widget de World ID
+      window.worldID.init('world-id-container', {
+        enableTelemetry: false,
+        app_id: "app_7686f9027d3e3c0b53d987a3caf1e111", // Tu App ID de Worldcoin
+        action_id: "ingreso", // Tu Action ID
+        signal: dynamicSignal,
+        theme: "light",
+        onSuccess: (proof) => {
+          console.log("Verificación exitosa:", proof);
+          isVerified = true;
+          document.getElementById('reclamar-btn').style.display = 'inline-block';
+          document.getElementById('mensaje').innerText = "¡Identidad verificada correctamente!";
         },
-        onError: (error) => {
-          console.error("❌ Error al verificar:", error);
-          alert("❌ Ocurrió un error con World ID");
-        },
+        onError: (err) => {
+          console.error("Error al verificar:", err);
+          document.getElementById('mensaje').innerText = "Error al verificar. Intenta de nuevo.";
+        }
       });
+    };
 
-      widget.mount("#world-id-button");
-    });
+    function reclamar() {
+      if (isVerified) {
+        alert("¡Felicidades! Has reclamado tus 1000 CHUN.");
+      } else {
+        alert("Debes verificar tu identidad primero.");
+      }
+    }
   </script>
 </body>
 </html>
