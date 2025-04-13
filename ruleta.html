@@ -3,17 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <title>Saldo TronLink</title>
-    <script src="https://cdn.jsdelivr.net/npm/@tronlink/ext"></script>
-<script src="https://cdn.jsdelivr.net/npm/tronweb@4.4.0/dist/TronWeb.js"></script>
-
+    <script src="https://cdn.jsdelivr.net/npm/tronweb@4.4.0/dist/TronWeb.js"></script>
 </head>
 <body>
     <h1>Juego con TronLink</h1>
     <p id="saldo">Consultando saldo...</p>
     <button id="jugarBtn" disabled>Jugar (1 TRX)</button>
 
-   <script>
-    window.addEventListener("load", async () => {
+    <script>
+    async function conectarTronLink() {
+        if (window.tronLink) {
+            try {
+                // Solicita acceso a la cuenta
+                const res = await window.tronLink.request({ method: 'tron_requestAccounts' });
+                console.log("Resultado de conexión:", res);
+            } catch (error) {
+                alert("Conexión rechazada o fallida: " + error.message);
+                return;
+            }
+        } else {
+            alert("Por favor, instala TronLink: https://www.tronlink.org/");
+            return;
+        }
+
         if (window.tronWeb && window.tronWeb.ready) {
             const address = window.tronWeb.defaultAddress.base58;
             console.log("Wallet conectada:", address);
@@ -21,17 +33,22 @@
             const saldo = await tronWeb.trx.getBalance(address);
             const saldoTRX = tronWeb.fromSun(saldo);
             console.log("Saldo:", saldoTRX, "TRX");
+            document.getElementById("saldo").innerText = `Saldo: ${saldoTRX} TRX`;
 
             if (saldoTRX >= 1) {
                 alert("Puedes jugar con " + saldoTRX + " TRX");
+                document.getElementById("jugarBtn").disabled = false;
             } else {
                 alert("No tienes suficiente TRX para jugar.");
             }
         } else {
-            alert("Por favor, conecta TronLink.");
+            alert("TronLink no está listo. Intenta de nuevo.");
         }
-    });
-</script>
+    }
 
+    window.addEventListener("load", () => {
+        conectarTronLink();
+    });
+    </script>
 </body>
 </html>
