@@ -1,39 +1,38 @@
 <!DOCTYPE html>
-<html lang="es">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>Autenticación World App</title>
-  <script>
-    async function authenticateWithWorldApp() {
-      const actionId = "app_7686f9027d3e3c0b53d987a3caf1e111";
-      const signal = "login";
-
-      const result = await window.worldID.enable();
-      if (result) {
-        window.worldID.init(actionId, signal);
-      } else {
-        alert("No se pudo habilitar World ID");
-      }
-
-      window.worldID.onSuccess = function (result) {
-        console.log("✅ Verificado:", result);
-        alert("Autenticación exitosa:\n" + JSON.stringify(result, null, 2));
-        // Aquí puedes enviar el resultado a tu servidor Flask si lo necesitas.
-      };
-
-      window.worldID.onError = function (error) {
-        console.error("❌ Error de verificación:", error);
-        alert("Fallo en la autenticación");
-      };
-    }
-  </script>
+  <title>CharlyCoin Login</title>
+  <script src="https://unpkg.com/@worldcoin/idkit@1.1.0/dist/index.umd.js"></script>
 </head>
 <body>
-  <h1>Bienvenido</h1>
-  <p>Haz clic en el botón para autenticarte con World App</p>
-  <button onclick="authenticateWithWorldApp()">Iniciar sesión con World ID</button>
+  <h2>Autenticación con World ID</h2>
+  <div id="world-id-button"></div>
 
-  <!-- SDK de World ID -->
-  <script src="https://unpkg.com/@worldcoin/id@latest"></script>
+  <script>
+    const signal = 'user_login_' + Date.now(); // señal única por sesión
+
+    new window.WorldIDWidget.WorldIDWidget({
+      action_id: "app_7686f9027d3e3c0b53d987a3caf1e111",
+      signal: signal,
+      enableTelemetry: true,
+      app_name: "CharlyCoin",
+      theme: "light",
+      containerId: "world-id-button",
+      onSuccess: async (proofData) => {
+        console.log("Prueba recibida:", proofData);
+        // Enviamos la prueba al backend para verificarla
+        const response = await fetch('/verify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ...proofData, signal })
+        });
+        const result = await response.json();
+        alert("Resultado de verificación: " + result.status);
+      },
+      onError: (error) => {
+        console.error("Error en verificación:", error);
+      }
+    });
+  </script>
 </body>
 </html>
