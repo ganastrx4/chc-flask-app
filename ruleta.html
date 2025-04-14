@@ -42,6 +42,10 @@
     }
     .success { color: lightgreen; }
     .fail { color: red; }
+    canvas {
+      max-width: 100%;
+      margin-top: 20px;
+    }
   </style>
 </head>
 <body>
@@ -49,8 +53,11 @@
   <h1>Predicciones del precio WLD/USDT</h1>
   <p>Precio actual (4 dígitos): <span id="currentPrice">...</span></p>
   <button onclick="iniciarPredicciones()">Iniciar Predicciones</button>
+
   <h2>Predicción:</h2>
   <div id="resultadoPrediccion">Esperando predicción...</div>
+
+  <canvas id="chart" width="700" height="300"></canvas>
 
   <h2>Historial:</h2>
   <div class="prediction-log" id="historial"></div>
@@ -63,6 +70,9 @@
   <p>Dirección para donaciones WLD: <span id="wallet">0xdc178d65c502f9589bb1a35af08b5723f85ec168</span></p>
   <button onclick="copiar()">Copiar dirección</button>
 </div>
+
+<!-- Cargar Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
 let precioAnterior = null;
@@ -131,7 +141,7 @@ function calcularMACD(datos) {
   const ema12 = calcularEMA(datos, 12);
   const ema26 = calcularEMA(datos, 26);
   const macdLine = ema12.map((v, i) => v - ema26[i]);
-  const signalLine = calcularEMA(macdLine, 9);
+  const signalLine = calcularEMA(macdLine.map(v => ({ close: v })), 9);
   return { macdLine, signalLine };
 }
 
