@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Predicciones WLD/USDT</title>
+  <title>Predicciones WLD/USDT con Indicadores Técnicos</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body {
@@ -42,13 +42,18 @@
     }
     .success { color: lightgreen; }
     .fail { color: red; }
+    canvas {
+      background-color: #fff;
+      border-radius: 10px;
+      margin-top: 20px;
+    }
   </style>
 </head>
 <body>
 <div class="container">
   <h1>Predicciones del precio WLD/USDT</h1>
-  <p>Precio actual (4 dígitos): <span id="currentPrice">...</span></p>
-  <button onclick="predecirPrecio()">Predecir subida o bajada</button>
+  <p>Precio actual: <span id="currentPrice">...</span></p>
+  <button onclick="iniciarPredicciones()">Iniciar Análisis y Predicción</button>
   <h2>Predicción:</h2>
   <div id="resultadoPrediccion">Esperando predicción...</div>
 
@@ -57,6 +62,8 @@
 
   <h2>Aciertos: <span id="aciertos">0</span> | Fallos: <span id="fallos">0</span></h2>
 
+  <canvas id="chart" width="700" height="400"></canvas>
+
   <hr>
   <h2>¡Apoya el proyecto CharlyCoin!</h2>
   <p>Estamos construyendo herramientas para ayudar a los traders a mejorar sus predicciones.</p>
@@ -64,42 +71,153 @@
   <button onclick="copiar()">Copiar dirección</button>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-let precioAnterior = null;
-let prediccion = null;
 let aciertos = 0;
 let fallos = 0;
+let chart;
+let prediccion = null;
+let precioAnterior = null;
 
-async function obtenerPrecio() {
-  const res = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=WLDUSDT');
+async function obtenerDatosHistoricos() {
+  const res = await fetch('https://api.binance.com/api/v3/klines?symbol=WLDUSDT&interval=1m&limit=100');
   const data = await res.json();
-  return parseFloat(parseFloat(data.price).toFixed(4));
+  return data.map(d => ({
+    time: new Date(d[0]),
+    open: parseFloat(d[1]),
+    high: parseFloat(d[2]),
+    low: parseFloat(d[3]),
+    close: parseFloat(d[4]),
+    volume: parseFloat(d[5])
+  }));
 }
 
-async function predecirPrecio() {
-  const ahora = new Date();
-  const segundosRestantes = 60 - ahora.getSeconds();
-  const espera = (segundosRestantes > 30 ? segundosRestantes - 30 : segundosRestantes + 30) * 1000;
+function calcularSMA(data, period = 14) {
+  const sma = [];
+  for (let i = period - 1; i < data.length; i++) {
+    const sum = data.slice(i - period + 1, i + 1).reduce((acc, val) => acc + val.close, 0);
+    sma.push(sum / period);
+  }
+  return sma;
+}
 
-  precioAnterior = await obtenerPrecio();
-  document.getElementById('currentPrice').textContent = precioAnterior;
+function calcularRSI(data, period = 14) {
+  const rsi = [];
+  for (let i = period; i < data.length; i++) {
+    let gains = 0;
+    let losses = 0;
+    for (let j = i - period + 1; j <= i; j++) {
+      const change = data[j].close - data[j - 1].close;
+      if (change > 0) gains += change;
+      else losses -= change;
+    }
+    const rs = gains / (losses || 1);
+    rsi.push(100 - 100 / (1 + rs));
+  }
+  return rsi;
+}
 
-  prediccion = Math.random() > 0.5 ? 'subira' : 'bajara';
-  document.getElementById('resultadoPrediccion').textContent = `Se predice que el precio ${prediccion} para dentro de 5 minutos.`;
+function calcularMACD(data, shortPeriod = 12, longPeriod = 26, signalPeriod = 9) {
+  const emaShort = calcularEMA(data, shortPeriod);
+  const emaLong = calcularEMA(data, longPeriod);
+  const macdLine = emaShort.map((val, idx) => val - emaLong[idx]);
+  const signalLine = calcularEMA(macdLine.map(val => ({ close: val })), signalPeriod);
+  return { macdLine, signalLine };
+}
 
+function calcularEMA(data, period) {
+  const k = 2 / (period + 1);
+  const ema = [data[0].close];
+  for (let i = 1; i < data.length; i++) {
+    ema.push(data[i].close * k + ema[i - 1] * (1 - k));
+  }
+  return ema;
+}
+
+function analizarIndicadores(data) {
+  const sma = calcularSMA(data);
+  const rsi = calcularRSI(data);
+  const { macdLine, signalLine } = calcularMACD(data);
+
+  const ultimoRSI = rsi
+::contentReference[oaicite:12]{index=12}
+
+    ? rsi[rsi.length - 1]
+  : null;
+  const ultimoMACD = macdLine.length > 0 ? macdLine[macdLine.length - 1] : 0;
+  const ultimoSignal = signalLine.length > 0 ? signalLine[signalLine.length - 1] : 0;
+
+  if (!ultimoRSI) return 'sin datos';
+
+  // Lógica básica para predecir
+  if (ultimoRSI < 30 && ultimoMACD > ultimoSignal) {
+    return 'subira';
+  } else if (ultimoRSI > 70 && ultimoMACD < ultimoSignal) {
+    return 'bajara';
+  } else {
+    return 'estable';
+  }
+}
+
+function actualizarGrafico(data) {
+  const labels = data.map(d => d.time.toLocaleTimeString());
+  const precios = data.map(d => d.close);
+  if (chart) chart.destroy();
+  const ctx = document.getElementById('chart').getContext('2d');
+  chart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Precio WLD/USDT',
+        data: precios,
+        borderColor: '#f9ca24',
+        backgroundColor: 'rgba(249,202,36,0.2)',
+        fill: true,
+        tension: 0.3
+      }]
+    },
+    options: {
+      scales: {
+        x: { display: false },
+        y: { beginAtZero: false }
+      },
+      plugins: {
+        legend: { labels: { color: '#fff' } }
+      }
+    }
+  });
+}
+
+async function ejecutarPrediccion() {
+  const datos = await obtenerDatosHistoricos();
+  const actual = datos[datos.length - 1].close;
+  document.getElementById('currentPrice').textContent = actual.toFixed(4);
+  precioAnterior = actual;
+  actualizarGrafico(datos);
+
+  prediccion = await analizarIndicadores(datos);
+  document.getElementById('resultadoPrediccion').textContent =
+    `Se predice que el precio ${prediccion} en los próximos 5 minutos.`;
+
+  // Esperar 5 minutos para verificar
   setTimeout(async () => {
-    const futuro = await obtenerPrecio();
-    const exito = (prediccion === 'subira' && futuro > precioAnterior) || (prediccion === 'bajara' && futuro < precioAnterior);
+    const nuevoDatos = await obtenerDatosHistoricos();
+    const futuro = nuevoDatos[nuevoDatos.length - 1].close;
+    const exito = (
+      (prediccion === 'subira' && futuro > precioAnterior) ||
+      (prediccion === 'bajara' && futuro < precioAnterior)
+    );
 
-    const resultado = document.createElement('p');
-    resultado.className = exito ? 'success' : 'fail';
-    resultado.textContent = `Se predijo que ${prediccion} y el precio paso de ${precioAnterior} a ${futuro} => ${exito ? '✅ ACERTASTE' : '❌ FALLASTE'}`;
-    document.getElementById('historial').prepend(resultado);
+    const log = document.createElement('p');
+    log.className = exito ? 'success' : 'fail';
+    log.textContent = `Predicción: ${prediccion}. Precio de ${precioAnterior} a ${futuro} => ${exito ? '✅ ACERTASTE' : '❌ FALLASTE'}`;
+    document.getElementById('historial').prepend(log);
 
     if (exito) aciertos++; else fallos++;
     document.getElementById('aciertos').textContent = aciertos;
     document.getElementById('fallos').textContent = fallos;
-  }, espera + (5 * 60 * 1000));
+  }, 5 * 60 * 1000);
 }
 
 function copiar() {
@@ -109,9 +227,18 @@ function copiar() {
   });
 }
 
-obtenerPrecio().then(precio => {
-  document.getElementById('currentPrice').textContent = precio;
-});
+function iniciarPredicciones() {
+  ejecutarPrediccion();
+  setInterval(() => {
+    const ahora = new Date();
+    const segundos = ahora.getSeconds();
+    const minutos = ahora.getMinutes();
+    if ((minutos % 5 === 4 && segundos >= 30) || (minutos % 5 === 0 && segundos < 30)) {
+      ejecutarPrediccion();
+    }
+  }, 1000);
+}
 </script>
 </body>
 </html>
+
