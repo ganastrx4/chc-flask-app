@@ -1,74 +1,117 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <title>Saldo TronLink</title>
-    <script src="https://cdn.jsdelivr.net/npm/tronweb@4.4.0/dist/TronWeb.js"></script>
+  <meta charset="UTF-8">
+  <title>Predicciones WLD/USDT</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      background: linear-gradient(to bottom right, #1a1a2e, #16213e);
+      color: #fff;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      text-align: center;
+      padding: 40px 20px;
+    }
+    .container {
+      max-width: 800px;
+      margin: auto;
+      background: #0f3460;
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 0 20px rgba(255,255,255,0.1);
+    }
+    h1, h2 {
+      color: #f9ca24;
+    }
+    button {
+      background-color: #f9ca24;
+      color: #000;
+      border: none;
+      padding: 10px 20px;
+      font-weight: bold;
+      border-radius: 10px;
+      cursor: pointer;
+      margin: 10px;
+      transition: background 0.3s ease;
+    }
+    button:hover {
+      background-color: #f6b93b;
+    }
+    .prediction-log p {
+      margin: 5px 0;
+    }
+    .success { color: lightgreen; }
+    .fail { color: red; }
+  </style>
 </head>
 <body>
-    <h1>Juego con TronLink</h1>
-    <p id="saldo">Consultando saldo...</p>
-    <button id="jugarBtn" disabled>Jugar (1 TRX)</button>
+<div class="container">
+  <h1>Predicciones del precio WLD/USDT</h1>
+  <p>Precio actual (4 dígitos): <span id="currentPrice">...</span></p>
+  <button onclick="predecirPrecio()">Predecir subida o bajada</button>
+  <h2>Predicción:</h2>
+  <div id="resultadoPrediccion">Esperando predicción...</div>
 
-    <script>
-    async function conectarTronLink() {
-        if (window.tronLink) {
-            try {
-                // Solicita acceso a la cuenta
-                const res = await window.tronLink.request({ method: 'tron_requestAccounts' });
-                console.log("Resultado de conexión:", res);
-            } catch (error) {
-                alert("Conexión rechazada o fallida: " + error.message);
-                return;
-            }
-        } else {
-            alert("Por favor, instala TronLink: https://www.tronlink.org/");
-            return;
-        }
+  <h2>Historial:</h2>
+  <div class="prediction-log" id="historial"></div>
 
-        if (window.tronWeb && window.tronWeb.ready) {
-            const address = window.tronWeb.defaultAddress.base58;
-            console.log("Wallet conectada:", address);
+  <h2>Aciertos: <span id="aciertos">0</span> | Fallos: <span id="fallos">0</span></h2>
 
-            const saldo = await tronWeb.trx.getBalance(address);
-            const saldoTRX = tronWeb.fromSun(saldo);
-            console.log("Saldo:", saldoTRX, "TRX");
-            document.getElementById("saldo").innerText = `Saldo: ${saldoTRX} TRX`;
+  <hr>
+  <h2>¡Apoya el proyecto CharlyCoin!</h2>
+  <p>Estamos construyendo herramientas para ayudar a los traders a mejorar sus predicciones.</p>
+  <p>Dirección para donaciones WLD: <span id="wallet">0xdc178d65c502f9589bb1a35af08b5723f85ec168</span></p>
+  <button onclick="copiar()">Copiar dirección</button>
+</div>
 
-            if (saldoTRX >= 1) {
-                alert("Puedes jugar con " + saldoTRX + " TRX");
-                document.getElementById("jugarBtn").disabled = false;
-            } else {
-                alert("No tienes suficiente TRX para jugar.");
-            }
-        } else {
-            alert("TronLink no está listo. Intenta de nuevo.");
-        }
-    }
+<script>
+let precioAnterior = null;
+let prediccion = null;
+let aciertos = 0;
+let fallos = 0;
 
-    window.addEventListener("load", () => {
-        conectarTronLink();
-    });
-        function esDispositivoMovil() {
-    return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+async function obtenerPrecio() {
+  const res = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=WLDUSDT');
+  const data = await res.json();
+  return parseFloat(parseFloat(data.price).toFixed(4));
 }
 
-function abrirTronLinkMovil() {
-    // No hay un `deep link` oficial público, pero puedes abrir la app manualmente con un mensaje
-    if (esDispositivoMovil()) {
-        alert("Por favor abre TronLink manualmente desde tu teléfono y vuelve a esta página.");
-        // Opcional: redirigir a la web oficial
-        window.location.href = "https://www.tronlink.org/";
-    }
+async function predecirPrecio() {
+  const ahora = new Date();
+  const segundosRestantes = 60 - ahora.getSeconds();
+  const espera = (segundosRestantes > 30 ? segundosRestantes - 30 : segundosRestantes + 30) * 1000;
+
+  precioAnterior = await obtenerPrecio();
+  document.getElementById('currentPrice').textContent = precioAnterior;
+
+  prediccion = Math.random() > 0.5 ? 'subira' : 'bajara';
+  document.getElementById('resultadoPrediccion').textContent = `Se predice que el precio ${prediccion} para dentro de 5 minutos.`;
+
+  setTimeout(async () => {
+    const futuro = await obtenerPrecio();
+    const exito = (prediccion === 'subira' && futuro > precioAnterior) || (prediccion === 'bajara' && futuro < precioAnterior);
+
+    const resultado = document.createElement('p');
+    resultado.className = exito ? 'success' : 'fail';
+    resultado.textContent = `Se predijo que ${prediccion} y el precio paso de ${precioAnterior} a ${futuro} => ${exito ? '✅ ACERTASTE' : '❌ FALLASTE'}`;
+    document.getElementById('historial').prepend(resultado);
+
+    if (exito) aciertos++; else fallos++;
+    document.getElementById('aciertos').textContent = aciertos;
+    document.getElementById('fallos').textContent = fallos;
+  }, espera + (5 * 60 * 1000));
 }
 
-        window.addEventListener("load", async () => {
-    abrirTronLinkMovil();
-    await conectarTronLink(); // esta es tu función de conexión
+function copiar() {
+  const wallet = document.getElementById('wallet').innerText;
+  navigator.clipboard.writeText(wallet).then(() => {
+    alert('✅ Dirección copiada al portapapeles');
+  });
+}
+
+obtenerPrecio().then(precio => {
+  document.getElementById('currentPrice').textContent = precio;
 });
-
-    </script>
-    
-
+</script>
 </body>
 </html>
