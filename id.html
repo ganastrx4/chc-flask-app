@@ -1,66 +1,101 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Reclamar CHUN</title>
-  <script src="https://cdn.jsdelivr.net/npm/@worldcoin/idkit@0.1.10/dist/index.umd.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Predicción WLD</title>
   <style>
     body {
+      background: linear-gradient(to bottom, #e6f3ff, #ffffff);
       font-family: Arial, sans-serif;
-      text-align: center;
-      padding: 2rem;
-      background: #f9f9f9;
+      color: #333;
+      margin: 0;
+      padding: 20px;
     }
-
-    .btn {
-      display: none;
-      margin-top: 1rem;
-      padding: 0.75rem 1.5rem;
-      font-size: 1.2rem;
-      background-color: #4caf50;
-      color: white;
+    .container {
+      max-width: 400px;
+      margin: auto;
+      background: #f5f9ff;
+      padding: 20px;
+      border-radius: 20px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+    .price-box {
+      background: #d0e8ff;
+      padding: 10px;
+      border-radius: 10px;
+      margin: 20px 0;
+      font-size: 24px;
+    }
+    button {
+      padding: 10px 20px;
+      margin: 10px;
+      font-size: 16px;
       border: none;
-      border-radius: 6px;
+      border-radius: 10px;
       cursor: pointer;
     }
-
-    .btn:hover {
-      background-color: #45a049;
+    .up {
+      background-color: #4caf50;
+      color: white;
     }
-
-    #mensaje {
-      margin-top: 1rem;
-      font-weight: bold;
-      color: green;
+    .down {
+      background-color: #f44336;
+      color: white;
+    }
+    .predict {
+      background-color: #2196f3;
+      color: white;
     }
   </style>
 </head>
 <body>
-  <h1>Reclama tus 1,000 CHUN</h1>
-  <p>Verifica tu identidad con World ID para continuar.</p>
-  <div id="world-id"></div>
-  <button class="btn" id="reclamar-btn" onclick="reclamar()">Reclamar</button>
-  <p id="mensaje"></p>
+  <div class="container">
+    <h2>¿Subirá o bajará el precio de WLD?</h2>
+    <div class="price-box" id="priceDisplay">Precio WLD: $--</div>
+    <button class="up" onclick="choose('up')">SUBE (1.6x)</button>
+    <button class="down" onclick="choose('down')">BAJA (1.9x)</button>
+    <br>
+    <button class="predict" onclick="predict()">Predecir ahora</button>
+    <p id="result"></p>
+  </div>
 
   <script>
-    let isVerified = false;
+    let lastPrice = 0;
+    let prediction = null;
 
-    window.IDKit.init({
-      app_id: "app_7686f9027d3e3c0b53d987a3caf1e111", // Tu App ID real
-      action: "reclamo", // nombre de la acción en tu panel de Worldcoin
-      signal: "reclamo_" + Date.now(),
-      onSuccess: (proof) => {
-        console.log("✅ Verificado con éxito", proof);
-        isVerified = true;
-        document.getElementById("mensaje").innerText = "¡Verificación exitosa!";
-        document.getElementById("reclamar-btn").style.display = "inline-block";
-      },
-      onError: (err) => {
-        console.error("❌ Error de verificación", err);
-        document.getElementById("mensaje").innerText = "Error al verificar.";
-      },
-    });
+    async function fetchPrice() {
+      const res = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=WLDUSDT');
+      const data = await res.json();
+      const price = parseFloat(data.price).toFixed(4);
+      document.getElementById('priceDisplay').textContent = `Precio WLD: $${price}`;
+      return parseFloat(price);
+    }
+
+    function choose(direction) {
+      prediction = direction;
+      document.getElementById('result').textContent = `Elegiste: ${direction === 'up' ? 'SUBE' : 'BAJA'}`;
+    }
+
+    async function predict() {
+      document.getElementById('result').textContent = 'Esperando resultado...';
+      lastPrice = await fetchPrice();
+      setTimeout(async () => {
+        const newPrice = await fetchPrice();
+        const wentUp = newPrice > lastPrice;
+
+        if ((wentUp && prediction === 'up') || (!wentUp && prediction === 'down')) {
+          document.getElementById('result').textContent = `¡Acertaste! El precio ${wentUp ? 'subió' : 'bajó'} a $${newPrice.toFixed(4)}`;
+        } else {
+          document.getElementById('result').textContent = `Fallaste. El precio ${wentUp ? 'subió' : 'bajó'} a $${newPrice.toFixed(4)}`;
+        }
+      }, 10000); // Espera 10 segundos para simular la siguiente ronda
+    }
+
+    // Mostrar precio inicial
+    fetchPrice();
+    setInterval(fetchPrice, 5000); // actualizar cada 5 segundos
   </script>
 </body>
 </html>
