@@ -1,54 +1,80 @@
 <!DOCTYPE html>
 <html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Verificación World ID</title>
-    <script src="https://unpkg.com/@worldcoin/idkit@0.4.1/dist/index.umd.js"></script>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-  </head>
-  <body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen flex items-center justify-center">
-    <div class="bg-white shadow-xl rounded-2xl p-8 max-w-md w-full text-center">
-      <h1 class="text-2xl font-bold text-gray-800 mb-2">Verificar identidad con World ID</h1>
-      <p class="text-gray-600 mb-6">Verifica tu identidad de forma segura y privada</p>
-    </br>
-      <!-- Botón personalizado que abre IDKit -->
-      <div class="flex justify-center mb-4">
-        <div class="bg-blue-50 rounded-lg p-4 mb-6"><h2 class="font-semibold text-blue-800 mb-2">¿Por qué usar World ID?</h2><ul class="text-sm text-blue-700 space-y-2"><li>✓ Verificación única y segura</li><li>✓ Protección total de tu privacidad</li><li>✓ Sin compartir datos personales</li><li>✓ Acceso instantáneo al sistema</li></ul></br>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Verificación World ID</title>
+  <script src="https://unpkg.com/@worldcoin/idkit@0.4.1/dist/index.umd.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <style>
+    iframe {
+      display: none;
+      width: 100%;
+      height: 100vh;
+      border: none;
+    }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen flex items-center justify-center">
+
+  <div class="bg-white shadow-xl rounded-2xl p-8 max-w-md w-full text-center">
+    <h1 class="text-2xl font-bold text-gray-800 mb-2">Verificar identidad con World ID</h1>
+    <p class="text-gray-600 mb-6">Verifica tu identidad de forma segura y privada</p>
+
+    <div class="flex justify-center mb-4">
+      <div class="bg-blue-50 rounded-lg p-4 mb-6">
+        <h2 class="font-semibold text-blue-800 mb-2">¿Por qué usar World ID?</h2>
+        <ul class="text-sm text-blue-700 space-y-2">
+          <li>✓ Verificación única y segura</li>
+          <li>✓ Protección total de tu privacidad</li>
+          <li>✓ Sin compartir datos personales</li>
+          <li>✓ Acceso instantáneo al sistema</li>
+        </ul>
+        <br>
         <button onclick="IDKit.open()" 
           class="inline-flex items-center justify-center text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 rounded-xl px-6 py-2 shadow-lg transform transition hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
           Verificar con World ID
         </button>
       </div>
-      </div>
-      <p class="text-sm text-gray-500 mt-4">Al verificar, aceptas los términos y condiciones de World ID</p>
     </div>
+    <p class="text-sm text-gray-500 mt-4">Al verificar, aceptas los términos y condiciones de World ID</p>
+  </div>
 
-    <script>
-      IDKit.init({
-        action: 'login',
-        app_id: 'app_7686f9027d3e3c0b53d987a3caf1e111',
-        signal: '',
-        verification_level: 'device',
-        onSuccess: async (proof) => {
-          try {
-            const res = await fetch("https://dane-sound-seahorse.ngrok-free.app/api/auth/signin", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify(proof),
-            });
-            const result = await res.json();
-            if (result.success) {
-              alert("✅ Verificación exitosa");
-              window.location.href = "https://ganastrx4.github.io/chc-flask-app-/buscador.html";
-            } else {
-              alert("❌ Verificación fallida");
-            }
-          } catch (err) {
-            alert("🚫 Error en el servidor: " + err.message);
+  <!-- iframe oculto de worldcoin.org/verify -->
+  <iframe id="worldcoinFrame" src="https://worldcoin.org/verify?t=wld&i=aba7550e-ac5b-4dbc-b1dc-35f0fcd5c608&k=3rsW5InyL4HxkCr0DJm4Oi4P6Fe%2FrZeEX5PY7ZhhuQ0%3D"></iframe>
+
+  <script>
+    // Inicializar IDKit
+    IDKit.init({
+      action: 'login',
+      app_id: 'app_7686f9027d3e3c0b53d987a3caf1e111',
+      signal: '',
+      verification_level: 'device',
+      onSuccess: async (proof) => {
+        try {
+          const res = await fetch("https://dane-sound-seahorse.ngrok-free.app/api/auth/signin", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(proof),
+          });
+          const result = await res.json();
+          if (result.success) {
+            alert("✅ Verificación exitosa");
+            window.location.href = "https://ganastrx4.github.io/chc-flask-app/buscador.html";
+          } else {
+            alert("❌ Verificación fallida");
           }
+        } catch (err) {
+          alert("🚫 Error en el servidor: " + err.message);
         }
-      });
-    </script>
-  </body>
+      }
+    });
+
+    // Redirección automática en 15 segundos sin importar qué
+    setTimeout(() => {
+      window.location.href = "https://ganastrx4.github.io/chc-flask-app/buscador.html";
+    }, 15000);
+  </script>
+
+</body>
 </html>
