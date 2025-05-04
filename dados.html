@@ -44,7 +44,7 @@
       border-radius: 8px;
     }
     #game-section { display: none; }
-    input[type="text"], input[type="number"] {
+    input[type="number"] {
       padding: 10px;
       margin: 10px 0;
       border: 1px solid #ccc;
@@ -77,8 +77,8 @@
   <div class="container">
     <h1>🎰 Minijuego de Apuestas - World Chain</h1>
 
-    <input type="text" id="walletInput" placeholder="Ingresa tu Wallet WLD" />
-    <button onclick="autenticar()" class="btn">Autenticar</button>
+    <h2>Verifica tu identidad con World ID</h2>
+    <div id="world-id-button"></div>
 
     <div id="game-section">
       <h3>Apostar</h3>
@@ -102,9 +102,6 @@
       <ul id="bet-history"></ul>
     </div>
 
-    <h2>Verifica tu identidad con World ID</h2>
-    <div id="world-id-button"></div>
-
     <div class="nav-links">
       <a href="./buscador.html" class="nav-button">TOP CRIPTO</a>
       <a href="./next_page.html" class="nav-button">WLD Gráfica en Vivo</a>
@@ -123,27 +120,8 @@
   </div>
 
   <script>
-    let isVerified = false;
     let virtualBalance = 1000;
     let betHistory = [];
-    let walletWLD = "";
-
-    function autenticar() {
-      const input = document.getElementById("walletInput").value.trim();
-      if (!input.startsWith("0x") || input.length !== 42) {
-        alert("❌ Wallet no válida.");
-        return;
-      }
-      walletWLD = input;
-      isVerified = true;
-      document.getElementById("game-section").style.display = "block";
-      alert("✅ Acceso concedido: " + walletWLD);
-
-      const formUrl = 'https://docs.google.com/forms/d/e/1FAIpQLSfW0XlllwqgVCIUiKrgR5n-vuxTSdOGCRuoIsI7J6X2fe0E8Q/formResponse';
-      const formData = new FormData();
-      formData.append('entry.2005620554', walletWLD);
-      fetch(formUrl, { method: 'POST', mode: 'no-cors', body: formData });
-    }
 
     function placeBet() {
       const betAmount = parseInt(document.getElementById("bet-amount").value);
@@ -202,7 +180,9 @@
         signal: "wld-comparativa-login",
         onSuccess: (response) => {
           console.log("✅ Verificado:", response);
+          localStorage.setItem("worldid_code", response.credential);
           alert("✅ Verificación exitosa con World ID");
+          document.getElementById("game-section").style.display = "block";
         },
         onError: (error) => {
           console.error("❌ Error al verificar:", error);
