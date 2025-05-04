@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
   <title>Minijuego de Apuestas - World Chain</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
   <style>
     body {
       font-family: 'Segoe UI', sans-serif;
@@ -79,6 +80,13 @@
 
     <h2>Verifica tu identidad con World ID</h2>
     <div id="world-id-button"></div>
+
+    <button onclick="startAuth()"
+      class="bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-bold py-3 px-8 rounded-2xl shadow-lg hover:scale-105 transition fade-in mb-4">
+      🔒 Autenticar con World App
+    </button>
+
+    <div id="result" class="mt-4 text-sm text-green-600"></div>
 
     <div id="game-section">
       <h3>Apostar</h3>
@@ -173,25 +181,33 @@
       });
     }
 
-   window.onload = function () {
-    const worldID = new window.WorldIDWidget({
-      enableTelemetry: true,
-      action_id: "chun", // Usa tu action_id registrado en Worldcoin
-      signal: "minijuego-apuesta",
-      app_id: "app_7686f9027d3e3c0b53d987a3caf1e111", // Tu App ID
-      theme: "light",
-      onSuccess: function (proof) {
-        console.log("✅ Verificación exitosa:", proof);
-        document.getElementById("game-section").style.display = "block";
-        document.getElementById("world-id-button").innerHTML = "✅ Identidad verificada";
-      },
-      onError: function (error) {
-        console.error("❌ Error en la verificación:", error);
-      }
-    });
+    function startAuth() {
+      const clientId = "app_7686f9027d3e3c0b53d987a3caf1e111";
+      const redirectUri = "https://ganastrx4.github.io/chc-flask-app/buscador.html";
+      const state = Math.random().toString(36).substring(2);
+      const scope = "openid";
+      const responseType = "code";
+      const nonce = Math.random().toString(36).substring(2);
 
-    worldID.mount("#world-id-button");
-  };
+      const authUrl = `https://id.worldcoin.org/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=${encodeURIComponent(responseType)}&scope=${encodeURIComponent(scope)}&state=${state}&nonce=${nonce}`;
+
+      window.location.href = authUrl;
+    }
+
+    window.onload = function () {
+      const params = new URLSearchParams(window.location.search);
+      const code = params.get("code");
+
+      if (code) {
+        document.getElementById("result").innerHTML = `
+          ✅ Autenticado correctamente con World ID.<br>
+          <strong>Code:</strong> ${code}<br><br>
+          🔐 Este código debe enviarse a tu servidor para intercambiarlo por tokens.
+        `;
+        console.log("Código de autenticación:", code);
+        document.getElementById("game-section").style.display = "block";
+      }
+    };
   </script>
 </body>
 </html>
