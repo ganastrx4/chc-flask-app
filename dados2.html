@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Juego con WLD</title>
+  <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    #game-section { display: none; margin-top: 20px; }
+    .history, .leaderboard { margin-top: 30px; }
+    button { padding: 10px; margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <h2>🎰 Juego con WLD - Ruleta de Suerte</h2>
+  <p>Conecta tu wallet, deposita WLD y juega para ganar más.</p>
+
+  <button onclick="connectWallet()">🔌 Conectar Wallet</button>
+  <div id="wallet-address"></div>
+
+  <hr>
+
+  <h3>1️⃣ Verificar depósitos a: <code>0xdc17...c168</code></h3>
+  <button onclick="checkDeposit()">🔎 Verificar Depósitos</button>
+  <div id="deposit-status"></div>
+
+  <hr>
+
+  <div id="game-section">
+    <h3>2️⃣ Jugar - Apuesta 0.1 WLD</h3>
+    <button onclick="apostarOnChain()">🎲 Apostar con WLD</button>
+    <div id="game-result"></div>
+
+    <div class="history">
+      <h4>🕹 Historial</h4>
+      <ul id="game-history"></ul>
+    </div>
+
+    <div class="leaderboard">
+      <h4>🏆 Tabla de Clasificación</h4>
+      <ul id="leaderboard-list"></ul>
+    </div>
+  </div>
+
+  <script>
+    let currentUser = "";
+    const adminWallet = "0xdc178d65c502f9589bb1a35af08b5723f85ec168";
+
+    async function connectWallet() {
+      if (!window.ethereum) return alert("Instala MetaMask o World App compatible.");
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      await provider.send("eth_requestAccounts", []);
+      const signer = provider.getSigner();
+      const address = await signer.getAddress();
+      currentUser = address;
+      document.getElementById("wallet-address").innerText = "Conectado: " + address;
+      document.getElementById("game-section").style.display = "block";
+    }
+
+    async function checkDeposit() {
+      const response = await fetch(`https://explorer.worldchain.xyz/api?module=account&action=txlist&address=${adminWallet}`);
+      const data = await response.json();
+
+      const lastDeposit = data.result.find(tx =>
+        tx.to?.toLowerCase() === adminWallet.toLowerCase() &&
+        parseFloat(tx.value) > 0 &&
+        tx.isError === "0"
+      );
+
+      if (lastDeposit) {
+        const amount = parseFloat(lastDeposit.value) / 1e18;
+        document.getElementById("deposit-status").innerText =
+          `✅ Depósito de ${amount.toFixed(3)} WLD detectado de ${lastDeposit.from}`;
+        document.getElementById("game-section").style.display = "block";
+      } else {
+        document.getElementById("deposit-status").innerText = "❌ No se detectaron depósitos recientes.";
+      }
+    }
+
+    async function apostarOnChain() {
+      try {
+        const provider = new ethers.providers.Web3Provider(window.ethereum);
+        const signer = provider.getSigner();
+
+        const betAmount = ethers.utils.parseEther("0.1");
+        const tx = await signer.sendTransaction({
+          to: adminWallet,
+          value: betAmount
+        });
+
+        document.getElementById("game-result").innerText = "⏳ Apuesta enviada, esperando confirmación...";
+        await tx.wait();
+        jugar();
+      } catch (e) {
+        alert("Error al enviar la transacción: " + e.message);
+      }
+    }
+
+    function jugar() {
+      const resultado = Math.random();
+      const gano = resultado > 0.5; // 50% de probabilidad
+
+      const mensaje = gano
+        ? `🎉 ¡Ganaste! Se te devolverán 0.18 WLD (80% del bote)`
+        : `😢 Perdiste esta vez. Intenta de nuevo`;
+
+      document.getElementById("game-result").innerText = mensaje;
+      agregarHistorial(currentUser, gano ? 0.18 : 0);
+      updateLeaderboard(currentUser, gano ? 0.18 : 0);
+    }
+
+    function agregarHistorial(user, ganado) {
+      const item = document.createElement("li");
+      item.textContent = `${user} ganó ${ganado.toFixed(2)} WLD`;
+      document.getElementById("game-history").appendChild(item);
+    }
+
+    function updateLeaderboard(username, amountWon) {
+      const stored = JSON.parse(localStorage.getItem("leaderboard")) || [];
+      const existing = stored.find(u => u.username === username);
+      if (existing) {
+        existing.total += amountWon;
+      } else {
+        stored.push({ username, total: amountWon });
+      }
+      localStorage.setItem("leaderboard", JSON.stringify(stored));
+      renderLeaderboard();
+    }
+
+    function renderLeaderboard() {
+      const leaderboard = JSON.parse(localStorage.getItem("leaderboard")) || [];
+      leaderboard.sort((a, b) => b.total - a.total);
+
+      const list = document.getElementById("leaderboard-list");
+      list.innerHTML = "";
+      leaderboard.slice(0, 5).forEach(user => {
+        const li = document.createElement("li");
+        li.textContent = `${user.username}: ${user.total.toFixed(2)} WLD`;
+        list.appendChild(li);
+      });
+    }
+
+    renderLeaderboard(); // mostrar al cargar
+  </script>
+</body>
+</html>
