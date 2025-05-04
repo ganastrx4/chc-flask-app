@@ -173,23 +173,25 @@
       });
     }
 
-    window.addEventListener('DOMContentLoaded', function () {
-      new IDKitWidget({
-        app_id: "app_7686f9027d3e3c0b53d987a3caf1e111",
-        action: "login",
-        signal: "wld-comparativa-login",
-        onSuccess: (response) => {
-          console.log("✅ Verificado:", response);
-          localStorage.setItem("worldid_code", response.credential);
-          alert("✅ Verificación exitosa con World ID");
-          document.getElementById("game-section").style.display = "block";
-        },
-        onError: (error) => {
-          console.error("❌ Error al verificar:", error);
-          alert("❌ Ocurrió un error con World ID");
-        },
-      }).mount("#world-id-button");
+   window.onload = function () {
+    const worldID = new window.WorldIDWidget({
+      enableTelemetry: true,
+      action_id: "chun", // Usa tu action_id registrado en Worldcoin
+      signal: "minijuego-apuesta",
+      app_id: "app_7686f9027d3e3c0b53d987a3caf1e111", // Tu App ID
+      theme: "light",
+      onSuccess: function (proof) {
+        console.log("✅ Verificación exitosa:", proof);
+        document.getElementById("game-section").style.display = "block";
+        document.getElementById("world-id-button").innerHTML = "✅ Identidad verificada";
+      },
+      onError: function (error) {
+        console.error("❌ Error en la verificación:", error);
+      }
     });
+
+    worldID.mount("#world-id-button");
+  };
   </script>
 </body>
 </html>
