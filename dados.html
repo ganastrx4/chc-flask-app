@@ -1,10 +1,11 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <meta charset="UTF-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
   <title>Minijuego de Apuestas - World Chain</title>
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
   <style>
     body {
       font-family: 'Segoe UI', sans-serif;
@@ -199,28 +200,13 @@
       const code = params.get("code");
 
       if (code) {
-        fetch("https://chun.vercel.app/api/auth", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ code }),
-        })
-        .then(res => res.json())
-        .then(data => {
-          if (data.tokens) {
-            document.getElementById("result").innerHTML = `
-              ✅ Autenticado correctamente con World ID.<br>
-              <strong>ID Token:</strong> ${data.tokens.id_token}<br><br>
-              ¡Puedes empezar a jugar!
-            `;
-            document.getElementById("game-section").style.display = "block";
-          } else {
-            document.getElementById("result").innerText = "Error: " + JSON.stringify(data);
-          }
-        })
-        .catch(err => {
-          console.error("Error al verificar el código:", err);
-          document.getElementById("result").innerText = "Error de red al verificar el código.";
-        });
+        document.getElementById("result").innerHTML = `
+          ✅ Autenticado correctamente con World ID.<br>
+          <strong>Code:</strong> ${code}<br><br>
+          🔐 Este código debe enviarse a tu servidor para intercambiarlo por tokens.
+        `;
+        console.log("Código de autenticación:", code);
+        document.getElementById("game-section").style.display = "block";
       }
     };
   </script>
