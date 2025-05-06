@@ -207,11 +207,13 @@
     `;
 
     // Llamar a tu backend de Vercel con el código
-    fetch("https://worldid-backend-beige.vercel.app/api/auth", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ code })
-    })
+   fetch("https://worldid-backend-cdiszcthp-carlos-sandovals-projects.vercel.app/api/auth", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify({ code: "el código que recibes de World ID" })
+})
     .then(res => res.json())
     .then(data => {
       console.log("Respuesta del backend:", data);
