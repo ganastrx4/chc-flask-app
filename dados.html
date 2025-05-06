@@ -127,105 +127,124 @@
       </button>
     </a>
   </div>
+ <!-- ... Todo igual en el <head> ... -->
+<script>
+  let virtualBalance = 0;
+  let betHistory = [];
+  let userData = null;
 
-  <script>
-    let virtualBalance = 1000;
-    let betHistory = [];
-
-    function placeBet() {
-      const betAmount = parseInt(document.getElementById("bet-amount").value);
-      if (isNaN(betAmount) || betAmount <= 0 || betAmount > virtualBalance) {
-        alert("Cantidad inválida o saldo insuficiente.");
-        return;
-      }
-
-      const selectedNumbers = [];
-      for (let i = 1; i <= 6; i++) {
-        if (document.getElementById(`num${i}`).checked) selectedNumbers.push(i);
-      }
-
-      if (selectedNumbers.length === 0 || selectedNumbers.length > 3) {
-        alert("Selecciona entre 1 y 3 números.");
-        return;
-      }
-
-      const diceRoll = Math.floor(Math.random() * 6) + 1;
-      let winAmount = 0;
-
-      if (selectedNumbers.includes(diceRoll)) {
-        if (selectedNumbers.length === 1) winAmount = betAmount * 3;
-        if (selectedNumbers.length === 2) winAmount = betAmount * 0.9;
-        if (selectedNumbers.length === 3) winAmount = betAmount * 0.49;
-        virtualBalance += winAmount;
-        betHistory.push(`🎉 Apostaste ${betAmount} WLD, ganaste ${winAmount.toFixed(2)} WLD (Número: ${diceRoll})`);
-      } else {
-        virtualBalance -= betAmount;
-        betHistory.push(`😢 Apostaste ${betAmount} WLD, perdiste (Número: ${diceRoll})`);
-      }
-
-      updateHistory();
-      updateBalance();
-      alert(`Resultado del dado: ${diceRoll}`);
+  function placeBet() {
+    const betAmount = parseInt(document.getElementById("bet-amount").value);
+    if (isNaN(betAmount) || betAmount <= 0 || betAmount > virtualBalance) {
+      alert("Cantidad inválida o saldo insuficiente.");
+      return;
     }
 
-    function updateBalance() {
-      document.getElementById("virtual-balance").textContent = virtualBalance.toFixed(2) + " WLD";
+    const selectedNumbers = [];
+    for (let i = 1; i <= 6; i++) {
+      if (document.getElementById(`num${i}`).checked) selectedNumbers.push(i);
     }
 
-    function updateHistory() {
-      const historyList = document.getElementById("bet-history");
-      historyList.innerHTML = "";
-      betHistory.slice(-10).forEach(entry => {
-        const li = document.createElement("li");
-        li.textContent = entry;
-        historyList.appendChild(li);
-      });
+    if (selectedNumbers.length === 0 || selectedNumbers.length > 3) {
+      alert("Selecciona entre 1 y 3 números.");
+      return;
     }
 
-    function startAuth() {
-      const clientId = "app_7686f9027d3e3c0b53d987a3caf1e111";
-      const redirectUri = "https://ganastrx4.github.io/chc-flask-app/dados.html";
-      const state = Math.random().toString(36).substring(2);
-      const scope = "openid";
-      const responseType = "code";
-      const nonce = Math.random().toString(36).substring(2);
+    const diceRoll = Math.floor(Math.random() * 6) + 1;
+    let winAmount = 0;
 
-      const authUrl = `https://id.worldcoin.org/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=${encodeURIComponent(responseType)}&scope=${encodeURIComponent(scope)}&state=${state}&nonce=${nonce}`;
-
-      window.location.href = authUrl;
+    if (selectedNumbers.includes(diceRoll)) {
+      if (selectedNumbers.length === 1) winAmount = betAmount * 3;
+      if (selectedNumbers.length === 2) winAmount = betAmount * 0.9;
+      if (selectedNumbers.length === 3) winAmount = betAmount * 0.49;
+      virtualBalance += winAmount;
+      userData.ganados += 1;
+      betHistory.push(`🎉 Apostaste ${betAmount} WLD, ganaste ${winAmount.toFixed(2)} WLD (Número: ${diceRoll})`);
+    } else {
+      virtualBalance -= betAmount;
+      betHistory.push(`😢 Apostaste ${betAmount} WLD, perdiste (Número: ${diceRoll})`);
     }
+
+    userData.juegos += 1;
+    userData.saldo = virtualBalance;
+
+    updateHistory();
+    updateBalance();
+
+    alert(`Resultado del dado: ${diceRoll}`);
+
+    // TODO: Aquí puedes llamar a un endpoint /api/update para guardar estadísticas reales
+  }
+
+  function updateBalance() {
+    document.getElementById("virtual-balance").textContent = virtualBalance.toFixed(2) + " WLD";
+  }
+
+  function updateHistory() {
+    const historyList = document.getElementById("bet-history");
+    historyList.innerHTML = "";
+    betHistory.slice(-10).forEach(entry => {
+      const li = document.createElement("li");
+      li.textContent = entry;
+      historyList.appendChild(li);
+    });
+  }
+
+  function startAuth() {
+    const clientId = "app_7686f9027d3e3c0b53d987a3caf1e111";
+    const redirectUri = "https://ganastrx4.github.io/chc-flask-app/dados.html";
+    const state = Math.random().toString(36).substring(2);
+    const scope = "openid";
+    const responseType = "code";
+    const nonce = Math.random().toString(36).substring(2);
+
+    const authUrl = `https://id.worldcoin.org/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=${encodeURIComponent(responseType)}&scope=${encodeURIComponent(scope)}&state=${state}&nonce=${nonce}`;
+
+    window.location.href = authUrl;
+  }
 
   window.onload = function () {
-  const params = new URLSearchParams(window.location.search);
-  const code = params.get("code");
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get("code");
 
-  if (code) {
-    // Mostrar que el usuario está autenticado
-    document.getElementById("result").innerHTML = `
-      ✅ Autenticado correctamente con World ID.<br>
-      <strong>Code:</strong> ${code}<br><br>
-    `;
+    if (code) {
+      document.getElementById("result").innerHTML = `✅ Autenticado correctamente con World ID.<br><strong>Code:</strong> ${code}<br><br>`;
 
-    // Llamar a tu backend de Vercel con el código
-   fetch("https://worldid-backend-e6rf61hlx-carlos-sandovals-projects.vercel.app/api/auth", {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json"
-  },
-  body: JSON.stringify({ code: "el código que recibes de World ID" })
-})
-    .then(res => res.json())
-    .then(data => {
-      console.log("Respuesta del backend:", data);
-      // Aquí puedes guardar datos, redirigir, etc.
-    })
-    .catch(err => {
-      console.error("Error en la autenticación:", err);
-    });
+      fetch("https://worldid-backend-7il8gdvqu-carlos-sandovals-projects.vercel.app/api/auth", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: code })
+      })
+        .then(res => res.json())
+        .then(data => {
+          console.log("Respuesta del backend:", data);
+          if (data.success && data.user) {
+            userData = data.user;
+            virtualBalance = userData.saldo;
+            updateBalance();
 
-    document.getElementById("game-section").style.display = "block";
-  }
-};
-  </script>
+            // Mostrar datos del usuario
+            const resultDiv = document.getElementById("result");
+            resultDiv.innerHTML += `
+              👤 Usuario: <strong>${userData.code}</strong><br>
+              🎮 Juegos: ${userData.juegos} | 🏆 Ganados: ${userData.ganados}<br>
+              💰 Saldo inicial: ${userData.saldo} WLD
+            `;
+
+            // Mostrar sección del juego
+            document.getElementById("game-section").style.display = "block";
+          } else {
+            document.getElementById("result").innerHTML += "❌ Error en autenticación o usuario no válido.";
+          }
+        })
+        .catch(err => {
+          console.error("Error en la autenticación:", err);
+          document.getElementById("result").innerHTML += "❌ Error en el servidor.";
+        });
+    }
+  };
+</script>
+
+  
 </body>
 </html>
