@@ -195,20 +195,36 @@
       window.location.href = authUrl;
     }
 
-    window.onload = function () {
-      const params = new URLSearchParams(window.location.search);
-      const code = params.get("code");
+   window.onload = function () {
+  const params = new URLSearchParams(window.location.search);
+  const code = params.get("code");
 
-      if (code) {
-        document.getElementById("result").innerHTML = `
-          ✅ Autenticado correctamente con World ID.<br>
-          <strong>Code:</strong> ${code}<br><br>
-          🔐 Este código debe enviarse a tu servidor para intercambiarlo por tokens.
-        `;
-        console.log("Código de autenticación:", code);
-        document.getElementById("game-section").style.display = "block";
-      }
-    };
+  if (code) {
+    // Mostrar que el usuario está autenticado
+    document.getElementById("result").innerHTML = `
+      ✅ Autenticado correctamente con World ID.<br>
+      <strong>Code:</strong> ${code}<br><br>
+    `;
+
+    // Llamar al backend con el code dinámico
+    fetch("https://TU-PROYECTO.vercel.app/api/auth", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ code })
+    })
+    .then(res => res.json())
+    .then(data => {
+      console.log("Respuesta del backend:", data);
+      // Aquí puedes validar el token o guardar la sesión
+    })
+    .catch(err => {
+      console.error("Error en la autenticación:", err);
+    });
+
+    document.getElementById("game-section").style.display = "block";
+  }
+};
+
   </script>
 </body>
 </html>
