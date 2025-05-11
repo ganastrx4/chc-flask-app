@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CHUN Exchange - Intercambia tus Tokens</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet"/>
+  <style>
+    body {
+      background: linear-gradient(135deg, #141e30, #243b55);
+      font-family: 'Arial', sans-serif;
+      color: white;
+    }
+    input::placeholder {
+      color: rgba(0, 0, 0, 0.5);
+    }
+  </style>
+</head>
+<body class="flex flex-col items-center justify-center min-h-screen p-4">
+
+  <h1 class="text-3xl font-bold mb-6">Intercambia tus Tokens en World App</h1>
+
+  <div class="w-full max-w-md bg-white bg-opacity-10 p-6 rounded-lg shadow-lg">
+    <label class="block mb-2">Token a Enviar:</label>
+    <input type="text" id="fromToken" placeholder="ej: WLD" class="w-full px-4 py-2 rounded bg-white bg-opacity-20 mb-4 text-black"/>
+
+    <label class="block mb-2">Token a Recibir:</label>
+    <input type="text" id="toToken" placeholder="ej: CHUN" class="w-full px-4 py-2 rounded bg-white bg-opacity-20 mb-4 text-black"/>
+
+    <label class="block mb-2">Cantidad:</label>
+    <input type="number" id="amount" class="w-full px-4 py-2 rounded bg-white bg-opacity-20 mb-4 text-black"/>
+
+    <button onclick="intercambiarTokens()"
+      class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-6 rounded w-full">
+      🔄 Intercambiar
+    </button>
+
+    <div id="resultado" class="mt-4 text-sm text-green-300"></div>
+  </div>
+
+  <script>
+    // Intercambio de tokens
+    async function intercambiarTokens() {
+      const from = document.getElementById("fromToken").value.trim().toUpperCase();
+      const to = document.getElementById("toToken").value.trim().toUpperCase();
+      const amount = parseFloat(document.getElementById("amount").value);
+
+      if (!from || !to || isNaN(amount) || amount <= 0) {
+        alert("Rellena todos los campos correctamente");
+        return;
+      }
+
+      const comision = amount * 0.01;
+      const neto = amount - comision;
+
+      document.getElementById("resultado").innerHTML = `
+        ⏳ Procesando transacción...<br>
+        Enviando ${neto.toFixed(6)} ${from} para recibir ${to}.<br>
+        Comisión: ${comision.toFixed(6)} ${from}.
+      `;
+
+      try {
+        const response = await fetch("https://ganastrx4.github.io/chun/api/intercambiar", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ fromToken: from, toToken: to, amount })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          document.getElementById("resultado").innerHTML += `
+            ✅ Transacción completada.<br>
+            Hash: <code>${result.txHash}</code>
+          `;
+        } else {
+          document.getElementById("resultado").innerHTML += `
+            ❌ Error: ${result.message || "No se pudo completar el intercambio"}.
+          `;
+        }
+      } catch (err) {
+        document.getElementById("resultado").innerHTML += `
+          ❌ Error de red o servidor. Intenta más tarde.
+        `;
+        console.error(err);
+      }
+    }
+  </script>
+</body>
+</html>
