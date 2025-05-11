@@ -1,77 +1,52 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Consultar saldo WLD</title>
-  <style>
-    body {
-      font-family: sans-serif;
-      background: #0f172a;
-      color: white;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 2rem;
-    }
-    input, button {
-      padding: 0.5rem;
-      margin: 0.5rem;
-      border-radius: 5px;
-      font-size: 1rem;
-    }
-    input {
-      width: 300px;
-      border: none;
-    }
-    button {
-      background-color: #22c55e;
-      border: none;
-      color: white;
-      cursor: pointer;
-    }
-    #resultado {
-      margin-top: 1rem;
-      font-size: 1.2rem;
-      color: #38bdf8;
-    }
-  </style>
+  <meta charset="UTF-8">
+  <title>Consulta tu saldo en World Chain</title>
 </head>
 <body>
+  <h2>Consulta de saldo en World Chain (WLD)</h2>
 
-  <h1>Ver tu saldo WLD (World Chain)</h1>
-
-  <input type="text" id="direccion" placeholder="Ingresa tu dirección 0x..." />
-  <button onclick="consultarSaldo()">Consultar</button>
-
-  <div id="resultado"></div>
+  <button onclick="consultarSaldo()">Ver saldo de mi cuenta</button>
+  <p id="resultado"></p>
 
   <script>
     async function consultarSaldo() {
-      const direccion = document.getElementById("direccion").value.trim();
-      if (!direccion.startsWith("0x") || direccion.length !== 42) {
-        alert("Dirección inválida");
-        return;
-      }
-
+      const direccion = "0xaD04c2c6ae7898Baa75F0519689b5fd361f84965"; // Tu dirección
       const endpoint = "https://worldchain-mainnet.g.alchemy.com/v2/f688b25b-d0b4-4c07-9800-1ee719428302";
 
-      const res = await fetch(endpoint, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          jsonrpc: "2.0",
-          id: 1,
-          method: "eth_getBalance",
-          params: [direccion, "latest"]
-        })
-      });
+      const body = {
+        jsonrpc: "2.0",
+        id: 1,
+        method: "eth_getBalance",
+        params: [direccion, "latest"]
+      };
 
-      const data = await res.json();
-      const balanceWei = BigInt(data.result);
-      const balanceWLD = Number(balanceWei) / 1e18;
+      try {
+        const response = await fetch(endpoint, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(body)
+        });
 
-      document.getElementById("resultado").innerText = `💰 Saldo: ${balanceWLD.toFixed(6)} WLD`;
+        const data = await response.json();
+
+        if (!data.result) {
+          document.getElementById("resultado").innerText = "Error al obtener el saldo. Revisa la API Key o la red.";
+          console.error("Respuesta de la API:", data);
+          return;
+        }
+
+        const saldoWei = BigInt(data.result);
+        const saldoWLD = Number(saldoWei) / 1e18;
+
+        document.getElementById("resultado").innerText = `Saldo: ${saldoWLD.toFixed(6)} WLD`;
+      } catch (error) {
+        document.getElementById("resultado").innerText = "Error al conectar con la red.";
+        console.error(error);
+      }
     }
   </script>
 </body>
