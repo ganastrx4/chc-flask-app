@@ -47,7 +47,7 @@
     // Autenticación con World ID
     function startAuth() {
       const clientId = "app_7686f9027d3e3c0b53d987a3caf1e111";
-      const redirectUri = "https://ganastrx4.github.io/chun/";
+      const redirectUri = "https://ganastrx4.github.io/chc-flask-app/tradingdashboard.html"; // Aquí redirige después de login
       const state = Math.random().toString(36).substring(2);
       const nonce = Math.random().toString(36).substring(2);
 
@@ -69,14 +69,12 @@
       const comision = amount * 0.01;
       const neto = amount - comision;
 
-      // Simular resultado inmediato para el usuario
       document.getElementById("resultado").innerHTML = `
         ⏳ Procesando transacción...<br>
         Enviando ${neto.toFixed(6)} ${from} para recibir ${to}.<br>
         Comisión: ${comision.toFixed(6)} ${from}.
       `;
 
-      // Lógica para llamar al backend e intercambiar
       try {
         const response = await fetch("https://ganastrx4.github.io/chun/api/intercambiar", {
           method: "POST",
