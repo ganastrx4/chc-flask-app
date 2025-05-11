@@ -2,24 +2,23 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Consulta tu saldo en World Chain</title>
+  <title>Tokens en World Chain</title>
 </head>
 <body>
-  <h2>Consulta de saldo en World Chain (WLD)</h2>
-
-  <button onclick="consultarSaldo()">Ver saldo de mi cuenta</button>
-  <p id="resultado"></p>
+  <h2>Ver todos los tokens de tu wallet en World Chain</h2>
+  <button onclick="verTokens()">Ver tokens</button>
+  <pre id="tokens"></pre>
 
   <script>
-    async function consultarSaldo() {
-      const direccion = "0xaD04c2c6ae7898Baa75F0519689b5fd361f84965"; // Tu dirección
+    async function verTokens() {
+      const direccion = "0xaD04c2c6ae7898Baa75F0519689b5fd361f84965"; // Tu wallet
       const endpoint = "https://worldchain-mainnet.g.alchemy.com/v2/f688b25b-d0b4-4c07-9800-1ee719428302";
 
       const body = {
         jsonrpc: "2.0",
         id: 1,
-        method: "eth_getBalance",
-        params: [direccion, "latest"]
+        method: "alchemy_getTokenBalances",
+        params: [direccion]
       };
 
       try {
@@ -34,18 +33,28 @@
         const data = await response.json();
 
         if (!data.result) {
-          document.getElementById("resultado").innerText = "Error al obtener el saldo. Revisa la API Key o la red.";
-          console.error("Respuesta de la API:", data);
+          document.getElementById("tokens").innerText = "Error: no se pudieron obtener los tokens.";
+          console.error(data);
           return;
         }
 
-        const saldoWei = BigInt(data.result);
-        const saldoWLD = Number(saldoWei) / 1e18;
+        const balances = data.result.tokenBalances;
 
-        document.getElementById("resultado").innerText = `Saldo: ${saldoWLD.toFixed(6)} WLD`;
-      } catch (error) {
-        document.getElementById("resultado").innerText = "Error al conectar con la red.";
-        console.error(error);
+        if (balances.length === 0) {
+          document.getElementById("tokens").innerText = "No se encontraron tokens.";
+          return;
+        }
+
+        let output = "Tokens encontrados:\n\n";
+        balances.forEach((token, i) => {
+          output += `${i + 1}. Token: ${token.contractAddress}\n   Balance (raw): ${token.tokenBalance}\n\n`;
+        });
+
+        document.getElementById("tokens").innerText = output;
+
+      } catch (e) {
+        console.error(e);
+        document.getElementById("tokens").innerText = "Error al conectarse a la API.";
       }
     }
   </script>
