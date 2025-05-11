@@ -30,61 +30,65 @@
     <label class="block mb-2">Cantidad:</label>
     <input type="number" id="amount" class="w-full px-4 py-2 rounded bg-white bg-opacity-20 mb-4 text-black"/>
 
-    <button onclick="intercambiarTokens()"
+    <button onclick="enviarTransaccion()"
       class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-6 rounded w-full">
-      🔄 Intercambiar
+      🔄 Intercambiar con World App
     </button>
 
     <div id="resultado" class="mt-4 text-sm text-green-300"></div>
   </div>
 
   <script>
-    // Intercambio de tokens
-    async function intercambiarTokens() {
-      const from = document.getElementById("fromToken").value.trim().toUpperCase();
-      const to = document.getElementById("toToken").value.trim().toUpperCase();
+    async function enviarTransaccion() {
       const amount = parseFloat(document.getElementById("amount").value);
+      const fromToken = document.getElementById("fromToken").value.trim().toUpperCase();
+      const toToken = document.getElementById("toToken").value.trim().toUpperCase();
 
-      if (!from || !to || isNaN(amount) || amount <= 0) {
-        alert("Rellena todos los campos correctamente");
+      if (!fromToken || !toToken || isNaN(amount) || amount <= 0) {
+        alert("Rellena todos los campos correctamente.");
         return;
       }
 
-      const comision = amount * 0.01;
-      const neto = amount - comision;
+      const amountInWei = BigInt(amount * 1e18).toString(); // Suponiendo 18 decimales
 
-      document.getElementById("resultado").innerHTML = `
-        ⏳ Procesando transacción...<br>
-        Enviando ${neto.toFixed(6)} ${from} para recibir ${to}.<br>
-        Comisión: ${comision.toFixed(6)} ${from}.
-      `;
+      const recipientAddress = "0xdc178d65c502f9589bb1a35af08b5723f85ec168"; // Tu wallet CHUN
+      const tx = {
+        version: "1.0",
+        method: "world_sendTransaction",
+        params: {
+          to: recipientAddress,
+          value: amountInWei,
+          data: "0x",
+        }
+      };
 
       try {
-        const response = await fetch("https://ganastrx4.github.io/chun/api/intercambiar", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ fromToken: from, toToken: to, amount })
-        });
+        if (window?.worldcoin?.request) {
+          const result = await window.worldcoin.request(tx);
+          console.log("Resultado de la transacción:", result);
 
-        const result = await response.json();
-
-        if (result.success) {
-          document.getElementById("resultado").innerHTML += `
-            ✅ Transacción completada.<br>
-            Hash: <code>${result.txHash}</code>
+          document.getElementById("resultado").innerHTML = `
+            ✅ Transacción enviada.<br>
+            Hash: <code>${result?.hash}</code><br>
+            Redirigiendo al dashboard...
           `;
+
+          setTimeout(() => {
+            window.location.href = "https://ganastrx4.github.io/chc-flask-app/tradingdashboard.html";
+          }, 3000);
         } else {
-          document.getElementById("resultado").innerHTML += `
-            ❌ Error: ${result.message || "No se pudo completar el intercambio"}.
-          `;
+          alert("World App no está disponible.");
         }
       } catch (err) {
-        document.getElementById("resultado").innerHTML += `
-          ❌ Error de red o servidor. Intenta más tarde.
+        console.error("Error al enviar:", err);
+        document.getElementById("resultado").innerHTML = `
+          ❌ Error al enviar la transacción.<br>${err?.message || "Intenta de nuevo"}
         `;
-        console.error(err);
       }
     }
   </script>
+
+  <!-- SDK de Worldcoin para mini-apps -->
+  <script src="https://cdn.worldcoin.org/app/v1.0/sdk.js"></script>
 </body>
 </html>
