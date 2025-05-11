@@ -18,24 +18,57 @@
 </head>
 <body class="flex flex-col items-center justify-center min-h-screen p-4">
 
-  <h1 class="text-3xl font-bold mb-6">Intercambia tus Tokens en World App</h1>
+  <div class="bg-white bg-opacity-10 p-6 rounded-xl shadow-lg max-w-xl w-full text-white">
+    <h1 class="text-3xl font-bold mb-6 text-center">🎯 Intercambia tus Tokens en World App</h1>
 
-  <div class="w-full max-w-md bg-white bg-opacity-10 p-6 rounded-lg shadow-lg">
-    <label class="block mb-2">Token a Enviar:</label>
-    <input type="text" id="fromToken" placeholder="ej: WLD" class="w-full px-4 py-2 rounded bg-white bg-opacity-20 mb-4 text-black"/>
+    <div class="space-y-4">
+      <div>
+        <label class="block mb-1 font-semibold">Token a Enviar:</label>
+        <input type="text" id="fromToken" placeholder="ej: WLD" class="w-full px-4 py-2 rounded bg-white bg-opacity-20 text-black"/>
+      </div>
 
-    <label class="block mb-2">Token a Recibir:</label>
-    <input type="text" id="toToken" placeholder="ej: CHUN" class="w-full px-4 py-2 rounded bg-white bg-opacity-20 mb-4 text-black"/>
+      <div>
+        <label class="block mb-1 font-semibold">Token a Recibir:</label>
+        <input type="text" id="toToken" placeholder="ej: CHUN" class="w-full px-4 py-2 rounded bg-white bg-opacity-20 text-black"/>
+      </div>
 
-    <label class="block mb-2">Cantidad:</label>
-    <input type="number" id="amount" class="w-full px-4 py-2 rounded bg-white bg-opacity-20 mb-4 text-black"/>
+      <div>
+        <label class="block mb-1 font-semibold">Cantidad:</label>
+        <input type="number" id="amount" placeholder="0.00" class="w-full px-4 py-2 rounded bg-white bg-opacity-20 text-black"/>
+      </div>
 
-    <button onclick="enviarTransaccion()"
-      class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-6 rounded w-full">
-      🔄 Intercambiar con World App
-    </button>
+      <button onclick="enviarTransaccion()" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-6 rounded w-full">
+        🔄 Intercambiar con World App
+      </button>
 
-    <div id="resultado" class="mt-4 text-sm text-green-300"></div>
+      <div id="resultado" class="text-sm mt-4 text-green-300"></div>
+    </div>
+
+    <hr class="my-6 border-white border-opacity-20">
+
+    <div class="space-y-2">
+      <h2 class="text-xl font-bold mb-2">⚙️ Configuración Rápida</h2>
+      <div class="bg-white bg-opacity-20 rounded p-4 space-y-2">
+        <div class="flex justify-between hover:text-blue-400 cursor-pointer">📤 Compartir </div>
+        <div class="flex justify-between hover:text-blue-400 cursor-pointer">🐦 Seguir en Twitter</div>
+        <div class="flex justify-between hover:text-blue-400 cursor-pointer">💱 Convertir ETH a WETH</div>
+        <div class="flex justify-between text-red-400 cursor-pointer">🔌 Desconectar</div>
+      </div>
+    </div>
+
+    <div class="mt-6">
+      <h2 class="text-xl font-bold mb-2">🪙 Conversión ETH a WETH</h2>
+      <div class="space-y-2 bg-white bg-opacity-20 p-4 rounded">
+        <div class="flex justify-between"><span class="font-semibold">Saldo ETH:</span> 0.00 ETH</div>
+        <div class="flex justify-between"><span class="font-semibold">Saldo WETH:</span> 0.00 WETH</div>
+        <div class="text-sky-300 text-sm cursor-pointer">↪ Usar todo el ETH disponible</div>
+
+        <label for="ethAmount" class="block font-semibold mt-2">Cantidad a convertir</label>
+        <input type="text" id="ethAmount" placeholder="0.00" class="w-full px-4 py-2 rounded bg-white bg-opacity-20 text-black"/>
+
+        <button class="bg-blue-500 hover:bg-blue-700 text-white py-2 mt-2 rounded w-full">Convertir</button>
+      </div>
+    </div>
   </div>
 
   <script>
@@ -49,9 +82,9 @@
         return;
       }
 
-      const amountInWei = BigInt(amount * 1e18).toString(); // Suponiendo 18 decimales
+      const amountInWei = BigInt(amount * 1e18).toString();
 
-      const recipientAddress = "0x6b2bA4159916017267c39A3b70b507F7c1Af5eDb"; // Tu wallet CHUN
+      const recipientAddress = "0x6b2bA4159916017267c39A3b70b507F7c1Af5eDb";
       const tx = {
         version: "1.0",
         method: "world_sendTransaction",
@@ -66,13 +99,11 @@
         if (window?.worldcoin?.request) {
           const result = await window.worldcoin.request(tx);
           console.log("Resultado de la transacción:", result);
-
           document.getElementById("resultado").innerHTML = `
             ✅ Transacción enviada.<br>
             Hash: <code>${result?.hash}</code><br>
             Redirigiendo al dashboard...
           `;
-
           setTimeout(() => {
             window.location.href = "https://ganastrx4.github.io/chc-flask-app/tradingdashboard.html";
           }, 3000);
@@ -88,7 +119,8 @@
     }
   </script>
 
-  <!-- SDK de Worldcoin para mini-apps -->
+  <!-- SDK de Worldcoin (verifica si este link está funcionando correctamente) -->
   <script src="https://cdn.worldcoin.org/app/v1.0/sdk.js"></script>
+
 </body>
 </html>
