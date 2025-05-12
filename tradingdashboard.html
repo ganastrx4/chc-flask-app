@@ -1,19 +1,19 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Consultar saldo de WLD</title>
+  <title>Consultar billetera completa</title>
 </head>
 <body>
-  <h2>Consultar saldo de WLD</h2>
+  <h2>Consultar billetera</h2>
   <p>Ingresa tu dirección de wallet:</p>
-  <input type="text" id="direccion" placeholder="0x676f72515A624D4bB6ac6195f0735bbE435CfDD1" />
-  <button onclick="consultarSaldo()">Ver saldo</button>
-  <p id="resultado">Saldo: </p>
+  <input type="text" id="direccion" placeholder="0xaD04c2c6ae7898Baa75F0519689b5fd361f84965" />
+  <button onclick="consultarBilletera()">Ver billetera</button>
+  <div id="resultado"></div>
 
   <script>
-    async function consultarSaldo() {
+    async function consultarBilletera() {
       const apiKey = "ujOcGgmg0seoiSICk6SPU4tAyQJY6kvx";
-      const direccion = document.getElementById("direccion").value;  // Dirección ingresada por el usuario
+      const direccion = document.getElementById("direccion").value;
       if (!direccion) {
         alert("Por favor ingresa una dirección de wallet.");
         return;
@@ -21,11 +21,12 @@
 
       const url = `https://worldchain-mainnet.g.alchemy.com/v2/${apiKey}`;
 
+      // Solicitar balance de todos los tokens ERC-20
       const data = {
         jsonrpc: "2.0",
         id: 1,
-        method: "eth_getBalance",
-        params: [direccion, "latest"]
+        method: "alchemy_getTokenBalances",
+        params: [direccion]
       };
 
       try {
@@ -45,13 +46,23 @@
           return;
         }
 
-        const balanceWei = BigInt(result.result);
-        const balanceETH = Number(balanceWei) / 1e18;  // Convertir de Wei a WLD (1 WLD = 1 ETH en este caso)
-
-        document.getElementById("resultado").innerText = `Saldo: ${balanceETH.toFixed(6)} WLD`;
+        const tokens = result.result.tokenBalances;
+        
+        if (tokens.length === 0) {
+          document.getElementById("resultado").innerText = "No se encontraron tokens en esta dirección.";
+        } else {
+          let output = "<h3>Tokens en tu billetera:</h3><ul>";
+          tokens.forEach(token => {
+            const tokenBalance = BigInt(token.tokenBalance);
+            const balanceFormatted = Number(tokenBalance) / 1e18;  // Convertir de Wei a tokens
+            output += `<li>${token.contractAddress}: ${balanceFormatted.toFixed(6)} tokens</li>`;
+          });
+          output += "</ul>";
+          document.getElementById("resultado").innerHTML = output;
+        }
       } catch (error) {
         console.error("Error:", error);
-        document.getElementById("resultado").innerText = "Error consultando saldo.";
+        document.getElementById("resultado").innerText = "Error consultando la billetera.";
       }
     }
   </script>
