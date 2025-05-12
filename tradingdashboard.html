@@ -1,69 +1,42 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Consultar billetera completa</title>
+  <title>Ver Wallet World App</title>
 </head>
 <body>
-  <h2>Consultar billetera</h2>
-  <p>Ingresa tu dirección de wallet:</p>
-  <input type="text" id="direccion" placeholder="0xaD04c2c6ae7898Baa75F0519689b5fd361f84965" />
-  <button onclick="consultarBilletera()">Ver billetera</button>
+  <h2>Introduce tu dirección de World App</h2>
+  <input type="text" id="direccionWallet" placeholder="0x...">
+  <button onclick="consultarDatos()">Ver tokens</button>
+
   <div id="resultado"></div>
 
   <script>
-    async function consultarBilletera() {
-      const apiKey = "ujOcGgmg0seoiSICk6SPU4tAyQJY6kvx";
-      const direccion = document.getElementById("direccion").value;
-      if (!direccion) {
-        alert("Por favor ingresa una dirección de wallet.");
+    async function consultarDatos() {
+      const address = document.getElementById("direccionWallet").value.trim();
+      if (!address.startsWith("0x") || address.length !== 42) {
+        alert("Dirección no válida");
         return;
       }
 
+      const apiKey = "ujOcGgmg0seoiSICk6SPU4tAyQJY6kvx"; // tu API key válida
       const url = `https://worldchain-mainnet.g.alchemy.com/v2/${apiKey}`;
 
-      // Solicitar balance de todos los tokens ERC-20
       const data = {
         jsonrpc: "2.0",
         id: 1,
         method: "alchemy_getTokenBalances",
-        params: [direccion]
+        params: [address]
       };
 
-      try {
-        const response = await fetch(url, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify(data)
-        });
+      const respuesta = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      });
 
-        const result = await response.json();
-
-        if (result.error) {
-          document.getElementById("resultado").innerText = "Error: " + result.error.message;
-          console.error(result);
-          return;
-        }
-
-        const tokens = result.result.tokenBalances;
-        
-        if (tokens.length === 0) {
-          document.getElementById("resultado").innerText = "No se encontraron tokens en esta dirección.";
-        } else {
-          let output = "<h3>Tokens en tu billetera:</h3><ul>";
-          tokens.forEach(token => {
-            const tokenBalance = BigInt(token.tokenBalance);
-            const balanceFormatted = Number(tokenBalance) / 1e18;  // Convertir de Wei a tokens
-            output += `<li>${token.contractAddress}: ${balanceFormatted.toFixed(6)} tokens</li>`;
-          });
-          output += "</ul>";
-          document.getElementById("resultado").innerHTML = output;
-        }
-      } catch (error) {
-        console.error("Error:", error);
-        document.getElementById("resultado").innerText = "Error consultando la billetera.";
-      }
+      const json = await respuesta.json();
+      console.log(json);
+      document.getElementById("resultado").innerText = JSON.stringify(json.result, null, 2);
     }
   </script>
 </body>
