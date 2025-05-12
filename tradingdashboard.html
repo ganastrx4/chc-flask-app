@@ -1,60 +1,57 @@
 <!DOCTYPE html>
-<html lang="es">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>Tokens en World Chain</title>
+  <title>Consultar saldo de WLD</title>
 </head>
 <body>
-  <h2>Ver todos los tokens de tu wallet en World Chain</h2>
-  <button onclick="verTokens()">Ver tokens</button>
-  <pre id="tokens"></pre>
+  <h2>Consultar saldo de WLD</h2>
+  <p>Ingresa tu dirección de wallet:</p>
+  <input type="text" id="direccion" placeholder="0xaD04c2c6ae7898Baa75F0519689b5fd361f84965" />
+  <button onclick="consultarSaldo()">Ver saldo</button>
+  <p id="resultado">Saldo: </p>
 
   <script>
-    async function verTokens() {
-      const direccion = "0xaD04c2c6ae7898Baa75F0519689b5fd361f84965"; // Tu wallet
-      const endpoint = "https://worldchain-mainnet.g.alchemy.com/v2/f688b25b-d0b4-4c07-9800-1ee719428302";
+    async function consultarSaldo() {
+      const apiKey = "ujOcGgmg0seoiSICk6SPU4tAyQJY6kvx";
+      const direccion = document.getElementById("direccion").value;  // Dirección ingresada por el usuario
+      if (!direccion) {
+        alert("Por favor ingresa una dirección de wallet.");
+        return;
+      }
 
-      const body = {
+      const url = `https://worldchain-mainnet.g.alchemy.com/v2/${apiKey}`;
+
+      const data = {
         jsonrpc: "2.0",
         id: 1,
-        method: "alchemy_getTokenBalances",
-        params: [direccion]
+        method: "eth_getBalance",
+        params: [direccion, "latest"]
       };
 
       try {
-        const response = await fetch(endpoint, {
+        const response = await fetch(url, {
           method: "POST",
           headers: {
             "Content-Type": "application/json"
           },
-          body: JSON.stringify(body)
+          body: JSON.stringify(data)
         });
 
-        const data = await response.json();
+        const result = await response.json();
 
-        if (!data.result) {
-          document.getElementById("tokens").innerText = "Error: no se pudieron obtener los tokens.";
-          console.error(data);
+        if (result.error) {
+          document.getElementById("resultado").innerText = "Error: " + result.error.message;
+          console.error(result);
           return;
         }
 
-        const balances = data.result.tokenBalances;
+        const balanceWei = BigInt(result.result);
+        const balanceETH = Number(balanceWei) / 1e18;  // Convertir de Wei a WLD (1 WLD = 1 ETH en este caso)
 
-        if (balances.length === 0) {
-          document.getElementById("tokens").innerText = "No se encontraron tokens.";
-          return;
-        }
-
-        let output = "Tokens encontrados:\n\n";
-        balances.forEach((token, i) => {
-          output += `${i + 1}. Token: ${token.contractAddress}\n   Balance (raw): ${token.tokenBalance}\n\n`;
-        });
-
-        document.getElementById("tokens").innerText = output;
-
-      } catch (e) {
-        console.error(e);
-        document.getElementById("tokens").innerText = "Error al conectarse a la API.";
+        document.getElementById("resultado").innerText = `Saldo: ${balanceETH.toFixed(6)} WLD`;
+      } catch (error) {
+        console.error("Error:", error);
+        document.getElementById("resultado").innerText = "Error consultando saldo.";
       }
     }
   </script>
