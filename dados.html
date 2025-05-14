@@ -1,250 +1,135 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta content="width=device-width, initial-scale=1.0" name="viewport">
-  <title>Minijuego de Apuestas - World Chain</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Reclamo CHUN y CHC - World ID</title>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
   <style>
     body {
       font-family: 'Segoe UI', sans-serif;
-      text-align: center;
       background: linear-gradient(to right, #f5f7fa, #c3cfe2);
       margin: 0;
       padding: 0;
+      text-align: center;
     }
     .container {
-      max-width: 700px;
+      max-width: 600px;
       background: #fff;
+      margin: 60px auto;
       padding: 30px;
       border-radius: 15px;
-      margin: 40px auto;
       box-shadow: 0 8px 20px rgba(0,0,0,0.1);
     }
-    .btn, .nav-button {
-      display: inline-block;
-      padding: 12px 25px;
-      margin: 10px 5px;
-      background: #4a00e0;
-      color: #fff;
+    .btn {
+      background-color: #6c47ff;
+      color: white;
+      padding: 12px 24px;
       border: none;
       border-radius: 10px;
       font-size: 16px;
       cursor: pointer;
-      text-decoration: none;
-      transition: background 0.3s;
+      margin-top: 15px;
     }
-    .btn:hover, .nav-button:hover {
-      background: #3b00b3;
-    }
-    .gif-container img { max-width: 100%; }
-    .history {
-      margin-top: 20px;
-      padding: 15px;
-      background-color: #f1f1f1;
-      border-radius: 8px;
-    }
-    #game-section { display: none; }
-    input[type="number"] {
-      padding: 10px;
-      margin: 10px 0;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      width: 80%;
-      font-size: 16px;
-    }
-    #dice-options input {
-      margin: 0 8px;
-    }
-    .nav-links {
-      margin-top: 40px;
-    }
-    .token-button {
-      margin-top: 30px;
-      padding: 18px;
-      font-size: 18px;
-      border-radius: 12px;
-      background-color: #6c47ff;
-      color: white;
-      border: none;
-      cursor: pointer;
-    }
-    .token-button:hover {
+    .btn:hover {
       background-color: #5935d2;
+    }
+    .hidden {
+      display: none;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>🎰 Minijuego de Apuestas - World Chain</h1>
-
-    <h2>Verifica tu identidad con World ID</h2>
-    <div id="world-id-button"></div>
-
-    <button onclick="startAuth()"
-      class="bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-bold py-3 px-8 rounded-2xl shadow-lg hover:scale-105 transition fade-in mb-4">
-      🔒 Autenticar con World App
+    <h1 class="text-xl font-bold mb-4">🔐 Reclama tus tokens con World ID</h1>
+    <button onclick="startAuth()" class="btn">Autenticarse con World App</button>
+    <div id="result" class="mt-4 text-sm text-green-700"></div>
+    <button id="claim-btn" onclick="reclamarTokens()" class="hidden btn bg-green-500 hover:bg-green-600 mt-4">
+      🚀 Reclamar 1 CHUN + 1 CHC
     </button>
-
-    <div id="result" class="mt-4 text-sm text-green-600"></div>
-
-    <div id="game-section">
-      <h3>Apostar</h3>
-      <p>Saldo Virtual: <span id="virtual-balance">1000 WLD</span></p>
-      <input type="number" id="bet-amount" placeholder="Cantidad en WLD" min="1" />
-      <p>Selecciona hasta 3 números (1-6):</p>
-      <div id="dice-options">
-        <input type="checkbox" id="num1" value="1"> 1
-        <input type="checkbox" id="num2" value="2"> 2
-        <input type="checkbox" id="num3" value="3"> 3
-        <input type="checkbox" id="num4" value="4"> 4
-        <input type="checkbox" id="num5" value="5"> 5
-        <input type="checkbox" id="num6" value="6"> 6
-      </div>
-      <button onclick="placeBet()" class="btn">Apostar</button>
-      <div class="gif-container" id="dice-gif"></div>
-    </div>
-
-    <div class="history">
-      <h4>Historial de Apuestas</h4>
-      <ul id="bet-history"></ul>
-    </div>
-
-    <div class="nav-links">
-      <a href="./buscador.html" class="nav-button">TOP CRIPTO</a>
-      <a href="./next_page.html" class="nav-button">WLD Gráfica en Vivo</a>
-      <a href="./wdd.html" class="nav-button">MULTIPLICA TU WDD</a>
-      <a href="./next_page.html" class="nav-button">Estadísticas Cripto</a>
-      <a href="./ganarchun.html" class="nav-button">GANA CHC Y CHUN</a>
-      <a href="./enviarwld.html" class="nav-button">DONACIÓN DE ❤️💛❤️</a>
-    </div>
-
-    <a href="./tokenchc.html" target="_blank">
-      <button class="token-button">
-        ¡Apoya nuestros Tokens CHC y CHUN en PUF y espera el PUMP!<br />
-        ¡Solo los débiles venden!
-      </button>
-    </a>
   </div>
- <!-- ... Todo igual en el <head> ... -->
-<script>
-  let virtualBalance = 0;
-  let betHistory = [];
-  let userData = null;
 
-  function placeBet() {
-    const betAmount = parseInt(document.getElementById("bet-amount").value);
-    if (isNaN(betAmount) || betAmount <= 0 || betAmount > virtualBalance) {
-      alert("Cantidad inválida o saldo insuficiente.");
-      return;
+  <script>
+    let userData = null;
+
+    function startAuth() {
+      const clientId = "app_7686f9027d3e3c0b53d987a3caf1e111";
+      const redirectUri = "https://ganastrx4.github.io/chc-flask-app/dados.html";
+      const state = Math.random().toString(36).substring(2);
+      const nonce = Math.random().toString(36).substring(2);
+      const scope = "openid";
+      const responseType = "code";
+
+      const authUrl = `https://id.worldcoin.org/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=${encodeURIComponent(responseType)}&scope=${encodeURIComponent(scope)}&state=${state}&nonce=${nonce}`;
+      window.location.href = authUrl;
     }
 
-    const selectedNumbers = [];
-    for (let i = 1; i <= 6; i++) {
-      if (document.getElementById(`num${i}`).checked) selectedNumbers.push(i);
-    }
+    async function reclamarTokens() {
+      if (!userData || !userData.wallet) {
+        alert("❌ Wallet no disponible.");
+        return;
+      }
 
-    if (selectedNumbers.length === 0 || selectedNumbers.length > 3) {
-      alert("Selecciona entre 1 y 3 números.");
-      return;
-    }
-
-    const diceRoll = Math.floor(Math.random() * 6) + 1;
-    let winAmount = 0;
-
-    if (selectedNumbers.includes(diceRoll)) {
-      if (selectedNumbers.length === 1) winAmount = betAmount * 3;
-      if (selectedNumbers.length === 2) winAmount = betAmount * 0.9;
-      if (selectedNumbers.length === 3) winAmount = betAmount * 0.49;
-      virtualBalance += winAmount;
-      userData.ganados += 1;
-      betHistory.push(`🎉 Apostaste ${betAmount} WLD, ganaste ${winAmount.toFixed(2)} WLD (Número: ${diceRoll})`);
-    } else {
-      virtualBalance -= betAmount;
-      betHistory.push(`😢 Apostaste ${betAmount} WLD, perdiste (Número: ${diceRoll})`);
-    }
-
-    userData.juegos += 1;
-    userData.saldo = virtualBalance;
-
-    updateHistory();
-    updateBalance();
-
-    alert(`Resultado del dado: ${diceRoll}`);
-
-    // TODO: Aquí puedes llamar a un endpoint /api/update para guardar estadísticas reales
-  }
-
-  function updateBalance() {
-    document.getElementById("virtual-balance").textContent = virtualBalance.toFixed(2) + " WLD";
-  }
-
-  function updateHistory() {
-    const historyList = document.getElementById("bet-history");
-    historyList.innerHTML = "";
-    betHistory.slice(-10).forEach(entry => {
-      const li = document.createElement("li");
-      li.textContent = entry;
-      historyList.appendChild(li);
-    });
-  }
-
-  function startAuth() {
-    const clientId = "app_7686f9027d3e3c0b53d987a3caf1e111";
-    const redirectUri = "https://ganastrx4.github.io/chc-flask-app/dados.html";
-    const state = Math.random().toString(36).substring(2);
-    const scope = "openid";
-    const responseType = "code";
-    const nonce = Math.random().toString(36).substring(2);
-
-    const authUrl = `https://id.worldcoin.org/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=${encodeURIComponent(responseType)}&scope=${encodeURIComponent(scope)}&state=${state}&nonce=${nonce}`;
-
-    window.location.href = authUrl;
-  }
-
-  window.onload = function () {
-    const params = new URLSearchParams(window.location.search);
-    const code = params.get("code");
-
-    if (code) {
-      document.getElementById("result").innerHTML = `✅ Autenticado correctamente con World ID.<br><strong>Code:</strong> ${code}<br><br>`;
-
-      fetch("https://worldid-backend-ongijst6l-carlos-sandovals-projects.vercel.app/api/auth", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code })
-      })
-        .then(res => res.json())
-        .then(data => {
-          console.log("Respuesta del backend:", data);
-          if (data.success && data.user) {
-            userData = data.user;
-            virtualBalance = userData.saldo;
-            updateBalance();
-
-            // Mostrar datos del usuario
-            const resultDiv = document.getElementById("result");
-            resultDiv.innerHTML += `
-              👤 Usuario: <strong>${userData.code}</strong><br>
-              🎮 Juegos: ${userData.juegos} | 🏆 Ganados: ${userData.ganados}<br>
-              💰 Saldo inicial: ${userData.saldo} WLD
-            `;
-
-            // Mostrar sección del juego
-            document.getElementById("game-section").style.display = "block";
-          } else {
-            document.getElementById("result").innerHTML += "❌ Error en autenticación o usuario no válido.";
-          }
-        })
-        .catch(err => {
-          console.error("Error en la autenticación:", err);
-          document.getElementById("result").innerHTML += "❌ Error en el servidor.";
+      try {
+        const res = await fetch("https://worldid-backend-ongijst6l-carlos-sandovals-projects.vercel.app/api/reclamar", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ wallet: userData.wallet })
         });
-    }
-  };
-</script>
 
-  
+        const result = await res.json();
+        if (result.success) {
+          alert("✅ Reclamo exitoso: 1 CHUN + 1 CHC enviados.");
+          document.getElementById("claim-btn").classList.add("hidden");
+        } else {
+          alert("❌ Error: " + result.message);
+        }
+      } catch (err) {
+        console.error(err);
+        alert("❌ Error al conectar con el backend.");
+      }
+    }
+
+    window.onload = function () {
+      const params = new URLSearchParams(window.location.search);
+      const code = params.get("code");
+
+      if (code) {
+        document.getElementById("result").innerHTML = `✅ Código recibido. Autenticando...`;
+
+        fetch("https://worldid-backend-ongijst6l-carlos-sandovals-projects.vercel.app/api/auth", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ code })
+        })
+          .then(res => res.json())
+          .then(data => {
+            console.log("Respuesta del backend:", data);
+            if (data.success && data.user) {
+              userData = data.user;
+
+              const resultDiv = document.getElementById("result");
+              resultDiv.innerHTML = `
+                ✅ Autenticado con éxito<br>
+                👤 Usuario: <strong>${userData.code}</strong><br>
+                💼 Wallet: ${userData.wallet}<br>
+              `;
+
+              if (userData.puede_reclamar) {
+                document.getElementById("claim-btn").classList.remove("hidden");
+              } else {
+                resultDiv.innerHTML += "⏳ Ya reclamaste. Espera 24h para volver a hacerlo.";
+              }
+            } else {
+              document.getElementById("result").innerHTML = "❌ Error en la autenticación.";
+            }
+          })
+          .catch(err => {
+            console.error("Error:", err);
+            document.getElementById("result").innerHTML = "❌ Fallo en la conexión con el servidor.";
+          });
+      }
+    };
+  </script>
 </body>
 </html>
