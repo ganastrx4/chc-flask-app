@@ -1,43 +1,63 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-  <title>Ver Wallet World App</title>
+  <meta charset="UTF-8">
+  <title>Ganar CHUN y CHC</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
-<body>
-  <h2>Introduce tu dirección de World App</h2>
-  <input type="text" id="direccionWallet" placeholder="0x...">
-  <button onclick="consultarDatos()">Ver tokens</button>
+<body class="bg-gradient-to-br from-gray-900 to-black text-white flex flex-col items-center justify-center min-h-screen px-4">
 
-  <div id="resultado"></div>
+  <h1 class="text-4xl font-bold mb-4">🎉 ¡Gana 1 CHUN y 1 CHC!</h1>
+  <p class="mb-6 text-lg text-center">Verifica tu identidad con World ID para recibir tus tokens.</p>
+
+  <button onclick="startAuth()" class="bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-lg font-semibold text-white mb-4">
+    🔐 Verificar con World App
+  </button>
+
+  <div id="status" class="text-sm mt-4"></div>
+
+  <div id="claimSection" class="hidden mt-6">
+    <p class="mb-2">Autenticación correcta. Presiona para reclamar:</p>
+    <button onclick="claimTokens()" class="bg-green-500 hover:bg-green-600 px-6 py-3 rounded-lg font-bold text-white">
+      🚀 Reclamar 1 CHUN + 1 CHC
+    </button>
+  </div>
 
   <script>
-    async function consultarDatos() {
-      const address = document.getElementById("direccionWallet").value.trim();
-      if (!address.startsWith("0x") || address.length !== 42) {
-        alert("Dirección no válida");
-        return;
-      }
+    const clientId = "app_7686f9027d3e3c0b53d987a3caf1e111";
+    const redirectUri = window.location.href.split("?")[0];
 
-      const apiKey = "ujOcGgmg0seoiSICk6SPU4tAyQJY6kvx"; // tu API key válida
-      const url = `https://worldchain-mainnet.g.alchemy.com/v2/${apiKey}`;
+    function startAuth() {
+      const state = Math.random().toString(36).substring(2);
+      const nonce = Math.random().toString(36).substring(2);
+      const url = `https://id.worldcoin.org/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=openid&state=${state}&nonce=${nonce}`;
+      window.location.href = url;
+    }
 
-      const data = {
-        jsonrpc: "2.0",
-        id: 1,
-        method: "alchemy_getTokenBalances",
-        params: [address]
-      };
+    async function claimTokens() {
+      const wallet = "0xdc178d65c502f9589bb1a35af08b5723f85ec168"; // dirección del usuario autenticado
+      const code = new URLSearchParams(window.location.search).get("code");
 
-      const respuesta = await fetch(url, {
+      if (!code) return;
+
+      const res = await fetch("https://tu-backend.com/api/enviar_tokens", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data)
+        body: JSON.stringify({ code, wallet })
       });
 
-      const json = await respuesta.json();
-      console.log(json);
-      document.getElementById("resultado").innerText = JSON.stringify(json.result, null, 2);
+      const data = await res.json();
+      document.getElementById("status").innerText = data.message;
     }
+
+    window.onload = () => {
+      const code = new URLSearchParams(window.location.search).get("code");
+      if (code) {
+        document.getElementById("status").innerText = "✅ Autenticación exitosa.";
+        document.getElementById("claimSection").classList.remove("hidden");
+      }
+    };
   </script>
 </body>
 </html>
