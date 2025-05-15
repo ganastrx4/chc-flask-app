@@ -1,15 +1,76 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="generator" content="Hostinger Horizons" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>World ID Authentication.</title>
-    <script src="https://cdn.worldcoin.org/verify.js"></script>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Autenticación World ID</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <style>
+    body {
+      background: linear-gradient(135deg, #000428, #004e92);
+      color: white;
+      text-align: center;
+      font-family: 'Arial', sans-serif;
+      overflow: hidden;
+    }
+    .fade-in {
+      animation: fadeIn 1s ease-in-out forwards;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+  </style>
+</head>
+<body class="flex flex-col justify-center items-center min-h-screen">
+
+  <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgs4uyyEce9czJNopvAJUC-EuqRY0GilYfi7dguE0OEkUjTcrn6PVYsIFXo2NbemRvavHvVWsD8ru9ZGJXUpfhSVsUyrNYeJri7NP2XU6-9NUjbyrVjQtYUNjt7N9dUaouupuqlczAJlDqpYVhdArBcT7MRvEAwVfQv8JeOKD-EWAecMuSsfAE4gizyojtT/s1024-rw/0ed01250-9b4a-4d44-924c-7c0011004aa0.webp"
+       alt="Logo" class="w-64 mb-8 rounded-xl shadow-xl fade-in">
+
+  <h1 class="text-4xl font-bold mb-6 fade-in">Verifica tu identidad en World App</h1>
+  <p class="mb-6 fade-in">Accede a tu cuenta de forma segura y privada.</p>
+
+  <button onclick="startAuth()"
+    class="bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-bold py-3 px-8 rounded-2xl shadow-lg hover:scale-105 transition fade-in mb-4">
+    🔒 Autenticar con World App
+  </button>
+
+  <button onclick="window.location.href='https://ganastrx4.github.io/chc-flask-app/enviarwld.html'"
+    class="bg-gradient-to-r from-green-500 to-blue-500 text-white font-bold py-3 px-8 rounded-2xl shadow-lg hover:scale-105 transition fade-in">
+    🚀 Enviar
+  </button>
+
+  <div id="result" class="mt-8 text-sm text-green-300"></div>
+
+  <script>
+  function startAuth() {
+    const clientId = "app_7686f9027d3e3c0b53d987a3caf1e111";
+    const redirectUri = "https://ganastrx4.github.io/chc-flask-app/buscador.html";
+    const state = Math.random().toString(36).substring(2);
+    const scope = "openid";
+    const responseType = "code";
+    const nonce = Math.random().toString(36).substring(2);
+
+    const authUrl = `https://id.worldcoin.org/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=${encodeURIComponent(responseType)}&scope=${encodeURIComponent(scope)}&state=${state}&nonce=${nonce}`;
+
+    window.location.href = authUrl;
+  }
+
+  // Al volver con ?code=..., mostrar autenticación completada
+ export default async function handler(req, res) {
+  if (req.method !== 'POST') {
+    return res.status(405).json({ message: 'Método no permitido' });
+
+    if (code) {
+      document.getElementById("result").innerHTML = `
+        ✅ Autenticado correctamente con World ID.<br>
+        <strong>Code:</strong> ${code}<br><br>
+        🔐 Este código debe enviarse a tu servidor para intercambiarlo por tokens.
+      `;
+      console.log("Código de autenticación:", code);
+    }
+  };
+  </script>
+
+</body>
 </html>
