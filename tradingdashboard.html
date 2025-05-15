@@ -66,10 +66,11 @@
       if (!code) return;
 
       const res = await fetch("https://charlycoin-qvt0du85g-carlos-sandovals-projects.vercel.app/api/auth", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code, wallet })
-      });
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ code, wallet })
+});
+
 
       const data = await res.json();
       document.getElementById("status").innerText = data.message;
