@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <title>Ganar CHUN</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
+
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.min.js"></script>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
 </head>
@@ -27,7 +27,6 @@
     </button>
   </div>
 
-  <!-- Barra de navegación inferior -->
   <nav class="fixed bottom-0 left-0 w-full bg-gray-800 border-t border-gray-700 text-white">
     <div class="flex justify-around py-3">
       <a href="inicio.html" class="flex flex-col items-center hover:text-blue-400">
@@ -52,12 +51,10 @@
   </nav>
 
   <script>
-    // Variables globales
     const clientId = "app_7686f9027d3e3c0b53d987a3caf1e111";
     const redirectUri = window.location.href.split("?")[0];
     let detectedWallet = null;
 
-    // Función para iniciar autenticación con World ID
     function startAuth() {
       const state = Math.random().toString(36).substring(2);
       const nonce = Math.random().toString(36).substring(2);
@@ -65,7 +62,6 @@
       window.location.href = url;
     }
 
-    // Detecta la wallet con ethers.js y muestra en pantalla
     async function detectWallet() {
       try {
         if (window.ethereum) {
@@ -73,52 +69,55 @@
           const accounts = await provider.send("eth_requestAccounts", []);
           if (accounts.length > 0) {
             detectedWallet = accounts[0];
-            document.getElementById("walletInfo").innerText = "✅ Wallet detectada (World Chain): " + detectedWallet;
+            document.getElementById("walletInfo").innerText = "✅ Wallet detectada: " + detectedWallet;
             document.getElementById("walletInfo").classList.remove("hidden");
-            return;
+            return true;
           }
         }
-        document.getElementById("walletInfo").innerText = "❌ No se detectó ninguna wallet compatible con World Chain.";
-        document.getElementById("walletInfo").classList.remove("hidden");
+        throw new Error("No wallet encontrada");
       } catch (err) {
         console.error("Error detectando wallet:", err);
         document.getElementById("walletInfo").innerText = "❌ Error detectando wallet.";
         document.getElementById("walletInfo").classList.remove("hidden");
+        return false;
       }
     }
 
-    // Función para reclamar tokens tras autenticación exitosa
     async function claimTokens() {
       const code = new URLSearchParams(window.location.search).get("code");
 
-      if (!code || !detectedWallet) {
-        document.getElementById("status").innerText = "❌ No se detectó wallet o código.";
+      if (!code) {
+        document.getElementById("status").innerText = "❌ No se encontró el código de autenticación.";
+        return;
+      }
+
+      const walletOk = await detectWallet();
+      if (!walletOk || !detectedWallet) {
+        document.getElementById("status").innerText = "❌ Wallet no detectada.";
         return;
       }
 
       try {
+        const provider = new ethers.providers.Web3Provider(window.ethereum);
+        const signer = provider.getSigner();
+        const message = "Confirma que esta wallet te pertenece y eres humano verificado.";
+        const signature = await signer.signMessage(message);
+
         const res = await fetch("https://charlycoin-jj6aw66sj-carlos-sandovals-projects.vercel.app/api/auth", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ code, wallet: detectedWallet })
+          body: JSON.stringify({ code, wallet: detectedWallet, signature })
         });
-
-        if (!res.ok) {
-          throw new Error("Error en la respuesta del servidor");
-        }
 
         const data = await res.json();
         document.getElementById("status").innerText = data.message || "✅ Token reclamado con éxito.";
       } catch (error) {
-        console.error("Error reclamando tokens:", error);
+        console.error("Error en reclamo:", error);
         document.getElementById("status").innerText = "❌ Error reclamando tokens.";
       }
     }
 
-    // Al cargar la página detecta wallet y muestra sección para reclamar si hay código en URL
     window.onload = async () => {
-      await detectWallet();
-
       const code = new URLSearchParams(window.location.search).get("code");
       if (code) {
         document.getElementById("status").innerText = "✅ Autenticación exitosa.";
