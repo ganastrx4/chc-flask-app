@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <title>Ganar CHUN</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ 
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.min.js"></script>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
@@ -49,6 +50,35 @@
       </a>
     </div>
   </nav>
+
+
+<script>
+  let userWallet = null;
+
+  async function detectWallet() {
+    try {
+      if (window.ethereum) {
+        const provider = new ethers.providers.Web3Provider(window.ethereum);
+        await provider.send("eth_requestAccounts", []);
+        const signer = provider.getSigner();
+        const address = await signer.getAddress();
+        userWallet = address;
+
+        document.getElementById("walletInfo").innerText = "✅ Wallet detectada: " + userWallet;
+        document.getElementById("walletInfo").classList.remove("hidden");
+      } else {
+        document.getElementById("walletInfo").innerText = "❌ MetaMask o una wallet compatible no está disponible.";
+        document.getElementById("walletInfo").classList.remove("hidden");
+      }
+    } catch (error) {
+      console.error("Error detectando wallet:", error);
+      document.getElementById("walletInfo").innerText = "❌ Error detectando wallet.";
+      document.getElementById("walletInfo").classList.remove("hidden");
+    }
+  }
+
+  window.onload = detectWallet;
+</script>
 
   <script>
     const clientId = "app_7686f9027d3e3c0b53d987a3caf1e111";
