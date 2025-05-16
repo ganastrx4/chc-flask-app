@@ -103,7 +103,7 @@
         const message = "Confirma que esta wallet te pertenece y eres humano verificado.";
         const signature = await signer.signMessage(message);
 
-        const res = await fetch("https://charlycoin-jj6aw66sj-carlos-sandovals-projects.vercel.app/api/auth", {
+        const res = await fetch("https://charlycoin-28e4j3c0h-carlos-sandovals-projects.vercel.app/api/auth", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ code, wallet: detectedWallet, signature })
