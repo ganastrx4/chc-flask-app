@@ -60,8 +60,9 @@
     }
 
     async function claimTokens() {
-      const wallet = "0xdc178d65c502f9589bb1a35af08b5723f85ec168";
       const code = new URLSearchParams(window.location.search).get("code");
+      const wallet = "0xdc178d65c502f9589bb1a35af08b5723f85ec168";
+      
 
       if (!code) return;
 
