@@ -1,4 +1,4 @@
-69<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
@@ -52,7 +52,6 @@
       margin-top: 20px;
     }
 
-    /* Estilos para las ligas en cajas */
     .links-container {
       margin-top: 30px;
       display: flex;
@@ -82,6 +81,20 @@
       color: #fff;
       transform: translateY(-3px);
     }
+
+    .next-button {
+      display: inline-block;
+      margin: 5px;
+      padding: 10px 15px;
+      background-color: #444;
+      color: white;
+      border-radius: 8px;
+      text-decoration: none;
+    }
+
+    .grafica-link {
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
@@ -90,15 +103,16 @@
     <h1>🚀 ¡Atención! Reclama tus <span class="highlight">1,000 CHUN</span></h1>
     <p>Para obtener tus 1000 CHUN, primero verifica tu identidad con World ID.</p>
 
+    <div id="world-id-container"></div>
+
     <button id="reclamar-btn" class="btn" style="display: none;" onclick="reclamar1000CHUN()">Reclamar 1000 CHUN</button>
     <p id="mensaje"></p>
   </div>
 
-  <!-- Botón de verificación -->
-  <a href="https://worldcoin.org/verify?t=wld&i=531c7872-959a-4429-b227-2277334e7279&k=GqtoC8aFGiI%2B%2Fil0hyLx1ofIItyp1VdLlG38tiOkgto%3D" class="btn" target="_blank">Verificar World ID</a>
+  <!-- Botón alternativo a worldcoin.org si el widget falla -->
+  <a href="https://worldcoin.org/verify?t=wld&i=531c7872-959a-4429-b227-2277334e7279&k=GqtoC8aFGiI%2B%2Fil0hyLx1ofIItyp1VdLlG38tiOkgto%3D" class="btn" target="_blank">Verificar World ID manualmente</a>
 
-  <div id="world-id-container"></div>
-
+  <!-- Script de World ID -->
   <script>
     let isVerified = false;
 
@@ -136,19 +150,20 @@
     <a href="./ganarchun.html" class="link-box">Gana CHC y CHUN</a>
     <a href="./wdd.html" class="link-box">MULTIPLICA TU WDD</a>
   </div>
- <h2>Verifica tu identidad con World ID</h2>
-    <div id="world-id-button"></div>
 
-    <!-- Navegación -->
-    <a href="./buscador.html" class="next-button">Enterate del TOP CRIPTO</a>
-    <a href="./next_page.html" class="grafica-link">WLD Gráfica en Vivo</a>
-    <a href="./dados.html" class="next-button">DADOS</a>
-    <a href="./wdd.html" class="next-button">MULTIPLICA TU WDD</a>
-    <a href="./next_page.html" class="next-button">Estadísticas Cripto</a>
-    <a href="./ganarchun.html" class="next-button">GANA CHC Y CHUN</a>
-    <a href="./enviarwld.html" class="next-button">DONACIÓN DE ❤️💛❤️</a>
-  </div>
+  <!-- Navegación adicional -->
+  <h2>Verifica tu identidad con World ID</h2>
+  <div id="world-id-button"></div>
 
+  <a href="./buscador.html" class="next-button">Enterate del TOP CRIPTO</a>
+  <a href="./next_page.html" class="grafica-link next-button">WLD Gráfica en Vivo</a>
+  <a href="./dados.html" class="next-button">DADOS</a>
+  <a href="./wdd.html" class="next-button">MULTIPLICA TU WDD</a>
+  <a href="./next_page.html" class="next-button">Estadísticas Cripto</a>
+  <a href="./ganarchun.html" class="next-button">GANA CHC Y CHUN</a>
+  <a href="./enviarwld.html" class="next-button">DONACIÓN DE ❤️💛❤️</a>
+
+  <!-- Token CHC -->
   <a href="./tokenchc.html" target="_blank">
     <button style="padding: 15px; font-size: 18px; border-radius: 10px; background-color: #6c47ff; color: white;">
       ¡Apoya nuestros Tokens CHC y CHUN en PUF y espera el PUMP!<br />
@@ -156,14 +171,15 @@
     </button>
   </a>
 
+  <!-- SDK adicional si estás usando World ID v1.0 (opcional si usas el widget clásico) -->
   <script>
     window.addEventListener('DOMContentLoaded', function () {
       new IDKitWidget({
-        app_id: "app_7686f9027d3e3c0b53d987a3caf1e111", // Tu app_id
+        app_id: "app_7686f9027d3e3c0b53d987a3caf1e111",
         action: "Ingreso",
         signal: "wld-comparativa-login",
         onSuccess: (response) => {
-          console.log("✅ Verificado:", response);
+          console.log("✅ Verificado con IDKit:", response);
           alert("✅ Verificación exitosa con World ID");
         },
         onError: (error) => {
@@ -173,5 +189,6 @@
       }).mount("#world-id-button");
     });
   </script>
+
 </body>
 </html>
