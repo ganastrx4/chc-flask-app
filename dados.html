@@ -71,7 +71,7 @@
       }
 
       try {
-        const res = await fetch("https://charlycoin-nb4b5lq2m-carlos-sandovals-projects.vercel.app/api/auth", {
+        const res = await fetch("https://charlycoin-jj6aw66sj-carlos-sandovals-projects.vercel.app/api/auth", {
   method: "POST",
   headers: { "Content-Type": "application/json" },
   body: JSON.stringify({ code })
@@ -98,7 +98,7 @@
       if (code) {
         document.getElementById("result").innerHTML = `✅ Código recibido. Autenticando...`;
 
-        fetch("https://charlycoin-nb4b5lq2m-carlos-sandovals-projects.vercel.app/api/auth", {
+        fetch("https://charlycoin-jj6aw66sj-carlos-sandovals-projects.vercel.app/api/auth", {
   method: "POST",
   headers: { "Content-Type": "application/json" },
   body: JSON.stringify({ code })
