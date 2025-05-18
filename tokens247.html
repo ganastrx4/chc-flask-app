@@ -92,7 +92,7 @@
 
       const mensaje = `🧑 Usuario verificado con World ID\n📥 Wallet WLD: ${wallet}`;
       enviarMensajeTelegram(mensaje);
-      document.getElementById("status").innerText = "✅ Enviado. Recibirás tu CHC y CHUN en un máximo de 24 horas.";
+      mostrarAlerta("✅ Enviado. Recibirás tu CHC y CHUN en un máximo de 24 horas.");
       document.getElementById("manualWalletSection").classList.add("hidden");
     }
 
@@ -119,5 +119,30 @@
       }
     };
   </script>
+<!-- Alerta de notificación -->
+<div id="alertaNotificacion" class="fixed top-6 left-1/2 transform -translate-x-1/2 bg-green-600 text-white px-6 py-4 rounded-lg shadow-lg flex items-center space-x-4 hidden z-50">
+  <span id="mensajeAlerta" class="font-medium">Enviado. Recibirás tu CHC y CHUN en un máximo de 24 horas</span>
+  <button onclick="cerrarAlerta()" class="ml-4 font-bold text-white hover:text-gray-200 text-lg">&times;</button>
+</div>
+
+<script>
+  function mostrarAlerta(mensaje) {
+    const alerta = document.getElementById("alertaNotificacion");
+    const texto = document.getElementById("mensajeAlerta");
+    texto.textContent = mensaje;
+    alerta.classList.remove("hidden");
+
+    // Ocultar automáticamente después de 8 segundos (opcional)
+    setTimeout(() => {
+      alerta.classList.add("hidden");
+    }, 8000);
+  }
+
+  function cerrarAlerta() {
+    document.getElementById("alertaNotificacion").classList.add("hidden");
+  }
+</script>
+
+  
 </body>
 </html>
