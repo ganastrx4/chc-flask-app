@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <title>Movimientos de World Chain</title>
- <script src="https://cdn.jsdelivr.net/npm/@worldcoin/id"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@worldcoin/id"></script>
   <style>
     body { font-family: Arial, sans-serif; padding: 20px; background: #f2f2f2; }
     input, button { padding: 10px; margin: 10px 0; width: 100%; max-width: 400px; }
@@ -45,11 +45,11 @@
           body: JSON.stringify({
             jsonrpc: "2.0",
             method: "alchemy_getAssetTransfers",
-            params: [{
+            params: [ {
               fromBlock: "0x0",
               category: ["external", "erc20", "erc721"],
               toAddress: wallet
-            }],
+            } ],
             id: 1
           })
         });
@@ -99,7 +99,7 @@
       sendResult.textContent = "⏳ Enviando transacción...";
 
       try {
-        const res = await fetch("https://worldcoin-mtwy6ukh4-carlos-sandovals-projects.vercel.app/api/send", {
+        const res = await fetch("https://worldcoin-njwbijtt6-carlos-sandovals-projects.vercel.app/api/send", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
