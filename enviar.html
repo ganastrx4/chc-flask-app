@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Enviar Tokens World Chain</title>
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 400px; margin: 30px auto; background: #f9f9f9; padding: 20px; border-radius: 8px; }
+    input, button { width: 100%; padding: 10px; margin: 10px 0; box-sizing: border-box; }
+    #result { white-space: pre-wrap; background: #eee; padding: 10px; border-radius: 5px; min-height: 50px; }
+  </style>
+</head>
+<body>
+
+  <h2>Enviar Tokens World Chain</h2>
+
+  <input type="password" id="privateKey" placeholder="Clave privada (solo para pruebas)" />
+  <input type="text" id="recipient" placeholder="Dirección destino (0x...)" />
+  <input type="text" id="amount" placeholder="Cantidad a enviar (ej. 0.01)" />
+  <input type="text" id="tokenAddress" placeholder="Dirección token (deja vacío para WLD)" />
+  <button onclick="enviar()">Enviar</button>
+
+  <div id="result">Esperando acción...</div>
+
+<script>
+  async function enviar() {
+    const privKey = document.getElementById('privateKey').value.trim();
+    const to = document.getElementById('recipient').value.trim();
+    const amount = document.getElementById('amount').value.trim();
+    const token = document.getElementById('tokenAddress').value.trim();
+    const result = document.getElementById('result');
+
+    if (!privKey || privKey.length !== 64) {
+      result.textContent = '❌ Clave privada inválida.';
+      return;
+    }
+    if (!/^0x[a-fA-F0-9]{40}$/.test(to)) {
+      result.textContent = '❌ Dirección destino inválida.';
+      return;
+    }
+    if (!amount || isNaN(amount) || Number(amount) <= 0) {
+      result.textContent = '❌ Cantidad inválida.';
+      return;
+    }
+
+    result.textContent = '⏳ Preparando transacción...';
+
+    try {
+      const provider = new ethers.providers.JsonRpcProvider('https://worldchain-mainnet.g.alchemy.com/v2/39Stwe7kZcWw8bQj6T0a7UIOgU7fq9P5');
+      const wallet = new ethers.Wallet(privKey, provider);
+
+      // Gas mínimo (en Gwei) → ajusta si aún da error
+      const maxFeePerGas = ethers.utils.parseUnits('0.000000001', 'gwei'); // 1 nano gwei
+      const maxPriorityFeePerGas = ethers.utils.parseUnits('0.000000001', 'gwei');
+
+      if (!token) {
+        // Enviar WLD
+        const tx = {
+          to: to,
+          value: ethers.utils.parseEther(amount),
+          type: 2,
+          maxFeePerGas,
+          maxPriorityFeePerGas
+        };
+
+        const txResponse = await wallet.sendTransaction(tx);
+        result.textContent = `✅ Transacción enviada.\nHash: ${txResponse.hash}\nEsperando confirmación...`;
+
+        const receipt = await txResponse.wait();
+        result.textContent += `\n✅ Confirmada en bloque: ${receipt.blockNumber}`;
+      } else {
+        // Enviar token ERC20
+        const abi = ["function transfer(address to, uint256 amount) returns (bool)"];
+        const contract = new ethers.Contract(token, abi, wallet);
+        const amountParsed = ethers.utils.parseUnits(amount, 18);
+
+        const txResponse = await contract.transfer(to, amountParsed, {
+          type: 2,
+          maxFeePerGas,
+          maxPriorityFeePerGas
+        });
+
+        result.textContent = `✅ Transacción enviada.\nHash: ${txResponse.hash}\nEsperando confirmación...`;
+
+        const receipt = await txResponse.wait();
+        result.textContent += `\n✅ Confirmada en bloque: ${receipt.blockNumber}`;
+      }
+    } catch (err) {
+      result.textContent = `❌ Error: ${err.message}`;
+    }
+  }
+</script>
+
+
+</body>
+</html>
