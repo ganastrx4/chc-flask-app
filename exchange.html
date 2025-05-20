@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <title>Movimientos de World Chain</title>
+ <script src="https://cdn.jsdelivr.net/npm/@worldcoin/id"></script>
   <style>
     body { font-family: Arial, sans-serif; padding: 20px; background: #f2f2f2; }
     input, button { padding: 10px; margin: 10px 0; width: 100%; max-width: 400px; }
@@ -99,7 +100,7 @@
 
       try {
         const res = await fetch("http://localhost:5000/send", {
-          method: "POST",
+          method: "GET",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             recipient: sendTo,
