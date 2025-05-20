@@ -1,121 +1,77 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>Panel World Chain</title>
-  <script src="https://cdn.jsdelivr.net/npm/ethers@6.6.2/dist/ethers.umd.min.js"></script>
+  <meta charset="UTF-8" />
+  <title>Movimientos de World Chain</title>
   <style>
-    body { font-family: Arial; padding: 20px; background: #eef2f3; }
-    input, button { padding: 10px; margin-top: 10px; width: 100%; max-width: 400px; }
-    .token { background: white; margin: 10px 0; padding: 10px; border-radius: 5px; }
+    body { font-family: Arial, sans-serif; padding: 20px; background: #f2f2f2; }
+    input, button { padding: 10px; margin: 10px 0; width: 100%; max-width: 400px; }
+    #result { white-space: pre-wrap; background: #fff; padding: 15px; border: 1px solid #ccc; }
   </style>
 </head>
 <body>
 
-<h2>Panel de Usuario - World Chain</h2>
+  <h2>Consultar Movimientos - World Chain</h2>
 
-<button onclick="connectWallet()">🔗 Conectar Wallet</button>
-<p><strong>Dirección:</strong> <span id="walletAddress">No conectada</span></p>
+  <input type="text" id="walletInput" placeholder="Ingresa tu dirección de billetera" />
+  <button onclick="consultarMovimientos()">Consultar</button>
 
-<div id="balances"></div>
+  <div id="result">Esperando entrada...</div>
 
-<h3>Enviar tokens</h3>
-<select id="tokenSelect"></select>
-<input type="text" id="toAddress" placeholder="Dirección de destino">
-<input type="number" id="amount" placeholder="Cantidad a enviar">
-<button onclick="sendToken()">🚀 Enviar</button>
+  <script>
+    async function consultarMovimientos() {
+      const wallet = document.getElementById("walletInput").value.trim();
+      const result = document.getElementById("result");
 
-<p id="status">Estado: Esperando acción...</p>
-
-<script>
-  const TOKENS = {
-    WLD: { address: "0x0000000000000000000000000000000000000000", decimals: 18 },
-    CHUN: { address: "0x6b2bA4159916017267c39A3b70b507F7c1Af5eDb", decimals: 18 },
-    CHC: { address: "0xde8239aEb9730D74548D65DD2fD3Ce3F42517395", decimals: 18 }
-  };
-  const MY_WALLET = "0xdc178d65c502f9589bb1a35af08b5723f85ec168";
-  let provider, signer, userAddress;
-
-  async function connectWallet() {
-    if (!window.ethereum) return alert("MetaMask no está instalado.");
-    provider = new ethers.BrowserProvider(window.ethereum);
-    const accounts = await provider.send("eth_requestAccounts", []);
-    signer = await provider.getSigner();
-    userAddress = await signer.getAddress();
-    document.getElementById("walletAddress").textContent = userAddress;
-    await mostrarBalances();
-    mostrarTokensDisponibles();
-  }
-
-  async function mostrarBalances() {
-    let html = "";
-    const balancesDiv = document.getElementById("balances");
-
-    for (let symbol in TOKENS) {
-      const token = TOKENS[symbol];
-      let balance;
-      if (token.address === "0x0000000000000000000000000000000000000000") {
-        balance = await provider.getBalance(userAddress);
-      } else {
-        const abi = ["function balanceOf(address) view returns (uint256)"];
-        const contract = new ethers.Contract(token.address, abi, provider);
-        balance = await contract.balanceOf(userAddress);
+      if (!/^0x[a-fA-F0-9]{40}$/.test(wallet)) {
+        result.textContent = "❌ Dirección de billetera inválida.";
+        return;
       }
-      const formatted = ethers.formatUnits(balance, token.decimals);
-      html += `<div class="token"><strong>${symbol}:</strong> ${formatted}</div>`;
+
+      result.textContent = "⏳ Consultando transacciones...";
+
+      try {
+        const response = await fetch("https://worldchain-mainnet.g.alchemy.com/v2/39Stwe7kZcWw8bQj6T0a7UIOgU7fq9P5", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            jsonrpc: "2.0",
+            method: "alchemy_getAssetTransfers",
+            params: [{
+              fromBlock: "0x0",
+              category: ["external", "erc20", "erc721"],
+              toAddress: wallet
+            }],
+            id: 1
+          })
+        });
+
+        const data = await response.json();
+        const transfers = data.result.transfers;
+
+        if (!transfers || transfers.length === 0) {
+          result.textContent = "⚠️ No se encontraron movimientos para esta billetera.";
+          return;
+        }
+
+        let output = `✅ ${transfers.length} transferencias encontradas:\n\n`;
+
+        transfers.forEach((tx, i) => {
+          output += `#${i + 1}\n`;
+          output += `🔹 Token: ${tx.asset}\n`;
+          output += `🔹 Cantidad: ${tx.value || 'N/A'}\n`;
+          output += `🔹 Desde: ${tx.from}\n`;
+          output += `🔹 Hacia: ${tx.to}\n`;
+          output += `🔹 Hash: ${tx.hash}\n\n`;
+        });
+
+        result.textContent = output;
+
+      } catch (err) {
+        result.textContent = `❌ Error al consultar: ${err.message}`;
+      }
     }
-
-    balancesDiv.innerHTML = html;
-  }
-
-  function mostrarTokensDisponibles() {
-    const select = document.getElementById("tokenSelect");
-    select.innerHTML = "";
-    for (let symbol in TOKENS) {
-      const option = document.createElement("option");
-      option.value = symbol;
-      option.textContent = symbol;
-      select.appendChild(option);
-    }
-  }
-
-  async function sendToken() {
-    const symbol = document.getElementById("tokenSelect").value;
-    const to = document.getElementById("toAddress").value;
-    const amount = parseFloat(document.getElementById("amount").value);
-    const status = document.getElementById("status");
-    const token = TOKENS[symbol];
-    const feeAddress = MY_WALLET;
-
-    if (!ethers.isAddress(to)) return alert("Dirección inválida");
-
-    const amountBN = ethers.parseUnits(amount.toString(), token.decimals);
-    const feeBN = amountBN / 100n; // 1%
-    const sendBN = amountBN - feeBN;
-
-    if (token.address === "0x0000000000000000000000000000000000000000") {
-      // Enviar WLD nativo
-      await signer.sendTransaction({
-        to: to,
-        value: sendBN
-      });
-      await signer.sendTransaction({
-        to: feeAddress,
-        value: feeBN
-      });
-    } else {
-      const abi = [
-        "function transfer(address to, uint256 amount) returns (bool)"
-      ];
-      const contract = new ethers.Contract(token.address, abi, signer);
-      await contract.transfer(to, sendBN);
-      await contract.transfer(feeAddress, feeBN);
-    }
-
-    status.textContent = `✅ Enviado ${amount} ${symbol} (${sendBN} al destino, ${ethers.formatUnits(feeBN, token.decimals)} fee)`;
-    await mostrarBalances();
-  }
-</script>
+  </script>
 
 </body>
 </html>
