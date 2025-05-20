@@ -6,17 +6,24 @@
   <style>
     body { font-family: Arial, sans-serif; padding: 20px; background: #f2f2f2; }
     input, button { padding: 10px; margin: 10px 0; width: 100%; max-width: 400px; }
-    #result { white-space: pre-wrap; background: #fff; padding: 15px; border: 1px solid #ccc; }
+    #result, #sendResult { white-space: pre-wrap; background: #fff; padding: 15px; border: 1px solid #ccc; }
   </style>
 </head>
 <body>
 
   <h2>Consultar Movimientos - World Chain</h2>
-
   <input type="text" id="walletInput" placeholder="Ingresa tu dirección de billetera" />
   <button onclick="consultarMovimientos()">Consultar</button>
-
   <div id="result">Esperando entrada...</div>
+
+  <hr>
+
+  <h2>Enviar Token / WLD</h2>
+  <input type="text" id="sendTo" placeholder="Dirección destino (0x...)" />
+  <input type="text" id="sendAmount" placeholder="Cantidad a enviar (ej. 0.01)" />
+  <input type="text" id="sendToken" placeholder="Token address (deja vacío para enviar WLD)" />
+  <button onclick="enviarToken()">Enviar</button>
+  <div id="sendResult">Esperando datos de envío...</div>
 
   <script>
     async function consultarMovimientos() {
@@ -69,6 +76,48 @@
 
       } catch (err) {
         result.textContent = `❌ Error al consultar: ${err.message}`;
+      }
+    }
+
+    async function enviarToken() {
+      const sendTo = document.getElementById("sendTo").value.trim();
+      const sendAmount = document.getElementById("sendAmount").value.trim();
+      const sendToken = document.getElementById("sendToken").value.trim();
+      const sendResult = document.getElementById("sendResult");
+
+      if (!/^0x[a-fA-F0-9]{40}$/.test(sendTo)) {
+        sendResult.textContent = "❌ Dirección destino inválida.";
+        return;
+      }
+
+      if (!sendAmount || isNaN(sendAmount)) {
+        sendResult.textContent = "❌ Cantidad inválida.";
+        return;
+      }
+
+      sendResult.textContent = "⏳ Enviando transacción...";
+
+      try {
+        const res = await fetch("http://localhost:3000/send", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            recipient: sendTo,
+            amount: sendAmount,
+            token: sendToken || null
+          })
+        });
+
+        const data = await res.json();
+
+        if (data.success) {
+          sendResult.textContent = `✅ Transacción enviada.\nHash: ${data.txHash}`;
+        } else {
+          sendResult.textContent = `❌ Error: ${data.error}`;
+        }
+
+      } catch (err) {
+        sendResult.textContent = `❌ Error al enviar: ${err.message}`;
       }
     }
   </script>
