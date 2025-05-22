@@ -1,51 +1,51 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
   <title>Agregar CHC a MetaMask</title>
   <style>
     body {
+      background: #1a1a1a;
+      color: #fff;
       font-family: Arial, sans-serif;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      background: #111827;
-      color: white;
+      text-align: center;
+      padding: 40px;
+    }
+    img {
+      max-width: 150px;
+      border-radius: 16px;
+      margin-bottom: 20px;
+      box-shadow: 0 0 12px #facc15;
     }
     button {
-      background: #fbbf24;
+      background-color: #facc15;
       color: #000;
       border: none;
       padding: 12px 24px;
       font-size: 18px;
-      border-radius: 10px;
+      border-radius: 12px;
       cursor: pointer;
-      margin-top: 20px;
+      transition: 0.3s;
     }
-    img {
-      width: 100px;
-      height: 100px;
-      object-fit: cover;
-      border-radius: 16px;
-      border: 2px solid white;
-      margin-bottom: 20px;
+    button:hover {
+      background-color: #eab308;
     }
   </style>
 </head>
 <body>
   <h1>🪙 Agrega CharlyCoin (CHC) a tu MetaMask</h1>
-  <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgrxQg1zxfSMxym0NKkic-2xp1gLjogCY4Bj1mnHI_DRYPtrObsqU7i2dVCNfvTag_mm_Muv8sPMVa557zUxLpOHYOT5Tw44s1P3ZkwxDiyRAD4MVpQGcf6QXCuUBcqJOWLC5-zVA5ujpnp0Qx3lxup8jo43wV5BciYd42eCHz27QFo1vtIsmFoBhfsp7RK/s1600-rw/CharlyCoin.JPG" alt="Logo CHC" />
-  <button onclick="addToken()">➕ Agregar CHC a MetaMask</button>
+  <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgrxQg1zxfSMxym0NKkic-2xp1gLjogCY4Bj1mnHI_DRYPtrObsqU7i2dVCNfvTag_mm_Muv8sPMVa557zUxLpOHYOT5Tw44s1P3ZkwxDiyRAD4MVpQGcf6QXCuUBcqJOWLC5-zVA5ujpnp0Qx3lxup8jo43wV5BciYd42eCHz27QFo1vtIsmFoBhfsp7RK/s1600-rw/CharlyCoin.JPG" alt="CHC Logo">
+
+  <p><strong>Dirección del Token:</strong> 0xde8239aEb9730D74548D65DD2fD3Ce3F42517395</p>
+
+  <button onclick="addToken()">➕ Agregar a MetaMask</button>
 
   <script>
     async function addToken() {
-      const tokenAddress = '0xde8239aEb9730D74548D65DD2fD3Ce3F42517395';
-      const tokenSymbol = 'CHC';
+      const tokenAddress = "0xde8239aEb9730D74548D65DD2fD3Ce3F42517395";
+      const tokenSymbol = "CHC";
       const tokenDecimals = 18;
-      const tokenImage = 'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgrxQg1zxfSMxym0NKkic-2xp1gLjogCY4Bj1mnHI_DRYPtrObsqU7i2dVCNfvTag_mm_Muv8sPMVa557zUxLpOHYOT5Tw44s1P3ZkwxDiyRAD4MVpQGcf6QXCuUBcqJOWLC5-zVA5ujpnp0Qx3lxup8jo43wV5BciYd42eCHz27QFo1vtIsmFoBhfsp7RK/s1600-rw/CharlyCoin.JPG';
+      const tokenImage = "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgrxQg1zxfSMxym0NKkic-2xp1gLjogCY4Bj1mnHI_DRYPtrObsqU7i2dVCNfvTag_mm_Muv8sPMVa557zUxLpOHYOT5Tw44s1P3ZkwxDiyRAD4MVpQGcf6QXCuUBcqJOWLC5-zVA5ujpnp0Qx3lxup8jo43wV5BciYd42eCHz27QFo1vtIsmFoBhfsp7RK/s1600-rw/CharlyCoin.JPG";
 
       try {
         const wasAdded = await window.ethereum.request({
@@ -62,13 +62,13 @@
         });
 
         if (wasAdded) {
-          alert('✅ Token CHC agregado correctamente');
+          alert('✅ CHC agregado a MetaMask.');
         } else {
-          alert('⚠️ Token no fue agregado');
+          alert('❌ Token no fue agregado.');
         }
       } catch (error) {
         console.error(error);
-        alert('⛔ Error al agregar el token');
+        alert("MetaMask no está disponible o hubo un error.");
       }
     }
   </script>
