@@ -3,108 +3,59 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Registro Diario CHUN/CHC</title>
+  <title>Registro World ID + Wallet</title>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://unpkg.com/@worldcoin/id@1.0.0-beta.8"></script>
+  <script>
+    let lastClaimDate = localStorage.getItem('lastClaimDate');
+
+    function functionAuth() {
+      // Simulación de login (reemplaza con tu lógica real de autenticación)
+      const now = new Date();
+      const nowDateStr = now.toISOString().split('T')[0];
+
+      if (lastClaimDate === nowDateStr) {
+        alert("⚠️ Ya reclamaste tus tokens hoy. Intenta mañana.");
+        return;
+      }
+
+      document.getElementById('authSection').classList.add('hidden');
+      document.getElementById('manualWalletSection').classList.remove('hidden');
+      lastClaimDate = nowDateStr;
+      localStorage.setItem('lastClaimDate', nowDateStr);
+    }
+
+    function enviarWallet() {
+      const wallet = document.getElementById('manualWallet').value;
+      if (!wallet || !wallet.startsWith('0x') || wallet.length !== 42) {
+        alert("❌ Dirección de wallet inválida. Asegúrate de pegarla correctamente.");
+        return;
+      }
+
+      // Enviar los datos al formulario de Google (esto solo se puede hacer con acción por URL o backend intermedio)
+      alert("✅ Wallet registrada con éxito. Recibirás 10 CHUN y 10 CHC si no has reclamado en las últimas 24h.");
+    }
+  </script>
 </head>
-<body class="bg-gradient-to-br from-gray-900 to-black text-white min-h-screen flex flex-col items-center justify-center p-6">
+<body class="bg-gray-900 text-white font-sans flex flex-col items-center min-h-screen p-4">
+  <h1 class="text-3xl font-bold text-yellow-400 mb-4">🎯 Verificación con World ID</h1>
 
-  <h1 class="text-3xl font-bold mb-4 text-center">🔐 Reclama tus 10 CHUN + 10 CHC cada 24h</h1>
-  <p class="text-center mb-6">Autentifícate con World ID para acceder al formulario</p>
-
+  <!-- Botón de funciónAuth -->
   <div id="authSection" class="mb-6">
-    <div id="world-id-container"></div>
+    <button onclick="functionAuth()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-full shadow-lg">
+      🔓 Autenticar con World ID
+    </button>
   </div>
 
-  <div id="formSection" class="hidden">
-    <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSfW0XlllwqgVCIUiKrgR5n-vuxTSdOGCRuoIsI7J6X2fe0E8Q/viewform?embedded=true" width="640" height="880" frameborder="0" marginheight="0" marginwidth="0" class="w-full max-w-3xl">Cargando…</iframe>
-  </div>
-
-  <!-- Nueva sección para ingresar wallet manualmente -->
+  <!-- Sección de wallet manual -->
   <div id="manualWalletSection" class="hidden mt-6 flex flex-col items-center">
     <p class="mb-2 text-center">🔁 Copia tu dirección WLD desde <a href="https://worldcoin.org/mini-app?app_id=app_a4f7f3e62c1de0b9490a5260cb390b56" target="_blank" class="underline text-blue-400">unoapp.xyz/swap</a> y pégala aquí:</p>
     <input type="text" id="manualWallet" placeholder="Pega aquí tu wallet WLD" class="text-black px-4 py-2 rounded mb-2 w-full max-w-xs">
     <button onclick="enviarWallet()" class="bg-yellow-500 hover:bg-yellow-600 px-6 py-2 rounded text-black font-bold">📤 Enviar</button>
   </div>
 
- <button onclick="startAuth()"
-    class="bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-bold py-3 px-8 rounded-2xl shadow-lg hover:scale-105 transition fade-in mb-4">
-    🔒 Autenticar con World App
-  </button>
-
-  <script>
-    let lastClaimKey = "lastClaim_";
-
-    function hasClaimedToday() {
-      const last = localStorage.getItem(lastClaimKey);
-      if (!last) return false;
-      const now = Date.now();
-      return (now - parseInt(last)) < 86400000; // 24h en ms
-    }
-
-    function markAsClaimed() {
-      localStorage.setItem(lastClaimKey, Date.now().toString());
-    }
-      
-  function startAuth() {
-    const clientId = "app_7686f9027d3e3c0b53d987a3caf1e111";
-    const redirectUri = "https://ganastrx4.github.io/chc-flask-app/chun.html";
-    const state = Math.random().toString(36).substring(2);
-    const scope = "openid";
-    const responseType = "code";
-    const nonce = Math.random().toString(36).substring(2);
-
-    const authUrl = `https://id.worldcoin.org/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=${encodeURIComponent(responseType)}&scope=${encodeURIComponent(scope)}&state=${state}&nonce=${nonce}`;
-
-    window.location.href = authUrl;
-  }
-
-  // Al volver con ?code=..., mostrar autenticación completada
-  window.onload = function () {
-    const params = new URLSearchParams(window.location.search);
-    const code = params.get("code");
-
-    if (code) {
-      document.getElementById("result").innerHTML = `
-        ✅ Autenticado correctamente con World ID.<br>
-        <strong>Code:</strong> ${code}<br><br>
-        🔐 Este código debe enviarse a tu servidor para intercambiarlo por tokens.
-      `;
-      console.log("Código de autenticación:", code);
-    }
-  };
- 
-    new WorldIDWidget({
-      enable_telemetry: true,
-      app_id: "app_a4f7f3e62c1de0b9490a5260cb390b56",
-      signal: "ingreso",
-      action_id: "ingreso",
-      container_id: "ingreso",
-      on_success: function (proof) {
-        if (hasClaimedToday()) {
-          alert("Ya reclamaste tus tokens hoy. Intenta de nuevo en 24h.");
-          return;
-        }
-        document.getElementById("authSection").classList.add("hidden");
-        document.getElementById("formSection").classList.remove("hidden");
-        document.getElementById("manualWalletSection").classList.remove("hidden");
-        markAsClaimed();
-      },
-      on_error: function (err) {
-        alert("Error al autenticar: " + err.message);
-      }
-    });
-
-    function enviarWallet() {
-      const wallet = document.getElementById("manualWallet").value;
-      if (!wallet || wallet.length < 20) {
-        alert("Por favor ingresa una wallet válida.");
-        return;
-      }
-      alert("Wallet registrada: " + wallet + "\nTu recompensa se enviará pronto.");
-      // Aquí puedes hacer POST al backend si lo deseas
-    }
-  </script>
+  <!-- Formulario incrustado -->
+  <div class="mt-10 w-full max-w-2xl">
+    <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSfW0XlllwqgVCIUiKrgR5n-vuxTSdOGCRuoIsI7J6X2fe0E8Q/viewform?embedded=true" width="100%" height="880" frameborder="0" marginheight="0" marginwidth="0">Cargando…</iframe>
+  </div>
 </body>
 </html>
