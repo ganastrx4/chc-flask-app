@@ -100,12 +100,12 @@
 <body>
 
   <div class="container">
-    <h1>🚀 ¡Atención! Reclama tus <span class="highlight">1,000 CHUN</span></h1>
+    <h1>🚀 ¡Atención! Reclama tus <span class="highlight">10 CHUN</span></h1>
     <p>Para obtener tus 1000 CHUN, primero verifica tu identidad con World ID.</p>
 
     <div id="world-id-container"></div>
 
-    <button id="reclamar-btn" class="btn" style="display: none;" onclick="reclamar1000CHUN()">Reclamar 1000 CHUN</button>
+    <button id="reclamar-btn" class="btn" style="display: none;" onclick="reclamar1000CHUN()">Reclamar 10 CHUN</button>
     <p id="mensaje"></p>
   </div>
 
@@ -126,7 +126,7 @@
         console.log("✅ Verificado:", proof);
         isVerified = true;
         document.getElementById("reclamar-btn").style.display = "inline-block";
-        document.getElementById("mensaje").innerHTML = "¡Autenticación exitosa! Ahora puedes reclamar tus 1000 CHUN.";
+        document.getElementById("mensaje").innerHTML = "¡Autenticación exitosa! Ahora puedes reclamar tus 10 CHUN.";
       },
       on_error: function (error) {
         console.error("❌ Error de World ID:", error);
@@ -136,7 +136,7 @@
 
     function reclamar1000CHUN() {
       if (isVerified) {
-        alert("🎉 ¡Has reclamado tus 1000 CHUN!");
+        alert("🎉 ¡Has reclamado tus 10 CHUN!");
       } else {
         alert("❌ No has sido autenticado correctamente.");
       }
