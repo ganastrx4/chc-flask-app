@@ -120,33 +120,14 @@
     <h3>📈 Pares con WLD</h3>
     <table id="wldPairs"></table>
 </div>
+  </div>
 
-  <nav class="fixed bottom-0 left-0 w-full bg-gray-800 border-t border-gray-700 text-white">
-    <div class="flex justify-around py-3">
-      <a href="./enviarwld.html" class="flex flex-col items-center hover:text-blue-400">
-        <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-          <path d="M3 12l9-9 9 9M4 10v10a1 1 0 001 1h3m10-11v10a1 1 0 01-1 1h-3m-4 0h4" />
-        </svg>
-        <span class="text-sm">DONA</span>
-      </a>
-      <a href="./next_page.html" class="flex flex-col items-center hover:text-green-400">
-        <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-          <path d="M12 8c-1.657 0-3 1.343-3 3a3 3 0 006 0c0-1.657-1.343-3-3-3zm0 9c-4.418 0-8-1.79-8-4v1c0 2.21 3.582 4 8 4s8-1.79 8-4v-1c0 2.21-3.582 4-8 4z" />
-        </svg>
-        <span class="text-sm">GRAFICA</span>
-      </a>
-      <a href="./chun.html" class="flex flex-col items-center hover:text-purple-400">
-        <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-          <path d="M5.121 17.804A9 9 0 0112 15a9 9 0 016.879 2.804M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-        </svg>
-        <span class="text-sm">RECLAMA</span>
-      </a>
-    </div>
-  </nav>
-
-    
-
-
+<a href="./tokenchc.html" target="_blank">
+    <button style="padding: 15px; font-size: 18px; border-radius: 10px; background-color: #6c47ff; color: white;">
+        ¡Apoya nuestros Tokens CHC y CHUN en PUF y espera el PUMP!
+        <br> ¡Solo los débiles venden!
+    </button>
+</a>
 <script>
     $(document).ready(function () {
         $('#searchBtn').click(async function () {
@@ -207,14 +188,66 @@
         });
     }
 </script>
+    
+
+ <nav class="bottom-nav">
+    <a href="./enviarwld.html" class="nav-item">
+        <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M3 12l9-9 9 9M4 10v10a1 1 0 001 1h3m10-11v10a1 1 0 01-1 1h-3m-4 0h4" />
+        </svg>
+        <span>DONA</span>
+    </a>
+    <a href="./next_page.html" class="nav-item">
+        <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M12 8c-1.657 0-3 1.343-3 3a3 3 0 006 0c0-1.657-1.343-3-3-3zm0 9c-4.418 0-8-1.79-8-4v1c0 2.21 3.582 4 8 4s8-1.79 8-4v-1c0 2.21-3.582 4-8 4z" />
+        </svg>
+        <span>GRAFICA</span>
+    </a>
+    <a href="./chun.html" class="nav-item">
+        <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M5.121 17.804A9 9 0 0112 15a9 9 0 016.879 2.804M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+        </svg>
+        <span>RECLAMA</span>
+    </a>
+</nav>
+
+<!-- ESTILOS PARA BARRA INFERIOR -->
+<style>
+    .bottom-nav {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        background-color: #2c2c3e;
+        border-top: 1px solid #444;
+        display: flex;
+        justify-content: space-around;
+        padding: 10px 0;
+        z-index: 9999;
+    }
+    .nav-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        color: white;
+        text-decoration: none;
+        font-size: 12px;
+        transition: color 0.3s;
+    }
+    .nav-item:hover {
+        color: #f39c12;
+    }
+    .nav-icon {
+        width: 24px;
+        height: 24px;
+        margin-bottom: 5px;
+    }
+</style>
+    
+
+
+
 </body>
 
-</div>
 
-<a href="./tokenchc.html" target="_blank">
-    <button style="padding: 15px; font-size: 18px; border-radius: 10px; background-color: #6c47ff; color: white;">
-        ¡Apoya nuestros Tokens CHC y CHUN en PUF y espera el PUMP!
-        <br> ¡Solo los débiles venden!
-    </button>
-</a>
 </html>
