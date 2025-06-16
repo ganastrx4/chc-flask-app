@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>MiniApp Swap Interno</title>
+</head>
+<body>
+  <h2>Swap dentro de World App</h2>
+
+  <label>Token a enviar (dirección):</label>
+  <input id="tokenIn" placeholder="0x..." />
+
+  <label>Cantidad a enviar:</label>
+  <input id="amountIn" placeholder="Cantidad (decimales base)" />
+
+  <label>Token a recibir:</label>
+  <input id="tokenOut" placeholder="0x..." />
+
+  <button onclick="openSwap()">Abrir Swap en World App</button>
+
+  <script type="module">
+    import { MiniKit } from '@worldcoin/minikit-js'
+
+    async function openSwap() {
+      const tokenIn = document.getElementById('tokenIn').value.trim()
+      const tokenOut = document.getElementById('tokenOut').value.trim()
+      const amount = document.getElementById('amountIn').value.trim()
+
+      if (!tokenIn || !tokenOut || !amount) {
+        return alert('Completa todos los datos')
+      }
+
+      try {
+        await MiniKit.commandsAsync.quickAction({
+          action: "uno",
+          tab: "swap",
+          fromToken: tokenIn,
+          amount,
+          toToken: tokenOut,
+          referrerAppId: "app_7686f9027d3e3c0b53d987a3caf1e111",
+          referrerDeeplinkPath: "/saldos_world_chain"
+        })
+      } catch (e) {
+        console.error(e)
+        alert('Error al abrir swap: ' + e.message)
+      }
+    }
+  </script>
+</body>
+</html>
