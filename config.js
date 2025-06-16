@@ -1,0 +1,1 @@
+const ALCHEMY_KEY = '39Stwe7kZcWw8bQj6T0a7UIOgU7fq9P5';
