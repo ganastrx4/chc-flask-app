@@ -35,87 +35,42 @@
 
   <!-- Config generado por GitHub Actions -->
   <script src="config.js"></script>
+<script>
+  const ALCHEMY_URL = `https://worldchain-mainnet.g.alchemy.com/v2/${ALCHEMY_KEY}`;
 
-  <script>
-    async function preguntarWallet() {
-      const wallet = prompt("Introduce tu dirección de wallet (0x...)");
-      if (!wallet || !wallet.startsWith("0x") || wallet.length !== 42) {
-        alert("⚠️ Dirección inválida");
-        return;
-      }
-
-      const resultadoDiv = document.getElementById("resultado");
-      resultadoDiv.innerHTML = "<p>⏳ Consultando saldos...</p>";
-
-      const balances = await getTokenBalances(wallet);
-      if (!balances || balances.length === 0) {
-        resultadoDiv.innerHTML = "<p>⚠️ No se encontraron tokens con saldo.</p>";
-        return;
-      }
-
-      let html = `<h3>📦 Saldos para <code>${wallet}</code>:</h3>`;
-      for (const token of balances) {
-        const { name, symbol, balance } = token;
-        html += `<div class="token">→ ${name} (${symbol}): ${balance.toFixed(4)}</div>`;
-      }
-
-      resultadoDiv.innerHTML = html;
+  async function preguntarWallet() {
+    const wallet = prompt("Introduce tu dirección de wallet (0x...)");
+    if (!wallet || !wallet.startsWith("0x") || wallet.length !== 42) {
+      alert("⚠️ Dirección inválida");
+      return;
     }
 
-    async function getTokenBalances(wallet) {
-      const url = `https://worldchain-mainnet.g.alchemy.com/v2/${ALCHEMY_KEY}`;
+    const resultadoDiv = document.getElementById("resultado");
+    resultadoDiv.innerHTML = "<p>⏳ Consultando saldos...</p>";
 
-      try {
-        const payload = {
-          jsonrpc: "2.0",
-          id: 1,
-          method: "alchemy_getTokenBalances",
-          params: [wallet]
-        };
-
-        const res = await fetch(url, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload)
-        });
-
-        const data = await res.json();
-        if (!data.result || !data.result.tokenBalances) return [];
-
-        const tokens = data.result.tokenBalances;
-        const resultados = [];
-
-        for (const token of tokens) {
-          const address = token.contractAddress;
-          const hexBalance = token.tokenBalance;
-
-          if (!hexBalance || hexBalance === "0x0") continue;
-
-          const balanceInt = parseInt(hexBalance, 16);
-          if (balanceInt === 0) continue;
-
-          const metadata = await getTokenMetadata(address, url);
-          const decimals = metadata.decimals || 18;
-          const name = metadata.name || "Desconocido";
-          const symbol = metadata.symbol || "???";
-          const balance = balanceInt / (10 ** decimals);
-
-          resultados.push({ name, symbol, balance });
-        }
-
-        return resultados;
-      } catch (err) {
-        console.error("❌ Error al consultar balances:", err);
-        return [];
-      }
+    const balances = await getTokenBalances(wallet);
+    if (!balances || balances.length === 0) {
+      resultadoDiv.innerHTML = "<p>⚠️ No se encontraron tokens con saldo.</p>";
+      return;
     }
 
-    async function getTokenMetadata(contractAddress, url) {
+    let html = `<h3>📦 Saldos para <code>${wallet}</code>:</h3>`;
+    for (const token of balances) {
+      const { name, symbol, balance } = token;
+      html += `<div class="token">→ ${name} (${symbol}): ${balance.toFixed(4)}</div>`;
+    }
+
+    resultadoDiv.innerHTML = html;
+  }
+
+  async function getTokenBalances(wallet) {
+    const url = ALCHEMY_URL;
+    try {
       const payload = {
         jsonrpc: "2.0",
         id: 1,
-        method: "alchemy_getTokenMetadata",
-        params: [contractAddress]
+        method: "alchemy_getTokenBalances",
+        params: [wallet]
       };
 
       const res = await fetch(url, {
@@ -125,8 +80,53 @@
       });
 
       const data = await res.json();
-      return data.result || {};
+      if (!data.result || !data.result.tokenBalances) return [];
+
+      const tokens = data.result.tokenBalances;
+      const resultados = [];
+
+      for (const token of tokens) {
+        const address = token.contractAddress;
+        const hexBalance = token.tokenBalance;
+        if (!hexBalance || hexBalance === "0x0") continue;
+
+        const balanceInt = parseInt(hexBalance, 16);
+        if (balanceInt === 0) continue;
+
+        const metadata = await getTokenMetadata(address, url);
+        const decimals = metadata.decimals || 18;
+        const name = metadata.name || "Desconocido";
+        const symbol = metadata.symbol || "???";
+        const balance = balanceInt / (10 ** decimals);
+
+        resultados.push({ name, symbol, balance });
+      }
+
+      return resultados;
+    } catch (err) {
+      console.error("❌ Error al consultar balances:", err);
+      return [];
     }
-  </script>
+  }
+
+  async function getTokenMetadata(contractAddress, url) {
+    const payload = {
+      jsonrpc: "2.0",
+      id: 1,
+      method: "alchemy_getTokenMetadata",
+      params: [contractAddress]
+    };
+
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await res.json();
+    return data.result || {};
+  }
+</script>
+
 </body>
 </html>
