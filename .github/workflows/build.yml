@@ -1,13 +1,20 @@
-name: Build Config
-on: [push]
+name: Build and Deploy
+on:
+  push:
+    branches:
+      - main
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Generar config.js
+
+      - name: Crear public/config.js
         run: |
+          mkdir -p public
           echo "const ALCHEMY_KEY = '${{ secrets.ALCHEMY_KEY }}';" > public/config.js
+
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
