@@ -264,24 +264,72 @@
     redireccionAleatoria();
     setInterval(realizarSorteo, 24 * 60 * 60 * 1000);
   </script>
+<div id="world-id-button"></div>
 
   <!-- World ID Kit -->
-  <script>
-    window.addEventListener('DOMContentLoaded', function () {
-      new IDKitWidget({
-        app_id: "app_7686f9027d3e3c0b53d987a3caf1e111",
-        action: "login",
-        signal: "wld-comparativa-login",
-        onSuccess: (response) => {
-          console.log("✅ Verificado:", response);
-          alert("✅ Verificación exitosa con World ID");
-        },
-        onError: (error) => {
-          console.error("❌ Error al verificar:", error);
-          alert("❌ Ocurrió un error con World ID");
-        },
-      }).mount("#world-id-button");
-    });
-  </script>
+ <!-- Verificación Híbrida con MiniKit o Backend -->
+<script src="https://static.worldcoin.org/miniapp-sdk/miniKit.umd.js"></script>
+<script>
+  window.addEventListener("DOMContentLoaded", async () => {
+    const miniDisponible = typeof MiniKit !== "undefined";
+    const userStatus = document.getElementById("userStatus");
+
+    // Si MiniKit existe (en World App)
+    if (miniDisponible) {
+      try {
+        const info = await MiniKit.commandsAsync.getUserInfo();
+        const wallet = info?.wallet?.address;
+        if (wallet) {
+          userWallet = wallet;
+          isAuthenticated = true;
+          userStatus.innerText = `Conectado: ${userWallet} ✅ (MiniKit)`;
+          console.log("✅ Verificado vía MiniKit", info);
+          return;
+        }
+      } catch (err) {
+        console.warn("⚠️ MiniKit falló o no está disponible:", err.message);
+      }
+    }
+
+    // Si no hay MiniKit, verifica si hay código de autenticación por backend
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get("code");
+
+    if (code) {
+      userStatus.innerText = "⌛ Verificando identidad con World ID...";
+      try {
+        const res = await fetch(`https://worldid-auth.onrender.com/callback?code=${code}`);
+        const data = await res.json();
+        if (data.success) {
+          userWallet = data.wallet_address;
+          isAuthenticated = true;
+          userStatus.innerText = `Conectado: ${userWallet} ✅ (Backend)`;
+          console.log("✅ Verificado vía Backend", data);
+        } else {
+          userStatus.innerText = `❌ Error al verificar: ${data.error || "desconocido"}`;
+        }
+      } catch (err) {
+        userStatus.innerText = `❌ Error inesperado: ${err.message}`;
+      }
+    } else {
+      // Si no hay código ni MiniKit, botón para redirigir al login World ID
+      const btn = document.createElement("button");
+      btn.innerText = "Verificar con World ID";
+      btn.style = "background-color:#2196f3;color:white;padding:12px 20px;border-radius:8px;margin-top:15px;";
+      btn.onclick = () => {
+        const clientId = "app_7686f9027d3e3c0b53d987a3caf1e111";
+        const redirectUri = window.location.href.split('?')[0]; // limpia parámetros
+        const state = Math.random().toString(36).substring(2);
+        const nonce = Math.random().toString(36).substring(2);
+        const scope = "openid wallet";
+
+        const url = `https://id.worldcoin.org/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${encodeURIComponent(scope)}&state=${state}&nonce=${nonce}`;
+        window.location.href = url;
+      };
+      document.getElementById("world-id-button").appendChild(btn);
+    }
+  });
+</script>
+
 </body>
 </html>
