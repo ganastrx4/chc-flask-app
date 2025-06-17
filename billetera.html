@@ -2,264 +2,28 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Publicidad con World ID</title>
-  <style>
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(to right, #f2f4f7, #e6ecf2);
-      margin: 0;
-      padding: 20px;
-      color: #222;
-    }
-
-    h1 {
-      text-align: center;
-      color: #4a4a4a;
-      margin-bottom: 30px;
-    }
-
-    button {
-      background-color: #4caf50;
-      color: white;
-      padding: 12px 24px;
-      margin: 10px 0;
-      border: none;
-      border-radius: 8px;
-      font-size: 16px;
-      cursor: pointer;
-      transition: background 0.3s ease;
-    }
-
-    button:hover {
-      background-color: #388e3c;
-    }
-
-    #userStatus {
-      font-weight: bold;
-      color: #333;
-      margin-bottom: 20px;
-      text-align: center;
-    }
-
-    input[type="text"] {
-      width: 100%;
-      padding: 12px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      font-size: 16px;
-      margin-bottom: 10px;
-      box-sizing: border-box;
-    }
-
-    iframe {
-      width: 100%;
-      height: 300px;
-      border: 2px solid #ccc;
-      border-radius: 8px;
-      margin-top: 20px;
-    }
-
-    .container {
-      max-width: 800px;
-      margin: 0 auto;
-      background-color: #ffffffdd;
-      padding: 30px;
-      border-radius: 15px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    }
-
-    .nav-links {
-      margin-top: 30px;
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-around;
-      gap: 10px;
-    }
-
-    .nav-links a {
-      background-color: #6c47ff;
-      color: white;
-      padding: 12px 16px;
-      border-radius: 8px;
-      text-decoration: none;
-      font-weight: bold;
-      transition: background 0.3s ease;
-    }
-
-    .nav-links a:hover {
-      background-color: #5433cc;
-    }
-
-    .promo-button {
-      display: block;
-      margin: 30px auto 10px;
-      padding: 15px 25px;
-      font-size: 18px;
-      border-radius: 12px;
-      background-color: #ff3366;
-      color: white;
-      border: none;
-      text-align: center;
-      cursor: pointer;
-      transition: background 0.3s ease;
-    }
-
-    .promo-button:hover {
-      background-color: #e6004c;
-    }
-  </style>
+  <title>Login World ID Básico</title>
 </head>
 <body>
-  <div class="container">
-    <h1>Publicidad con World ID</h1>
+  <h1>Login con World ID</h1>
+  <button id="loginBtn">Login World ID</button>
 
-    <p id="userStatus">🔒 No autenticado</p>
-
-    <div id="world-id-button" style="text-align: center;"></div>
-
-    <input type="text" id="publicidad" placeholder="Introduce el enlace de tu publicidad" />
-    <button onclick="pagarYGuardarPublicidad()">Pagar y Guardar</button>
-
-    <iframe id="iframeRedireccion" src="" frameborder="0"></iframe>
-
-    <div class="nav-links">
-      <a href="./buscador.html">TOP CRIPTO</a>
-      <a href="./next_page.html">Gráfica en Vivo</a>
-      <a href="./dados.html">DADOS</a>
-      <a href="./wdd.html">MULTIPLICA TU WDD</a>
-      <a href="./next_page.html">Estadísticas Cripto</a>
-      <a href="./ganarchun.html">GANA CHC Y CHUN</a>
-      <a href="./enviarwld.html">DONACIÓN ❤️💛❤️</a>
-    </div>
-
-    <a href="./tokenchc.html" target="_blank">
-      <button class="promo-button">
-        ¡Apoya nuestros Tokens CHC y CHUN en PUF y espera el PUMP!<br />
-        ¡Solo los débiles venden!
-      </button>
-    </a>
-  </div>
-
-  <!-- MiniKit SDK -->
-  <script src="https://static.worldcoin.org/miniapp-sdk/miniKit.umd.js"></script>
+  <div id="info"></div>
 
   <script>
-    let userWallet = null;
-    let isAuthenticated = false;
-    let fondosAcumulados = 0;
-    let urls = [];
+    const clientId = "app_7686f9027d3e3c0b53d987a3caf1e111";
+    const redirectUri = "https://ganastrx4.github.io/chc-flask-app/dados.html";  // <- Cambia esta URL a tu backend
 
-    const contratoDestino = '0xdc178d65c502f9589bb1a35af08b5723f85ec168';
-    const montoPago = '500000000000000000'; // 0.5 WLD
+    document.getElementById('loginBtn').onclick = () => {
+      const url = `https://id.worldcoin.org/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=openid`;
+      window.location.href = url;
+    };
 
-    function guardarURLLocal(publicidad) {
-      urls.push(publicidad);
-      localStorage.setItem('publicidades', JSON.stringify(urls));
+    // Cuando el backend te redirija, muestra el código en pantalla (solo si haces redirect aquí)
+    const params = new URLSearchParams(window.location.search);
+    if(params.has('code')) {
+      document.getElementById('info').textContent = 'Código de autorización: ' + params.get('code');
     }
-
-    function cargarURLs() {
-      const datos = localStorage.getItem('publicidades');
-      if (datos) urls = JSON.parse(datos);
-    }
-
-    async function pagarYGuardarPublicidad() {
-      if (!isAuthenticated || !userWallet) {
-        alert('Debes verificarte con World ID primero.');
-        return;
-      }
-
-      const publicidad = document.getElementById('publicidad').value;
-      if (!publicidad) {
-        alert('Introduce un enlace válido para la publicidad.');
-        return;
-      }
-
-      try {
-        const tx = await window.ethereum.request({
-          method: 'eth_sendTransaction',
-          params: [{ from: userWallet, to: contratoDestino, value: montoPago }]
-        });
-
-        alert(`✅ Pago realizado: ${tx}`);
-        guardarURLLocal(publicidad);
-        actualizarFondos();
-        alert('Publicidad guardada exitosamente.');
-      } catch (error) {
-        console.error('Error en la transacción:', error);
-        alert('❌ Error al realizar el pago.');
-      }
-    }
-
-    function redireccionAleatoria() {
-      if (urls.length === 0) return;
-      const indice = Math.floor(Math.random() * urls.length);
-      const url = urls[indice];
-      document.getElementById('iframeRedireccion').src = url;
-      setTimeout(redireccionAleatoria, 30000);
-    }
-
-    function actualizarFondos() {
-      fondosAcumulados += parseInt(montoPago);
-    }
-
-    window.addEventListener("DOMContentLoaded", async () => {
-      cargarURLs();
-      redireccionAleatoria();
-
-      const miniDisponible = typeof MiniKit !== "undefined";
-      const userStatus = document.getElementById("userStatus");
-
-      if (miniDisponible) {
-        try {
-          const info = await MiniKit.commandsAsync.getUserInfo();
-          const wallet = info?.wallet?.address;
-          if (wallet) {
-            userWallet = wallet;
-            isAuthenticated = true;
-            userStatus.innerText = `✅ Conectado: ${userWallet} (MiniKit)`;
-            return;
-          }
-        } catch (err) {
-          console.warn("MiniKit falló:", err.message);
-        }
-      }
-
-      const params = new URLSearchParams(window.location.search);
-      const code = params.get("code");
-
-      if (code) {
-        userStatus.innerText = "⌛ Verificando identidad...";
-        try {
-          const res = await fetch(`https://ganastrx4.github.io/chc-flask-app/dados.html?code=${code}`);
-          const data = await res.json();
-          if (data.success) {
-            userWallet = data.wallet_address;
-            isAuthenticated = true;
-            userStatus.innerText = `✅ Conectado: ${userWallet} (Backend)`;
-          } else {
-            userStatus.innerText = `❌ Error: ${data.error || "desconocido"}`;
-          }
-        } catch (err) {
-          userStatus.innerText = `❌ Error inesperado: ${err.message}`;
-        }
-      } else {
-        const btn = document.createElement("button");
-        btn.innerText = "Verificar con World ID";
-        btn.style = "background-color:#2196f3;color:white;padding:12px 20px;border-radius:8px;margin-top:15px;";
-        btn.onclick = () => {
-          const clientId = "app_7686f9027d3e3c0b53d987a3caf1e111";
-          const redirectUri = window.location.href.split('?')[0];
-          const state = Math.random().toString(36).substring(2);
-          const nonce = Math.random().toString(36).substring(2);
-          const scope = "openid wallet";
-
-          const url = `https://id.worldcoin.org/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${encodeURIComponent(scope)}&state=${state}&nonce=${nonce}`;
-          window.location.href = url;
-        };
-        document.getElementById("world-id-button").appendChild(btn);
-      }
-    });
   </script>
 </body>
 </html>
