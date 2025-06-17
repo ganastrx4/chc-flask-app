@@ -19,7 +19,7 @@
       margin-bottom: 30px;
     }
 
-    #authButton, button {
+    button {
       background-color: #4caf50;
       color: white;
       padding: 12px 24px;
@@ -31,7 +31,7 @@
       transition: background 0.3s ease;
     }
 
-    #authButton:hover, button:hover {
+    button:hover {
       background-color: #388e3c;
     }
 
@@ -91,11 +91,6 @@
       background-color: #5433cc;
     }
 
-    #world-id-button {
-      margin: 20px auto;
-      text-align: center;
-    }
-
     .promo-button {
       display: block;
       margin: 30px auto 10px;
@@ -116,28 +111,18 @@
   </style>
 </head>
 <body>
-
   <div class="container">
     <h1>Publicidad con World ID</h1>
 
-    <!-- Autenticación -->
-    <div style="text-align: center;">
-      <button id="authButton">Autenticarse con World ID</button>
-      <p id="userStatus">No autenticado</p>
-    </div>
+    <p id="userStatus">🔒 No autenticado</p>
 
-    <!-- Publicidad -->
+    <div id="world-id-button" style="text-align: center;"></div>
+
     <input type="text" id="publicidad" placeholder="Introduce el enlace de tu publicidad" />
     <button onclick="pagarYGuardarPublicidad()">Pagar y Guardar</button>
 
-    <!-- Visualización -->
     <iframe id="iframeRedireccion" src="" frameborder="0"></iframe>
 
-    <!-- World ID -->
-    <h2 style="text-align: center;">Verifica tu identidad con World ID</h2>
-    <div id="world-id-button"></div>
-
-    <!-- Navegación -->
     <div class="nav-links">
       <a href="./buscador.html">TOP CRIPTO</a>
       <a href="./next_page.html">Gráfica en Vivo</a>
@@ -148,7 +133,6 @@
       <a href="./enviarwld.html">DONACIÓN ❤️💛❤️</a>
     </div>
 
-    <!-- Token Button -->
     <a href="./tokenchc.html" target="_blank">
       <button class="promo-button">
         ¡Apoya nuestros Tokens CHC y CHUN en PUF y espera el PUMP!<br />
@@ -157,7 +141,9 @@
     </a>
   </div>
 
-  <!-- Lógica -->
+  <!-- MiniKit SDK -->
+  <script src="https://static.worldcoin.org/miniapp-sdk/miniKit.umd.js"></script>
+
   <script>
     let userWallet = null;
     let isAuthenticated = false;
@@ -167,26 +153,19 @@
     const contratoDestino = '0xdc178d65c502f9589bb1a35af08b5723f85ec168';
     const montoPago = '500000000000000000'; // 0.5 WLD
 
-    async function authenticateWithWorldID() {
-      try {
-        const response = await window.ethereum.request({ method: 'eth_requestAccounts' });
-        if (response.length > 0) {
-          userWallet = response[0];
-          isAuthenticated = true;
-          document.getElementById('userStatus').innerText = `Conectado: ${userWallet}`;
-          alert('Autenticación exitosa con World ID');
-        }
-      } catch (error) {
-        console.error('Error en autenticación:', error);
-        alert('Error al autenticar con World ID');
-      }
+    function guardarURLLocal(publicidad) {
+      urls.push(publicidad);
+      localStorage.setItem('publicidades', JSON.stringify(urls));
     }
 
-    document.getElementById('authButton').addEventListener('click', authenticateWithWorldID);
+    function cargarURLs() {
+      const datos = localStorage.getItem('publicidades');
+      if (datos) urls = JSON.parse(datos);
+    }
 
     async function pagarYGuardarPublicidad() {
       if (!isAuthenticated || !userWallet) {
-        alert('Debes autenticarte primero con World ID.');
+        alert('Debes verificarte con World ID primero.');
         return;
       }
 
@@ -197,140 +176,90 @@
       }
 
       try {
-        const transaction = await window.ethereum.request({
+        const tx = await window.ethereum.request({
           method: 'eth_sendTransaction',
           params: [{ from: userWallet, to: contratoDestino, value: montoPago }]
         });
 
-        alert(`Pago confirmado: ${transaction}`);
-        urls.push(publicidad);
+        alert(`✅ Pago realizado: ${tx}`);
+        guardarURLLocal(publicidad);
         actualizarFondos();
-        alert('Publicidad guardada correctamente.');
-        enviarMensajeTelegram(`Nueva publicidad añadida: ${publicidad}`);
+        alert('Publicidad guardada exitosamente.');
       } catch (error) {
         console.error('Error en la transacción:', error);
-        alert('Error al procesar el pago.');
+        alert('❌ Error al realizar el pago.');
       }
     }
 
     function redireccionAleatoria() {
       if (urls.length === 0) return;
-      const indiceAleatorio = Math.floor(Math.random() * urls.length);
-      const urlRedireccion = urls[indiceAleatorio];
-      document.getElementById('iframeRedireccion').src = urlRedireccion;
+      const indice = Math.floor(Math.random() * urls.length);
+      const url = urls[indice];
+      document.getElementById('iframeRedireccion').src = url;
       setTimeout(redireccionAleatoria, 30000);
-    }
-
-    async function realizarSorteo() {
-      if (fondosAcumulados <= 0 || urls.length === 0) return;
-
-      const ganancia = fondosAcumulados * 0.01;
-      const ganador = urls[Math.floor(Math.random() * urls.length)];
-
-      try {
-        const transaction = await window.ethereum.request({
-          method: 'eth_sendTransaction',
-          params: [{ from: userWallet, to: contratoDestino, value: ganancia.toString() }]
-        });
-
-        alert(`🎉 Sorteo realizado: ${ganancia / 1e18} WLD al ganador: ${ganador}`);
-        enviarMensajeTelegram(`🎉 Sorteo: ${ganancia / 1e18} WLD enviados a ${ganador}`);
-      } catch (error) {
-        console.error('Error en el sorteo:', error);
-      }
     }
 
     function actualizarFondos() {
       fondosAcumulados += parseInt(montoPago);
     }
 
-    async function enviarMensajeTelegram(mensaje) {
-      const telegramToken = '8010490851:AAGXRC8_OlcfCeL53VgJ_ALqmbRuT691Wlk';
-      const chatId = '7613604212';
-      const url = `https://api.telegram.org/bot${telegramToken}/sendMessage`;
+    window.addEventListener("DOMContentLoaded", async () => {
+      cargarURLs();
+      redireccionAleatoria();
 
-      try {
-        await fetch(url, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ chat_id: chatId, text: mensaje })
-        });
-      } catch (error) {
-        console.error('Error enviando mensaje a Telegram:', error);
-      }
-    }
+      const miniDisponible = typeof MiniKit !== "undefined";
+      const userStatus = document.getElementById("userStatus");
 
-    // Iniciar ciclo de redirección
-    redireccionAleatoria();
-    setInterval(realizarSorteo, 24 * 60 * 60 * 1000);
-  </script>
-
-
-  <!-- World ID Kit -->
- <!-- Verificación Híbrida con MiniKit o Backend -->
-<script src="https://static.worldcoin.org/miniapp-sdk/miniKit.umd.js"></script>
-<script>
-  window.addEventListener("DOMContentLoaded", async () => {
-    const miniDisponible = typeof MiniKit !== "undefined";
-    const userStatus = document.getElementById("userStatus");
-
-    // Si MiniKit existe (en World App)
-    if (miniDisponible) {
-      try {
-        const info = await MiniKit.commandsAsync.getUserInfo();
-        const wallet = info?.wallet?.address;
-        if (wallet) {
-          userWallet = wallet;
-          isAuthenticated = true;
-          userStatus.innerText = `Conectado: ${userWallet} ✅ (MiniKit)`;
-          console.log("✅ Verificado vía MiniKit", info);
-          return;
+      if (miniDisponible) {
+        try {
+          const info = await MiniKit.commandsAsync.getUserInfo();
+          const wallet = info?.wallet?.address;
+          if (wallet) {
+            userWallet = wallet;
+            isAuthenticated = true;
+            userStatus.innerText = `✅ Conectado: ${userWallet} (MiniKit)`;
+            return;
+          }
+        } catch (err) {
+          console.warn("MiniKit falló:", err.message);
         }
-      } catch (err) {
-        console.warn("⚠️ MiniKit falló o no está disponible:", err.message);
       }
-    }
 
-    // Si no hay MiniKit, verifica si hay código de autenticación por backend
-    const params = new URLSearchParams(window.location.search);
-    const code = params.get("code");
+      const params = new URLSearchParams(window.location.search);
+      const code = params.get("code");
 
-    if (code) {
-      userStatus.innerText = "⌛ Verificando identidad con World ID...";
-      try {
-        const res = await fetch(`https://worldid-auth.onrender.com/callback?code=${code}`);
-const data = await res.json();
-if (data.success) {
-  userWallet = data.wallet_address;
-  isAuthenticated = true;
-  userStatus.innerText = `Conectado: ${userWallet} ✅ (Backend)`;
-  console.log("✅ Verificado vía Backend", data);
-} else {
-  userStatus.innerText = `❌ Error al verificar: ${data.error || "desconocido"}`;
-}
+      if (code) {
+        userStatus.innerText = "⌛ Verificando identidad...";
+        try {
+          const res = await fetch(`https://worldid-auth.onrender.com/callback?code=${code}`);
+          const data = await res.json();
+          if (data.success) {
+            userWallet = data.wallet_address;
+            isAuthenticated = true;
+            userStatus.innerText = `✅ Conectado: ${userWallet} (Backend)`;
+          } else {
+            userStatus.innerText = `❌ Error: ${data.error || "desconocido"}`;
+          }
+        } catch (err) {
+          userStatus.innerText = `❌ Error inesperado: ${err.message}`;
+        }
+      } else {
+        const btn = document.createElement("button");
+        btn.innerText = "Verificar con World ID";
+        btn.style = "background-color:#2196f3;color:white;padding:12px 20px;border-radius:8px;margin-top:15px;";
+        btn.onclick = () => {
+          const clientId = "app_7686f9027d3e3c0b53d987a3caf1e111";
+          const redirectUri = window.location.href.split('?')[0];
+          const state = Math.random().toString(36).substring(2);
+          const nonce = Math.random().toString(36).substring(2);
+          const scope = "openid wallet";
 
-      } catch (err) {
-        userStatus.innerText = `❌ Error inesperado: ${err.message}`;
+          const url = `https://id.worldcoin.org/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${encodeURIComponent(scope)}&state=${state}&nonce=${nonce}`;
+          window.location.href = url;
+        };
+        document.getElementById("world-id-button").appendChild(btn);
       }
-    } else {
-      // Si no hay código ni MiniKit, botón para redirigir al login World ID
-      const btn = document.createElement("button");
-      btn.innerText = "Verificar con World ID";
-      btn.style = "background-color:#2196f3;color:white;padding:12px 20px;border-radius:8px;margin-top:15px;";
-      btn.onclick = () => {
-        const clientId = "app_7686f9027d3e3c0b53d987a3caf1e111";
-        const redirectUri = window.location.href.split('?')[0]; // limpia parámetros
-        const state = Math.random().toString(36).substring(2);
-        const nonce = Math.random().toString(36).substring(2);
-        const scope = "openid wallet";
-
-        const url = `https://id.worldcoin.org/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${encodeURIComponent(scope)}&state=${state}&nonce=${nonce}`;
-        window.location.href = url;
-      };
-      document.getElementById("world-id-button").appendChild(btn);
-    }
-  });
-</script>
-<div id="world-id-button"></div>
+    });
+  </script>
 </body>
 </html>
