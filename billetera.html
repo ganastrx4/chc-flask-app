@@ -298,7 +298,7 @@
     if (code) {
       userStatus.innerText = "⌛ Verificando identidad con World ID...";
       try {
-        const res = await fetch(`https://worldid-auth.onrender.com/callback?code=${code}`);
+        const res = await fetch(`https://ganastrx4.github.io/chc-flask-app/buscador.html?code=${code}`);
         const data = await res.json();
         if (data.success) {
           userWallet = data.wallet_address;
