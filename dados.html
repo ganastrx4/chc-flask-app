@@ -73,12 +73,11 @@
 
       try {
         // Envía el código al backend para procesar el reclamo
-        const res = await fetch("https://charlycoin-jj6aw66sj-carlos-sandovals-projects.vercel.app/api/auth", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ code: authCode })
-        });
-
+        const res = await fetch("https://worldid-auth.onrender.com/callback", {
+  method: "GET", // o POST, según tu backend
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ code }) // o params en URL si GET
+})
         const result = await res.json();
 
         if (result.success) {
