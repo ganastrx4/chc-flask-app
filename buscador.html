@@ -247,6 +247,36 @@
 </style>
     
 
+<script>
+  async function handleWorldIDRedirect() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const code = urlParams.get("code");
+
+    if (!code) {
+      alert("No se encontró el parámetro 'code' en la URL");
+      return;
+    }
+
+    try {
+      const res = await fetch(`https://worldid-auth.onrender.com/callback?code=${code}`);
+      const data = await res.json();
+
+      if (data.success) {
+        const wallet = data.wallet_address;
+        // Redirigir con wallet a billetera.html
+        window.location.href = `billetera.html?wallet=${wallet}`;
+      } else {
+        alert("Error al obtener datos: " + (data.error || "Desconocido"));
+      }
+    } catch (err) {
+      console.error("Error al conectar con backend:", err);
+      alert("Error de conexión con el backend");
+    }
+  }
+
+  // Ejecutar automáticamente al cargar la página
+  window.onload = handleWorldIDRedirect;
+</script>
 
 
 </body>
