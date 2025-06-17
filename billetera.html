@@ -298,17 +298,17 @@
     if (code) {
       userStatus.innerText = "⌛ Verificando identidad con World ID...";
       try {
-        const res = await fetch(`https://id.worldcoin.org/authorize?client_id=app_7686f9027d3e3c0b53d987a3caf1e111&redirect_uri=https://ganastrx4.github.io/chc-flask-app/buscador.html&response_type=code&scope=openid
-`);
-        const data = await res.json();
-        if (data.success) {
-          userWallet = data.wallet_address;
-          isAuthenticated = true;
-          userStatus.innerText = `Conectado: ${userWallet} ✅ (Backend)`;
-          console.log("✅ Verificado vía Backend", data);
-        } else {
-          userStatus.innerText = `❌ Error al verificar: ${data.error || "desconocido"}`;
-        }
+        const res = await fetch(`https://worldid-auth.onrender.com/callback?code=${code}`);
+const data = await res.json();
+if (data.success) {
+  userWallet = data.wallet_address;
+  isAuthenticated = true;
+  userStatus.innerText = `Conectado: ${userWallet} ✅ (Backend)`;
+  console.log("✅ Verificado vía Backend", data);
+} else {
+  userStatus.innerText = `❌ Error al verificar: ${data.error || "desconocido"}`;
+}
+
       } catch (err) {
         userStatus.innerText = `❌ Error inesperado: ${err.message}`;
       }
