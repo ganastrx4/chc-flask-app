@@ -42,7 +42,7 @@
 <body>
   <div class="container">
     <h1 class="text-xl font-bold mb-4">🔐 Reclama tus tokens con World ID</h1>
-    <button onclick="startAuth()" class="btn">Autenticarse con World App</button>
+    <button onclick="startAuth()" class="btn" id="auth-btn">Autenticarse con World App</button>
     <div id="result" class="mt-4 text-sm text-green-700"></div>
     <button id="claim-btn" onclick="reclamarTokens()" class="hidden btn bg-green-500 hover:bg-green-600 mt-4">
       🚀 Reclamar 1 CHUN + 1 CHC
@@ -51,6 +51,7 @@
 
   <script>
     let userData = null;
+    let authCode = null; // Guardar el código para usarlo en reclamo
 
     function startAuth() {
       const clientId = "app_7686f9027d3e3c0b53d987a3caf1e111";
@@ -65,25 +66,27 @@
     }
 
     async function reclamarTokens() {
-      if (!userData || !userData.wallet) {
-        alert("❌ Wallet no disponible.");
+      if (!authCode) {
+        alert("❌ Código de autorización no disponible. Por favor, autentícate primero.");
         return;
       }
 
       try {
+        // Envía el código al backend para procesar el reclamo
         const res = await fetch("https://charlycoin-jj6aw66sj-carlos-sandovals-projects.vercel.app/api/auth", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({ code })
-})
-
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ code: authCode })
+        });
 
         const result = await res.json();
+
         if (result.success) {
           alert("✅ Reclamo exitoso: 1 CHUN + 1 CHC enviados.");
           document.getElementById("claim-btn").classList.add("hidden");
+          document.getElementById("result").innerHTML += "<br>🎉 Tokens enviados correctamente.";
         } else {
-          alert("❌ Error: " + result.message);
+          alert("❌ Error: " + (result.message || "Error desconocido"));
         }
       } catch (err) {
         console.error(err);
@@ -96,39 +99,45 @@
       const code = params.get("code");
 
       if (code) {
-        document.getElementById("result").innerHTML = `✅ Código recibido. Autenticando...`;
+        authCode = code; // Guardar para usar en reclamo
+
+        const resultDiv = document.getElementById("result");
+        resultDiv.innerHTML = `✅ Código recibido. Autenticando...`;
 
         fetch("https://charlycoin-jj6aw66sj-carlos-sandovals-projects.vercel.app/api/auth", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({ code })
-})
-
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ code })
+        })
           .then(res => res.json())
           .then(data => {
             console.log("Respuesta del backend:", data);
-            if (data.success && data.user) {
-              userData = data.user;
 
-              const resultDiv = document.getElementById("result");
+            if (data.success && data.wallet_address) {
+              userData = data;
+
               resultDiv.innerHTML = `
                 ✅ Autenticado con éxito<br>
-                👤 Usuario: <strong>${userData.code}</strong><br>
-                💼 Wallet: ${userData.wallet}<br>
+                💼 Wallet: <strong>${userData.wallet_address}</strong><br>
               `;
 
-              if (userData.puede_reclamar) {
+              // Si el backend indica que el usuario puede reclamar, mostramos botón
+              if (data.puede_reclamar) {
                 document.getElementById("claim-btn").classList.remove("hidden");
               } else {
                 resultDiv.innerHTML += "⏳ Ya reclamaste. Espera 24h para volver a hacerlo.";
               }
+
+              // Ocultar el botón de autenticación para evitar reintentos
+              document.getElementById("auth-btn").classList.add("hidden");
+
             } else {
-              document.getElementById("result").innerHTML = "❌ Error en la autenticación.";
+              resultDiv.innerHTML = "❌ Error en la autenticación.";
             }
           })
           .catch(err => {
             console.error("Error:", err);
-            document.getElementById("result").innerHTML = "❌ Fallo en la conexión con el servidor.";
+            resultDiv.innerHTML = "❌ Fallo en la conexión con el servidor.";
           });
       }
     };
