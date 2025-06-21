@@ -6,7 +6,8 @@
     <title>Comprar CHCBTC (BSC)</title>
 
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
-    <script src="https://unpkg.com/@web3modal/standalone@3.6.0/dist/web3modal-standalone.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/web3modal@1.9.10/dist/index.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@walletconnect/web3-provider@1.8.0/dist/umd/index.min.js"></script>
 
     <style>
         body {
@@ -115,7 +116,7 @@
 <body>
 
     <div class="container">
-        <h2>🪙 Comprar <b>CHCBTC</b> directamente desde el contrato</h2>
+        <h2>🪙 Comprar <b>CHCBTC</b> (Binance Smart Chain)</h2>
 
         <button onclick="connectWallet()">🔗 Conectar Wallet</button>
         <p id="account">No conectado</p>
@@ -132,149 +133,171 @@
         <hr>
         <h3>🔗 Enlaces útiles:</h3>
         <ul>
-            <li><a href="https://bscscan.com/address/0x63F547B3749e022B28a5a506dfD3ECEb454f1726" target="_blank">Ver contrato en BscScan</a></li>
-            <li><a href="https://www.geckoterminal.com/bsc/pools/0x55abc3f532e31cae7f4fde3c78d906798800f785" target="_blank">Ver pool en GeckoTerminal</a></li>
+            <li><a href="https://bscscan.com/address/0x63F547B3749e022B28a5a506dfD3ECEb454f1726" target="_blank">Contrato en BscScan</a></li>
+            <li><a href="https://www.geckoterminal.com/bsc/pools/0x55abc3f532e31cae7f4fde3c78d906798800f785" target="_blank">Pool en GeckoTerminal</a></li>
         </ul>
     </div>
 
     <script>
-        // Constantes del contrato
         const CONTRACT_ADDRESS = "0x63F547B3749e022B28a5a506dfD3ECEb454f1726";
-
         const ABI = [
             "function buyTokens() payable",
             "function pricePerWLD() view returns (uint256)",
-            // Aunque las siguientes funciones están en tu ABI, no se usan en tu HTML,
-            // pero las mantengo por si son relevantes para el contrato.
-            "function balanceOf(address) view returns (uint256)",
-            "function setPrice(uint256) external",
-            "function transfer(address, uint256) returns (bool)"
+            // Asegúrate de incluir cualquier otra función que tu contrato use, como balanceOf, setPrice, transfer, etc.,
+            // aunque no estén directamente en el flujo de compra/mostrar precio.
+            // Por ejemplo, si usas balanceOf para mostrar el balance del usuario:
+            "function balanceOf(address account) view returns (uint256)",
+            // "function setPrice(uint256) external",
+            // "function transfer(address, uint256) returns (bool)"
         ];
 
-        // Variables globales
-        let provider, signer, contract;
-        let modal; // Variable para Web3Modal
+        let provider, signer, contract, web3ModalInstance; // Renombrado de 'web3Modal' a 'web3ModalInstance' para claridad.
+        let connectedWalletProvider; // Para guardar la instancia del proveedor de la wallet
 
-        // Configuración de WalletConnect y Web3Modal
-        const projectId = "89c0bea32a0d933c45f3b1083f21b293"; // ¡IMPORTANTE: Usa tu propio projectId de WalletConnect!
-                                                              // Obtén uno en cloud.walletconnect.com
-
-        const chains = [{
-            chainId: 56, // ID de la red BSC Mainnet
-            name: "BNB Chain",
-            currency: "BNB",
-            rpcUrl: "https://bsc-dataseed.binance.org/",
-            explorerUrl: "https://bscscan.com"
-        }];
-
-        const metadata = {
-            name: "CHCBTC WebApp",
-            description: "Compra directa de CHCBTC desde el contrato",
-            url: "https://ganastrx4.github.io", // Asegúrate de que esta URL sea la de tu sitio real
-            icons: ["https://avatars.githubusercontent.com/u/37784886?s=200&v=4"]
+        // Opciones para múltiples billeteras
+        const providerOptions = {
+            // Metamask (u otros proveedores inyectados) se detectan automáticamente
+            // Si quieres un control explícito sobre MetaMask, puedes añadirlo así:
+            // injected: {
+            //     display: {
+            //         name: "Injected",
+            //         description: "Connect with the browser injected wallet (e.g. MetaMask)"
+            //     },
+            //     package: null // No se requiere un paquete para proveedores inyectados
+            // },
+            walletconnect: {
+                package: WalletConnectProvider.default, // WalletConnect v1
+                options: {
+                    rpc: {
+                        56: "https://bsc-dataseed.binance.org/" // RPC para BNB Smart Chain
+                    },
+                    network: "binance", // Puede ser "binance" para BNB Smart Chain
+                    // Si usas un Project ID para WalletConnect v2 (aunque estamos en V1), podría ir aquí.
+                    // projectId: "TU_PROJECT_ID_DE_WALLETCONNECT" // Si tienes uno y quieres usarlo
+                }
+            },
+            // Soporte para Binance Chain Wallet (extensión de navegador)
+            binancechainwallet: {
+                package: true // Indica que Web3Modal debe buscar el objeto window.BinanceChain
+            }
+            // Puedes añadir más wallets aquí si es necesario (ej. Coinbase Wallet, Torus, etc.)
+            // Consulta la documentación de Web3Modal V1 para otras opciones:
+            // https://github.com/Web3Modal/web3modal#provider-options
         };
 
-        /**
-         * Inicializa Web3Modal para la conexión de la wallet.
-         * Se ejecuta cuando el DOM está completamente cargado.
-         */
-        async function initializeWeb3Modal() {
+        // Función para inicializar Web3Modal cuando la página carga
+        window.addEventListener('load', async () => {
             try {
-                if (window.web3modal && typeof window.web3modal.createWeb3Modal === 'function') {
-                    modal = window.web3modal.createWeb3Modal({
-                        projectId,
-                        chains,
-                        metadata
-                    });
-                    console.log("✅ Web3Modal inicializado correctamente.");
-                    document.getElementById("status").innerText = "Listo para conectar tu wallet.";
-                } else {
-                    console.error("❌ window.web3modal no está disponible o no tiene createWeb3Modal.");
-                    document.getElementById("status").innerText = "❌ Error: Las librerías de WalletConnect/Web3Modal no se cargaron correctamente. Recarga la página.";
+                web3ModalInstance = new Web3Modal.default({
+                    cacheProvider: true, // Si quieres que la wallet permanezca conectada al recargar
+                    providerOptions, // Opciones de proveedores configuradas arriba
+                    disableInjectedProvider: false, // Asegura que MetaMask (u otros inyectados) sea una opción
+                    theme: "dark" // Puedes elegir "light", "dark", o "native"
+                });
+                document.getElementById("status").innerText = "Listo para conectar tu wallet.";
+                console.log("✅ Web3Modal V1/V2 inicializado correctamente.");
+
+                // Si hay un proveedor cacheado, intenta conectar automáticamente
+                if (web3ModalInstance.cachedProvider) {
+                    await connectWallet();
                 }
+
             } catch (error) {
                 console.error("❌ Error al inicializar Web3Modal:", error);
-                document.getElementById("status").innerText = "❌ Error crítico: No se pudo inicializar la conexión con la wallet. Consulta la consola para más detalles.";
+                document.getElementById("status").innerText = "❌ Error crítico: No se pudo inicializar la conexión con la wallet. Consulta la consola.";
             }
-        }
+        });
 
-        /**
-         * Conecta la wallet del usuario usando Web3Modal (funciona para escritorio y móvil).
-         * Renombramos de 'connect' a 'connectWallet' para evitar conflictos y ser más descriptivos.
-         */
+        // Función para conectar la wallet
         async function connectWallet() {
-            if (!modal) {
-                document.getElementById("status").innerText = "❌ Web3Modal no está inicializado. Recarga la página o verifica la consola.";
-                return;
-            }
+            document.getElementById("status").innerText = "Conectando wallet...";
             try {
-                document.getElementById("status").innerText = "Conectando wallet...";
                 // Abre el modal para que el usuario elija su wallet
-                const walletProvider = await modal.connect();
+                // Guarda la instancia del proveedor para escuchar eventos
+                connectedWalletProvider = await web3ModalInstance.connect();
 
-                // Crea un provider de Ethers.js usando el provider de la wallet
-                provider = new ethers.providers.Web3Provider(walletProvider);
+                // Crea un provider de Ethers.js usando el proveedor de la wallet
+                provider = new ethers.providers.Web3Provider(connectedWalletProvider);
 
                 // Obtiene el signer para enviar transacciones
                 signer = provider.getSigner();
 
                 // Obtiene la dirección de la cuenta conectada
                 const address = await signer.getAddress();
+                document.getElementById("account").innerText = "✅ Conectado: " + address.substring(0, 6) + "..." + address.substring(address.length - 4);
 
                 // Instancia el contrato con el signer
                 contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, signer);
-
-                document.getElementById("account").innerText = "✅ Conectado: " + address.substring(0, 6) + "..." + address.substring(address.length - 4); // Muestra una dirección acortada
                 document.getElementById("status").innerText = "📦 Contrato listo para usar.";
 
-                // Opcional: Escucha eventos de cambio de cuenta o red para mantener la interfaz actualizada
-                // Esto es crucial para una UX robusta
-                walletProvider.on("accountsChanged", (accounts) => {
-                    console.log("Cuentas cambiadas:", accounts);
-                    if (accounts.length === 0) {
-                        document.getElementById("account").innerText = "No conectado";
-                        document.getElementById("status").innerText = "Wallet desconectada.";
-                        signer = null;
-                        provider = null;
-                        contract = null;
-                    } else {
-                        // Reconecta para actualizar el signer y la dirección
-                        connectWallet();
-                    }
-                });
+                // Suscribirse a eventos del proveedor de la wallet
+                subscribeProvider(connectedWalletProvider);
 
-                walletProvider.on("chainChanged", (chainId) => {
-                    console.log("Red cambiada a:", chainId);
-                    // Verifica si la red es la esperada (BSC)
-                    if (parseInt(chainId) !== 56) {
-                        document.getElementById("status").innerText = "⚠️ Por favor, cambia a la red BNB Smart Chain (BSC).";
-                        signer = null;
-                        provider = null;
-                        contract = null;
-                        document.getElementById("account").innerText = "Red incorrecta";
-                    } else {
-                        // Reconecta si la red es la correcta para re-inicializar el contrato con la nueva red
-                        connectWallet();
-                    }
-                });
-
-            } catch (err) {
-                console.error("Error al conectar la wallet:", err);
-                // Mensajes de error más amigables
-                if (err.message && err.message.includes("User rejected")) {
-                    document.getElementById("status").innerText = "❌ Conexión cancelada por el usuario.";
-                } else if (err.message && err.message.includes("No wallets found") || err.message.includes("MetaMask is not installed")) {
-                    document.getElementById("status").innerText = "❌ No se encontró una wallet Web3. Por favor, instala MetaMask o una wallet compatible.";
-                } else {
-                    document.getElementById("status").innerText = "❌ Error al conectar: " + (err.message || err);
+            } catch (e) {
+                console.error("Error al conectar la wallet:", e);
+                let errorMessage = "Error al conectar la wallet.";
+                if (e.message && e.message.includes("User closed modal")) {
+                    errorMessage = "Conexión cancelada por el usuario.";
+                } else if (e.message) {
+                    errorMessage = "Error: " + e.message;
                 }
+                document.getElementById("status").innerText = `❌ ${errorMessage}`;
                 document.getElementById("account").innerText = "No conectado";
+                // Limpiar el caché si hay un error de conexión significativo
+                if (web3ModalInstance.cachedProvider) {
+                    web3ModalInstance.clearCachedProvider();
+                }
             }
         }
 
-        /**
-         * Muestra el precio actual del token según el contrato.
-         */
+        // Función para suscribirse a eventos del proveedor de la wallet
+        function subscribeProvider(walletProvider) {
+            if (!walletProvider.on) return; // Si el proveedor no tiene un método 'on', no podemos suscribirnos
+
+            walletProvider.on("accountsChanged", (accounts) => {
+                console.log("Cuentas cambiadas:", accounts);
+                if (accounts.length === 0) {
+                    // Wallet desconectada o todas las cuentas eliminadas
+                    document.getElementById("account").innerText = "No conectado";
+                    document.getElementById("status").innerText = "Wallet desconectada.";
+                    resetApp();
+                } else {
+                    // Cuenta cambiada, reconectar para actualizar el signer y la dirección
+                    connectWallet(); // Re-ejecutar conexión para actualizar estado
+                }
+            });
+
+            walletProvider.on("chainChanged", (chainId) => {
+                console.log("Red cambiada a:", chainId);
+                // Verifica si la red es la esperada (BSC - chainId 56)
+                if (parseInt(chainId) !== 56) {
+                    document.getElementById("status").innerText = "⚠️ Por favor, cambia a la red BNB Smart Chain (BSC - Chain ID 56).";
+                    document.getElementById("account").innerText = "Red incorrecta";
+                    resetApp();
+                } else {
+                    // Reconectar si la red es la correcta para re-inicializar el contrato con la nueva red
+                    connectWallet(); // Re-ejecutar conexión para actualizar estado
+                }
+            });
+
+            walletProvider.on("disconnect", (code, reason) => {
+                console.log("Proveedor desconectado:", code, reason);
+                document.getElementById("account").innerText = "No conectado";
+                document.getElementById("status").innerText = "Wallet desconectada.";
+                resetApp();
+            });
+        }
+
+        // Función para resetear el estado de la app si la wallet se desconecta o cambia de red
+        function resetApp() {
+            provider = null;
+            signer = null;
+            contract = null;
+            connectedWalletProvider = null;
+            document.getElementById("currentPrice").innerText = "Precio: --";
+            web3ModalInstance.clearCachedProvider(); // Limpia el caché de Web3Modal
+        }
+
         async function showPrice() {
             if (!contract) {
                 document.getElementById("status").innerText = "⚠️ Conecta tu wallet primero para ver el precio.";
@@ -283,25 +306,18 @@
 
             try {
                 document.getElementById("currentPrice").innerText = "Cargando precio...";
-                // Asegúrate de que el nombre de la función en tu ABI y contrato sea 'pricePerWLD'
                 const price = await contract.pricePerWLD();
-
-                // Formatea el precio. Asumo 18 decimales para CHCBTC como un token ERC-20 estándar.
-                // ¡IMPORTANTE: AJUSTA '18' AL NÚMERO REAL DE DECIMALES DE TU TOKEN CHCBTC!
+                // Asumiendo 18 decimales para CHCBTC. AJUSTA SI TU TOKEN TIENE OTROS DECIMALES.
                 const formattedPrice = ethers.utils.formatUnits(price, 18);
-
                 document.getElementById("currentPrice").innerText = `💹 1 BNB = ${formattedPrice} CHCBTC`;
-                document.getElementById("status").innerText = ""; // Limpia el mensaje de estado si no hay error
-            } catch (err) {
-                console.error("Error al obtener el precio:", err);
+                document.getElementById("status").innerText = "";
+            } catch (e) {
+                console.error("Error al obtener el precio:", e);
                 document.getElementById("currentPrice").innerText = "❌ Error al obtener el precio.";
-                document.getElementById("status").innerText = "❌ Error al obtener el precio: " + (err.message || err);
+                document.getElementById("status").innerText = "❌ Error al obtener el precio: " + (e.message || e);
             }
         }
 
-        /**
-         * Permite al usuario comprar tokens CHCBTC enviando BNB al contrato.
-         */
         async function buyTokens() {
             if (!contract) {
                 document.getElementById("status").innerText = "⚠️ Conecta tu wallet primero para comprar tokens.";
@@ -310,7 +326,6 @@
 
             try {
                 const amountInBNB = document.getElementById("bnbAmount").value;
-                // Validar que el monto sea un número positivo
                 if (isNaN(parseFloat(amountInBNB)) || parseFloat(amountInBNB) <= 0) {
                     document.getElementById("status").innerText = "❌ Por favor, introduce un monto válido y positivo en BNB.";
                     return;
@@ -318,31 +333,28 @@
 
                 document.getElementById("status").innerText = "⏳ Preparando transacción...";
 
-                // Envía la transacción con el valor en BNB
                 const tx = await contract.buyTokens({
-                    value: ethers.utils.parseEther(amountInBNB) // Convierte el monto de BNB a Wei
+                    value: ethers.utils.parseEther(amountInBNB)
                 });
 
                 document.getElementById("status").innerText = "⏳ Transacción enviada. Esperando confirmación...";
-                await tx.wait(); // Espera a que la transacción sea minada
+                await tx.wait();
 
-                document.getElementById("status").innerText = "✅ Compra exitosa. ¡Revisa tu wallet para ver los tokens CHCBTC!";
-                document.getElementById("bnbAmount").value = "0.01"; // Restablece el valor del input para la siguiente compra
+                document.getElementById("status").innerText = "✅ Compra exitosa. ¡Revisa tu wallet!";
+                document.getElementById("bnbAmount").value = "0.01";
             } catch (err) {
                 console.error("Error al comprar tokens:", err);
-                // Mensajes de error más específicos
-                if (err.code === 4001) { // Error de "User denied transaction signature"
-                    document.getElementById("status").innerText = "❌ Transacción cancelada por el usuario.";
+                let errorMessage = "Error al comprar tokens.";
+                if (err.code === 4001) {
+                    errorMessage = "Transacción cancelada por el usuario.";
                 } else if (err.message && err.message.includes("insufficient funds")) {
-                    document.getElementById("status").innerText = "❌ Fondos insuficientes en tu wallet para esta transacción.";
-                } else {
-                    document.getElementById("status").innerText = "❌ Error al comprar: " + (err.message || err);
+                    errorMessage = "Fondos insuficientes en tu wallet para esta transacción.";
+                } else if (err.message) {
+                    errorMessage = "Error: " + err.message;
                 }
+                document.getElementById("status").innerText = `❌ ${errorMessage}`;
             }
         }
-
-        // Se ejecuta cuando el DOM está completamente cargado para inicializar Web3Modal
-        window.addEventListener("DOMContentLoaded", initializeWeb3Modal);
     </script>
 </body>
 </html>
