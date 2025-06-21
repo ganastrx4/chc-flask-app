@@ -6,68 +6,67 @@
     <title>Comprar CHCBTC (BSC)</title>
 
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
-    <script src="https://unpkg.com/@walletconnect/ethereum-provider@2.11.0/dist/index.umd.min.js"></script>
     <script src="https://unpkg.com/@web3modal/standalone@3.6.0/dist/web3modal-standalone.umd.min.js"></script>
 
     <style>
         body {
             font-family: Arial, sans-serif;
-            background: #f9f9f9;
             padding: 20px;
+            background: #f3f3f3;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             min-height: 100vh;
             margin: 0;
-            box-sizing: border-box; /* Incluye padding y borde en el ancho total */
+            box-sizing: border-box;
         }
         .container {
             background: white;
             padding: 30px;
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            max-width: 400px; /* Ancho máximo para mejor legibilidad */
-            width: 100%; /* Ocupa todo el ancho disponible hasta el max-width */
+            max-width: 400px;
+            width: 100%;
             text-align: center;
             box-sizing: border-box;
         }
-        h2 {
+        h2, h3 {
             color: #333;
             margin-bottom: 20px;
         }
         button {
             background-color: #007bff;
             color: white;
-            padding: 12px 20px; /* Un poco más de padding */
+            padding: 12px 20px;
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            font-size: 17px; /* Fuente ligeramente más grande */
-            margin-top: 15px; /* Más espacio arriba */
+            font-size: 17px;
+            margin-top: 15px;
             width: 100%;
-            transition: background-color 0.3s ease, transform 0.2s ease; /* Transición para un efecto suave */
+            transition: background-color 0.3s ease, transform 0.2s ease;
         }
         button:hover {
             background-color: #0056b3;
-            transform: translateY(-2px); /* Pequeño efecto al pasar el ratón */
+            transform: translateY(-2px);
         }
         input[type="number"] {
-            width: calc(100% - 22px); /* Ajusta para padding y borde */
+            width: calc(100% - 22px);
             padding: 10px;
             margin-top: 10px;
             border: 1px solid #ddd;
             border-radius: 5px;
             font-size: 16px;
             box-sizing: border-box;
-            text-align: center; /* Centra el texto del input */
+            text-align: center;
         }
         label {
             display: block;
-            margin-top: 20px; /* Más espacio arriba */
+            margin-top: 20px;
             margin-bottom: 5px;
             font-weight: bold;
-            text-align: left; /* Alinea el texto de la etiqueta a la izquierda */
+            text-align: left;
             color: #555;
         }
         p {
@@ -79,13 +78,13 @@
             margin-top: 15px;
             font-weight: bold;
             color: #333;
-            word-wrap: break-word; /* Para evitar desbordamiento en direcciones largas */
+            word-wrap: break-word;
             font-size: 15px;
-            min-height: 20px; /* Para evitar saltos de diseño cuando el texto cambia */
+            min-height: 20px;
         }
         #status {
-            color: #d9534f; /* Color para mensajes de estado/error */
-            min-height: 40px; /* Un poco más de espacio para mensajes largos */
+            color: #d9534f;
+            min-height: 40px;
         }
         hr {
             border: 0;
@@ -96,19 +95,27 @@
         a {
             color: #007bff;
             text-decoration: none;
-            margin-top: 8px; /* Más espacio entre enlaces */
+            margin-top: 8px;
             display: inline-block;
             font-size: 15px;
         }
         a:hover {
             text-decoration: underline;
         }
+        ul {
+            list-style: none; /* Quita los puntos de la lista */
+            padding: 0;
+            margin: 15px 0;
+        }
+        ul li {
+            margin-bottom: 5px;
+        }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <h2>🪙 Comprar <b>CHCBTC</b> (BSC)</h2>
+        <h2>🪙 Comprar <b>CHCBTC</b> directamente desde el contrato</h2>
 
         <button onclick="connectWallet()">🔗 Conectar Wallet</button>
         <p id="account">No conectado</p>
@@ -116,34 +123,41 @@
         <button onclick="showPrice()">📈 Ver precio actual</button>
         <p id="currentPrice">Precio: --</p>
 
-        <label for="bnbAmount">💰 Monto a enviar en BNB:</label>
-        <input type="number" id="bnbAmount" step="0.0001" value="0.01">
+        <label for="bnbAmount">💰 Monto a enviar en BNB:</label><br>
+        <input type="number" id="bnbAmount" step="0.0001" value="0.01"><br><br>
 
         <button onclick="buyTokens()">💸 Comprar CHCBTC</button>
         <p id="status"></p>
 
         <hr>
-        <p>
-            <a href="https://bscscan.com/address/0x63F547B3749e022B28a5a506dfD3ECEb454f1726" target="_blank">🔍 Ver contrato en BscScan</a><br>
-            <a href="https://www.geckoterminal.com/bsc/pools/0x55abc3f532e31cae7f4fde3c78d906798800f785" target="_blank">📊 Ver pool en GeckoTerminal</a>
-        </p>
+        <h3>🔗 Enlaces útiles:</h3>
+        <ul>
+            <li><a href="https://bscscan.com/address/0x63F547B3749e022B28a5a506dfD3ECEb454f1726" target="_blank">Ver contrato en BscScan</a></li>
+            <li><a href="https://www.geckoterminal.com/bsc/pools/0x55abc3f532e31cae7f4fde3c78d906798800f785" target="_blank">Ver pool en GeckoTerminal</a></li>
+        </ul>
     </div>
 
     <script>
         // Constantes del contrato
         const CONTRACT_ADDRESS = "0x63F547B3749e022B28a5a506dfD3ECEb454f1726";
+
         const ABI = [
             "function buyTokens() payable",
-            // Asegúrate de que el nombre de la función aquí coincida con tu contrato
-            "function pricePerWLD() view returns (uint256)"
+            "function pricePerWLD() view returns (uint256)",
+            // Aunque las siguientes funciones están en tu ABI, no se usan en tu HTML,
+            // pero las mantengo por si son relevantes para el contrato.
+            "function balanceOf(address) view returns (uint256)",
+            "function setPrice(uint256) external",
+            "function transfer(address, uint256) returns (bool)"
         ];
 
         // Variables globales
-        let signer, provider, contract;
-        let modal; // Declaramos `modal` aquí para que sea accesible globalmente
+        let provider, signer, contract;
+        let modal; // Variable para Web3Modal
 
         // Configuración de WalletConnect y Web3Modal
-        const projectId = "3f30d29d8c2e517af8a771f3a81b463b"; // ¡IMPORTANTE: Usa tu propio projectId de WalletConnect!
+        const projectId = "89c0bea32a0d933c45f3b1083f21b293"; // ¡IMPORTANTE: Usa tu propio projectId de WalletConnect!
+                                                              // Obtén uno en cloud.walletconnect.com
 
         const chains = [{
             chainId: 56, // ID de la red BSC Mainnet
@@ -156,7 +170,7 @@
         const metadata = {
             name: "CHCBTC WebApp",
             description: "Compra directa de CHCBTC desde el contrato",
-            url: "https://ganastrx4.github.io",
+            url: "https://ganastrx4.github.io", // Asegúrate de que esta URL sea la de tu sitio real
             icons: ["https://avatars.githubusercontent.com/u/37784886?s=200&v=4"]
         };
 
@@ -166,7 +180,6 @@
          */
         async function initializeWeb3Modal() {
             try {
-                // Verificamos que las librerías se hayan cargado antes de usarlas
                 if (window.web3modal && typeof window.web3modal.createWeb3Modal === 'function') {
                     modal = window.web3modal.createWeb3Modal({
                         projectId,
@@ -186,7 +199,8 @@
         }
 
         /**
-         * Conecta la wallet del usuario usando Web3Modal.
+         * Conecta la wallet del usuario usando Web3Modal (funciona para escritorio y móvil).
+         * Renombramos de 'connect' a 'connectWallet' para evitar conflictos y ser más descriptivos.
          */
         async function connectWallet() {
             if (!modal) {
@@ -195,10 +209,10 @@
             }
             try {
                 document.getElementById("status").innerText = "Conectando wallet...";
-                // Abre el modal para conectar la wallet
+                // Abre el modal para que el usuario elija su wallet
                 const walletProvider = await modal.connect();
 
-                // Crea un provider de Ethers.js
+                // Crea un provider de Ethers.js usando el provider de la wallet
                 provider = new ethers.providers.Web3Provider(walletProvider);
 
                 // Obtiene el signer para enviar transacciones
@@ -207,13 +221,14 @@
                 // Obtiene la dirección de la cuenta conectada
                 const address = await signer.getAddress();
 
-                // Instancia el contrato
+                // Instancia el contrato con el signer
                 contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, signer);
 
                 document.getElementById("account").innerText = "✅ Conectado: " + address.substring(0, 6) + "..." + address.substring(address.length - 4); // Muestra una dirección acortada
                 document.getElementById("status").innerText = "📦 Contrato listo para usar.";
 
                 // Opcional: Escucha eventos de cambio de cuenta o red para mantener la interfaz actualizada
+                // Esto es crucial para una UX robusta
                 walletProvider.on("accountsChanged", (accounts) => {
                     console.log("Cuentas cambiadas:", accounts);
                     if (accounts.length === 0) {
@@ -248,7 +263,7 @@
                 // Mensajes de error más amigables
                 if (err.message && err.message.includes("User rejected")) {
                     document.getElementById("status").innerText = "❌ Conexión cancelada por el usuario.";
-                } else if (err.message && err.message.includes("No wallets found")) {
+                } else if (err.message && err.message.includes("No wallets found") || err.message.includes("MetaMask is not installed")) {
                     document.getElementById("status").innerText = "❌ No se encontró una wallet Web3. Por favor, instala MetaMask o una wallet compatible.";
                 } else {
                     document.getElementById("status").innerText = "❌ Error al conectar: " + (err.message || err);
@@ -268,15 +283,12 @@
 
             try {
                 document.getElementById("currentPrice").innerText = "Cargando precio...";
-                // Asegúrate de que el método "pricePerWLD()" exista en tu contrato y devuelva el valor esperado.
-                // Si tu token es CHCBTC, el nombre del método podría ser 'pricePerCHCBTC()' o similar.
+                // Asegúrate de que el nombre de la función en tu ABI y contrato sea 'pricePerWLD'
                 const price = await contract.pricePerWLD();
 
-                // El valor devuelto por el contrato es un BigNumber. Para mostrarlo legiblemente,
-                // necesitas convertirlo de vuelta a un número decimal si es necesario,
-                // dependiendo de los decimales de tu token CHCBTC.
-                // Si CHCBTC tiene 18 decimales (como la mayoría de los ERC-20), usa 18. Ajusta según tu contrato.
-                const formattedPrice = ethers.utils.formatUnits(price, 18); // <-- AJUSTA ESTE NÚMERO DE DECIMALES
+                // Formatea el precio. Asumo 18 decimales para CHCBTC como un token ERC-20 estándar.
+                // ¡IMPORTANTE: AJUSTA '18' AL NÚMERO REAL DE DECIMALES DE TU TOKEN CHCBTC!
+                const formattedPrice = ethers.utils.formatUnits(price, 18);
 
                 document.getElementById("currentPrice").innerText = `💹 1 BNB = ${formattedPrice} CHCBTC`;
                 document.getElementById("status").innerText = ""; // Limpia el mensaje de estado si no hay error
@@ -297,9 +309,9 @@
             }
 
             try {
-                const amount = document.getElementById("bnbAmount").value;
+                const amountInBNB = document.getElementById("bnbAmount").value;
                 // Validar que el monto sea un número positivo
-                if (isNaN(parseFloat(amount)) || parseFloat(amount) <= 0) {
+                if (isNaN(parseFloat(amountInBNB)) || parseFloat(amountInBNB) <= 0) {
                     document.getElementById("status").innerText = "❌ Por favor, introduce un monto válido y positivo en BNB.";
                     return;
                 }
@@ -308,14 +320,14 @@
 
                 // Envía la transacción con el valor en BNB
                 const tx = await contract.buyTokens({
-                    value: ethers.utils.parseEther(amount) // Convierte el monto de BNB a Wei
+                    value: ethers.utils.parseEther(amountInBNB) // Convierte el monto de BNB a Wei
                 });
 
                 document.getElementById("status").innerText = "⏳ Transacción enviada. Esperando confirmación...";
                 await tx.wait(); // Espera a que la transacción sea minada
 
-                document.getElementById("status").innerText = "✅ Compra exitosa. Revisa tu wallet para ver los tokens CHCBTC.";
-                document.getElementById("bnbAmount").value = "0.01"; // Restablece el valor del input
+                document.getElementById("status").innerText = "✅ Compra exitosa. ¡Revisa tu wallet para ver los tokens CHCBTC!";
+                document.getElementById("bnbAmount").value = "0.01"; // Restablece el valor del input para la siguiente compra
             } catch (err) {
                 console.error("Error al comprar tokens:", err);
                 // Mensajes de error más específicos
