@@ -2,17 +2,14 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Comprar CHCBTC</title>
-  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/web3modal@1.9.10/dist/index.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@walletconnect/web3-provider@1.8.0/dist/umd/index.min.js"></script>
+  <title>Comprar CHCBTC (BSC)</title>
+  <script src="https://unpkg.com/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+  <script src="https://unpkg.com/@web3modal/standalone@3.1.0/dist/web3modal-standalone.umd.js"></script>
   <style>
-    body { font-family: Arial, sans-serif; padding: 20px; background: #f3f3f3; }
-    h2 { color: #333; }
-    button { padding: 10px; margin: 5px; font-size: 16px; }
-    input { padding: 8px; font-size: 16px; width: 120px; }
-    #status, #account, #currentPrice { margin-top: 10px; font-weight: bold; }
-    a { color: #007bff; text-decoration: none; }
+    body { font-family: Arial, sans-serif; padding: 20px; background: #f4f4f4; }
+    button { padding: 10px 20px; font-size: 16px; margin-top: 10px; }
+    input { padding: 8px; width: 100px; font-size: 16px; }
+    #status, #account, #currentPrice { margin-top: 15px; font-weight: bold; }
   </style>
 </head>
 <body>
@@ -25,71 +22,72 @@
   <button onclick="showPrice()">📈 Ver precio actual</button>
   <p id="currentPrice">Precio: --</p>
 
-  <label>💰 Monto a enviar en BNB:</label><br>
+  <label>💰 Monto en BNB:</label><br>
   <input type="number" id="bnbAmount" step="0.0001" value="0.01"><br><br>
 
   <button onclick="buyTokens()">💸 Comprar CHCBTC</button>
   <p id="status"></p>
 
   <hr>
-  <h3>🔗 Enlaces útiles:</h3>
   <ul>
-    <li><a href="https://bscscan.com/address/0x63F547B3749e022B28a5a506dfD3ECEb454f1726" target="_blank">Contrato en BscScan</a></li>
+    <li><a href="https://bscscan.com/address/0x63F547B3749e022B28a5a506dfD3ECEb454f1726" target="_blank">Ver contrato en BscScan</a></li>
     <li><a href="https://www.geckoterminal.com/bsc/pools/0x55abc3f532e31cae7f4fde3c78d906798800f785" target="_blank">Pool en GeckoTerminal</a></li>
   </ul>
 
   <script>
+  window.addEventListener('DOMContentLoaded', () => {
     const CONTRACT_ADDRESS = "0x63F547B3749e022B28a5a506dfD3ECEb454f1726";
     const ABI = [
       "function buyTokens() payable",
       "function pricePerWLD() view returns (uint256)"
     ];
 
-    let provider, signer, contract, web3Modal;
+    let provider, signer, contract;
+    let ethereumProvider;
 
-    // Opciones para múltiples billeteras
-    const providerOptions = {
-      walletconnect: {
-        package: window.WalletConnectProvider.default,
-        options: {
-          rpc: {
-            56: "https://bsc-dataseed.binance.org/"
-          },
-          network: "binance"
-        }
-      },
-      binancechainwallet: {
-        package: true
-      }
+    const projectId = "3f30d29d8c2e517af8a771f3a81b463b";
+
+    const metadata = {
+      name: "CHCBTC DApp",
+      description: "Comprar tokens CHCBTC desde Web3",
+      url: "https://ganastrx4.github.io/",
+      icons: ["https://avatars.githubusercontent.com/u/37784886?s=200&v=4"]
     };
 
-    window.addEventListener('load', async () => {
-      web3Modal = new window.Web3Modal.default({
-        cacheProvider: false,
-        providerOptions,
-        theme: "dark"
-      });
+    const chains = [{
+      chainId: 56,
+      name: "Binance Smart Chain",
+      currency: "BNB",
+      explorerUrl: "https://bscscan.com",
+      rpcUrl: "https://bsc-dataseed.binance.org/"
+    }];
+
+    const modal = window.web3modal.createWeb3Modal({
+      projectId,
+      chains,
+      themeMode: "light",
+      standaloneChains: chains,
+      metadata
     });
 
-    async function connectWallet() {
+    window.connectWallet = async function() {
       try {
-        const instance = await web3Modal.connect();
-        provider = new ethers.providers.Web3Provider(instance);
+        ethereumProvider = await modal.connect();
+        provider = new ethers.providers.Web3Provider(ethereumProvider);
         signer = provider.getSigner();
-
         const address = await signer.getAddress();
-        document.getElementById("account").innerText = "✅ Conectado: " + address;
 
+        document.getElementById("account").innerText = "✅ Conectado: " + address;
         contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, signer);
         document.getElementById("status").innerText = "📦 Contrato listo.";
       } catch (e) {
         console.error(e);
-        document.getElementById("status").innerText = "❌ Error al conectar: " + e.message;
+        document.getElementById("status").innerText = "❌ Error: " + e.message;
       }
-    }
+    };
 
-    async function showPrice() {
-      if (!contract) return alert("Conecta tu wallet primero");
+    window.showPrice = async function() {
+      if (!contract) return alert("Conecta la wallet primero");
 
       try {
         const price = await contract.pricePerWLD();
@@ -98,25 +96,27 @@
         console.error(e);
         document.getElementById("currentPrice").innerText = "❌ Error al obtener el precio";
       }
-    }
+    };
 
-    async function buyTokens() {
-      if (!contract) return alert("Conecta tu wallet primero");
+    window.buyTokens = async function() {
+      if (!contract) return alert("Conecta la wallet primero");
 
       try {
-        const amountInBNB = document.getElementById("bnbAmount").value;
+        const amount = document.getElementById("bnbAmount").value;
         const tx = await contract.buyTokens({
-          value: ethers.utils.parseEther(amountInBNB)
+          value: ethers.utils.parseEther(amount)
         });
 
         document.getElementById("status").innerText = "⏳ Confirmando transacción...";
         await tx.wait();
-        document.getElementById("status").innerText = "✅ Compra exitosa. ¡Revisa tu wallet!";
+        document.getElementById("status").innerText = "✅ ¡Compra exitosa!";
       } catch (err) {
         console.error(err);
         document.getElementById("status").innerText = "❌ Error: " + err.message;
       }
-    }
+    };
+  });
   </script>
+
 </body>
 </html>
