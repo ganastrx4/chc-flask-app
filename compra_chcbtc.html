@@ -2,10 +2,13 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Comprar CHCBTC (BSC)</title>
+
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
     <script src="https://unpkg.com/@walletconnect/ethereum-provider@2.11.0/dist/index.umd.min.js"></script>
     <script src="https://unpkg.com/@web3modal/standalone@3.6.0/dist/web3modal-standalone.umd.min.js"></script>
+
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -17,63 +20,85 @@
             justify-content: center;
             min-height: 100vh;
             margin: 0;
+            box-sizing: border-box; /* Incluye padding y borde en el ancho total */
         }
         .container {
             background: white;
             padding: 30px;
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            max-width: 400px;
-            width: 100%;
+            max-width: 400px; /* Ancho máximo para mejor legibilidad */
+            width: 100%; /* Ocupa todo el ancho disponible hasta el max-width */
             text-align: center;
+            box-sizing: border-box;
+        }
+        h2 {
+            color: #333;
+            margin-bottom: 20px;
         }
         button {
             background-color: #007bff;
             color: white;
-            padding: 10px 15px;
+            padding: 12px 20px; /* Un poco más de padding */
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            font-size: 16px;
-            margin-top: 10px;
+            font-size: 17px; /* Fuente ligeramente más grande */
+            margin-top: 15px; /* Más espacio arriba */
             width: 100%;
-            transition: background-color 0.3s ease;
+            transition: background-color 0.3s ease, transform 0.2s ease; /* Transición para un efecto suave */
         }
         button:hover {
             background-color: #0056b3;
+            transform: translateY(-2px); /* Pequeño efecto al pasar el ratón */
         }
         input[type="number"] {
-            width: calc(100% - 20px);
+            width: calc(100% - 22px); /* Ajusta para padding y borde */
             padding: 10px;
             margin-top: 10px;
             border: 1px solid #ddd;
             border-radius: 5px;
             font-size: 16px;
-            box-sizing: border-box; /* Para incluir el padding en el ancho */
+            box-sizing: border-box;
+            text-align: center; /* Centra el texto del input */
         }
         label {
             display: block;
-            margin-top: 15px;
+            margin-top: 20px; /* Más espacio arriba */
+            margin-bottom: 5px;
             font-weight: bold;
-            text-align: left;
+            text-align: left; /* Alinea el texto de la etiqueta a la izquierda */
+            color: #555;
+        }
+        p {
+            margin-top: 10px;
+            margin-bottom: 10px;
+            color: #444;
         }
         #status, #account, #currentPrice {
             margin-top: 15px;
             font-weight: bold;
             color: #333;
             word-wrap: break-word; /* Para evitar desbordamiento en direcciones largas */
+            font-size: 15px;
+            min-height: 20px; /* Para evitar saltos de diseño cuando el texto cambia */
+        }
+        #status {
+            color: #d9534f; /* Color para mensajes de estado/error */
+            min-height: 40px; /* Un poco más de espacio para mensajes largos */
         }
         hr {
             border: 0;
             height: 1px;
             background: #eee;
-            margin: 25px 0;
+            margin: 30px 0;
         }
         a {
             color: #007bff;
             text-decoration: none;
-            margin-top: 5px;
+            margin-top: 8px; /* Más espacio entre enlaces */
             display: inline-block;
+            font-size: 15px;
         }
         a:hover {
             text-decoration: underline;
@@ -92,7 +117,7 @@
         <p id="currentPrice">Precio: --</p>
 
         <label for="bnbAmount">💰 Monto a enviar en BNB:</label>
-        <input type="number" id="bnbAmount" step="0.0001" value="0.01"><br>
+        <input type="number" id="bnbAmount" step="0.0001" value="0.01">
 
         <button onclick="buyTokens()">💸 Comprar CHCBTC</button>
         <p id="status"></p>
@@ -109,7 +134,8 @@
         const CONTRACT_ADDRESS = "0x63F547B3749e022B28a5a506dfD3ECEb454f1726";
         const ABI = [
             "function buyTokens() payable",
-            "function pricePerWLD() view returns (uint256)" // Asumo que el nombre es correcto, si no, cámbialo a "pricePerCHCBTC"
+            // Asegúrate de que el nombre de la función aquí coincida con tu contrato
+            "function pricePerWLD() view returns (uint256)"
         ];
 
         // Variables globales
@@ -117,7 +143,7 @@
         let modal; // Declaramos `modal` aquí para que sea accesible globalmente
 
         // Configuración de WalletConnect y Web3Modal
-        const projectId = "3f30d29d8c2e517af8a771f3a81b463b"; // ¡Importante: Usa tu propio projectId de WalletConnect!
+        const projectId = "3f30d29d8c2e517af8a771f3a81b463b"; // ¡IMPORTANTE: Usa tu propio projectId de WalletConnect!
 
         const chains = [{
             chainId: 56, // ID de la red BSC Mainnet
@@ -134,27 +160,106 @@
             icons: ["https://avatars.githubusercontent.com/u/37784886?s=200&v=4"]
         };
 
-        // Función de inicialización de Web3Modal
-       async function initializeWeb3Modal() {
-    try {
-        // Asegúrate de que window.web3modal esté disponible
-        if (window.web3modal && typeof window.web3modal.createWeb3Modal === 'function') {
-            modal = window.web3modal.createWeb3Modal({
-                projectId,
-                chains,
-                metadata
-            });
-            console.log("✅ Web3Modal inicializado correctamente. Objeto modal:", modal);
-        } else {
-            console.error("❌ window.web3modal no está disponible o no tiene createWeb3Modal.");
-            document.getElementById("status").innerText = "❌ Error: La librería de WalletConnect/Web3Modal no se cargó correctamente.";
+        /**
+         * Inicializa Web3Modal para la conexión de la wallet.
+         * Se ejecuta cuando el DOM está completamente cargado.
+         */
+        async function initializeWeb3Modal() {
+            try {
+                // Verificamos que las librerías se hayan cargado antes de usarlas
+                if (window.web3modal && typeof window.web3modal.createWeb3Modal === 'function') {
+                    modal = window.web3modal.createWeb3Modal({
+                        projectId,
+                        chains,
+                        metadata
+                    });
+                    console.log("✅ Web3Modal inicializado correctamente.");
+                    document.getElementById("status").innerText = "Listo para conectar tu wallet.";
+                } else {
+                    console.error("❌ window.web3modal no está disponible o no tiene createWeb3Modal.");
+                    document.getElementById("status").innerText = "❌ Error: Las librerías de WalletConnect/Web3Modal no se cargaron correctamente. Recarga la página.";
+                }
+            } catch (error) {
+                console.error("❌ Error al inicializar Web3Modal:", error);
+                document.getElementById("status").innerText = "❌ Error crítico: No se pudo inicializar la conexión con la wallet. Consulta la consola para más detalles.";
+            }
         }
-    } catch (error) {
-        console.error("❌ Error al inicializar Web3Modal:", error);
-        document.getElementById("status").innerText = "❌ Error: No se pudo inicializar la conexión con la wallet. Consulta la consola para más detalles.";
-    }
-}
 
+        /**
+         * Conecta la wallet del usuario usando Web3Modal.
+         */
+        async function connectWallet() {
+            if (!modal) {
+                document.getElementById("status").innerText = "❌ Web3Modal no está inicializado. Recarga la página o verifica la consola.";
+                return;
+            }
+            try {
+                document.getElementById("status").innerText = "Conectando wallet...";
+                // Abre el modal para conectar la wallet
+                const walletProvider = await modal.connect();
+
+                // Crea un provider de Ethers.js
+                provider = new ethers.providers.Web3Provider(walletProvider);
+
+                // Obtiene el signer para enviar transacciones
+                signer = provider.getSigner();
+
+                // Obtiene la dirección de la cuenta conectada
+                const address = await signer.getAddress();
+
+                // Instancia el contrato
+                contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, signer);
+
+                document.getElementById("account").innerText = "✅ Conectado: " + address.substring(0, 6) + "..." + address.substring(address.length - 4); // Muestra una dirección acortada
+                document.getElementById("status").innerText = "📦 Contrato listo para usar.";
+
+                // Opcional: Escucha eventos de cambio de cuenta o red para mantener la interfaz actualizada
+                walletProvider.on("accountsChanged", (accounts) => {
+                    console.log("Cuentas cambiadas:", accounts);
+                    if (accounts.length === 0) {
+                        document.getElementById("account").innerText = "No conectado";
+                        document.getElementById("status").innerText = "Wallet desconectada.";
+                        signer = null;
+                        provider = null;
+                        contract = null;
+                    } else {
+                        // Reconecta para actualizar el signer y la dirección
+                        connectWallet();
+                    }
+                });
+
+                walletProvider.on("chainChanged", (chainId) => {
+                    console.log("Red cambiada a:", chainId);
+                    // Verifica si la red es la esperada (BSC)
+                    if (parseInt(chainId) !== 56) {
+                        document.getElementById("status").innerText = "⚠️ Por favor, cambia a la red BNB Smart Chain (BSC).";
+                        signer = null;
+                        provider = null;
+                        contract = null;
+                        document.getElementById("account").innerText = "Red incorrecta";
+                    } else {
+                        // Reconecta si la red es la correcta para re-inicializar el contrato con la nueva red
+                        connectWallet();
+                    }
+                });
+
+            } catch (err) {
+                console.error("Error al conectar la wallet:", err);
+                // Mensajes de error más amigables
+                if (err.message && err.message.includes("User rejected")) {
+                    document.getElementById("status").innerText = "❌ Conexión cancelada por el usuario.";
+                } else if (err.message && err.message.includes("No wallets found")) {
+                    document.getElementById("status").innerText = "❌ No se encontró una wallet Web3. Por favor, instala MetaMask o una wallet compatible.";
+                } else {
+                    document.getElementById("status").innerText = "❌ Error al conectar: " + (err.message || err);
+                }
+                document.getElementById("account").innerText = "No conectado";
+            }
+        }
+
+        /**
+         * Muestra el precio actual del token según el contrato.
+         */
         async function showPrice() {
             if (!contract) {
                 document.getElementById("status").innerText = "⚠️ Conecta tu wallet primero para ver el precio.";
@@ -163,23 +268,28 @@
 
             try {
                 document.getElementById("currentPrice").innerText = "Cargando precio...";
-                // Asegurarse de que el método "pricePerWLD()" exista en tu contrato y devuelva el valor esperado.
+                // Asegúrate de que el método "pricePerWLD()" exista en tu contrato y devuelva el valor esperado.
                 // Si tu token es CHCBTC, el nombre del método podría ser 'pricePerCHCBTC()' o similar.
                 const price = await contract.pricePerWLD();
+
                 // El valor devuelto por el contrato es un BigNumber. Para mostrarlo legiblemente,
                 // necesitas convertirlo de vuelta a un número decimal si es necesario,
-                // dependiendo de los decimales de tu token.
-                // Supongamos 18 decimales para un token ERC-20 estándar, ajusta si es diferente.
-                const formattedPrice = ethers.utils.formatUnits(price, 18); // Ajusta 18 a los decimales de tu token CHCBTC
+                // dependiendo de los decimales de tu token CHCBTC.
+                // Si CHCBTC tiene 18 decimales (como la mayoría de los ERC-20), usa 18. Ajusta según tu contrato.
+                const formattedPrice = ethers.utils.formatUnits(price, 18); // <-- AJUSTA ESTE NÚMERO DE DECIMALES
 
                 document.getElementById("currentPrice").innerText = `💹 1 BNB = ${formattedPrice} CHCBTC`;
+                document.getElementById("status").innerText = ""; // Limpia el mensaje de estado si no hay error
             } catch (err) {
                 console.error("Error al obtener el precio:", err);
                 document.getElementById("currentPrice").innerText = "❌ Error al obtener el precio.";
-                document.getElementById("status").innerText = "❌ Error al obtener el precio: " + err.message;
+                document.getElementById("status").innerText = "❌ Error al obtener el precio: " + (err.message || err);
             }
         }
 
+        /**
+         * Permite al usuario comprar tokens CHCBTC enviando BNB al contrato.
+         */
         async function buyTokens() {
             if (!contract) {
                 document.getElementById("status").innerText = "⚠️ Conecta tu wallet primero para comprar tokens.";
@@ -188,8 +298,9 @@
 
             try {
                 const amount = document.getElementById("bnbAmount").value;
+                // Validar que el monto sea un número positivo
                 if (isNaN(parseFloat(amount)) || parseFloat(amount) <= 0) {
-                    document.getElementById("status").innerText = "❌ Por favor, introduce un monto válido en BNB.";
+                    document.getElementById("status").innerText = "❌ Por favor, introduce un monto válido y positivo en BNB.";
                     return;
                 }
 
@@ -203,19 +314,23 @@
                 document.getElementById("status").innerText = "⏳ Transacción enviada. Esperando confirmación...";
                 await tx.wait(); // Espera a que la transacción sea minada
 
-                document.getElementById("status").innerText = "✅ Compra exitosa. Revisa tu wallet.";
+                document.getElementById("status").innerText = "✅ Compra exitosa. Revisa tu wallet para ver los tokens CHCBTC.";
+                document.getElementById("bnbAmount").value = "0.01"; // Restablece el valor del input
             } catch (err) {
                 console.error("Error al comprar tokens:", err);
                 // Mensajes de error más específicos
                 if (err.code === 4001) { // Error de "User denied transaction signature"
                     document.getElementById("status").innerText = "❌ Transacción cancelada por el usuario.";
-                } else if (err.message.includes("insufficient funds")) {
-                    document.getElementById("status").innerText = "❌ Fondos insuficientes en tu wallet.";
+                } else if (err.message && err.message.includes("insufficient funds")) {
+                    document.getElementById("status").innerText = "❌ Fondos insuficientes en tu wallet para esta transacción.";
                 } else {
-                    document.getElementById("status").innerText = "❌ Error al comprar: " + err.message;
+                    document.getElementById("status").innerText = "❌ Error al comprar: " + (err.message || err);
                 }
             }
         }
+
+        // Se ejecuta cuando el DOM está completamente cargado para inicializar Web3Modal
+        window.addEventListener("DOMContentLoaded", initializeWeb3Modal);
     </script>
 </body>
 </html>
