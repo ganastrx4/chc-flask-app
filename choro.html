@@ -1,1 +1,144 @@
 
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Comprar y Vender CharlyOro (CHORO)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body {
+      background: #121212;
+      color: white;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      text-align: center;
+      padding: 40px;
+    }
+    h1 {
+      color: #00ffff;
+    }
+    input, button {
+      padding: 10px;
+      font-size: 1rem;
+      margin: 10px 0;
+      border-radius: 6px;
+      border: none;
+    }
+    input {
+      width: 220px;
+    }
+    button {
+      background: #00ffff;
+      color: black;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    button:hover {
+      background: #00cccc;
+    }
+    .info {
+      margin-top: 30px;
+      font-size: 0.9rem;
+      color: #ccc;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>CharlyOro (CHORO)</h1>
+  <p>Compra tokens enviando BNB y vende tus tokens directamente desde tu wallet MetaMask.</p>
+  
+  <h3>Comprar CHORO</h3>
+  <input type="number" id="inputBNB" placeholder="Cantidad de BNB a enviar" step="0.0001" min="0.0001" />
+  <br />
+  <button onclick="comprarTokens()">Comprar CHORO</button>
+
+  <h3>Vender CHORO</h3>
+  <input type="number" id="inputCHORO" placeholder="Cantidad de CHORO a vender" step="1" min="1" />
+  <br />
+  <button onclick="venderTokens()">Vender CHORO</button>
+
+  <div class="info" id="status"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+  <script>
+    const contratoDireccion = "0x113345bee2bfeb3c4b65dc5c7f3e1d864d5b930f"; // tu contrato
+    const precioTokensPorBNB = 700000; // 1 BNB = 700,000 CHORO (ajustar si cambias)
+
+    // ABI reducido para buyTokens() y transfer()
+    const contratoABI = [
+      "function buyTokens() external payable",
+      "function transfer(address recipient, uint256 amount) external returns (bool)",
+      "function balanceOf(address account) external view returns (uint256)"
+    ];
+
+    async function conectarWallet() {
+      if (typeof window.ethereum === 'undefined') {
+        alert("⚠️ MetaMask no está instalada.");
+        throw new Error("MetaMask no encontrada");
+      }
+      await window.ethereum.request({ method: 'eth_requestAccounts' });
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const signer = provider.getSigner();
+      return signer;
+    }
+
+    async function comprarTokens() {
+      try {
+        const signer = await conectarWallet();
+        const contrato = new ethers.Contract(contratoDireccion, contratoABI, signer);
+
+        const inputBNB = document.getElementById("inputBNB");
+        let cantidadBNB = inputBNB.value;
+        if (!cantidadBNB || cantidadBNB <= 0) {
+          alert("Por favor ingresa una cantidad válida de BNB.");
+          return;
+        }
+
+        // Convierte cantidadBNB a Wei
+        const valorWei = ethers.utils.parseEther(cantidadBNB);
+
+        // Llama a buyTokens enviando el valor
+        const tx = await contrato.buyTokens({ value: valorWei });
+        document.getElementById("status").innerText = `⌛ Transacción enviada. Esperando confirmación... TX: ${tx.hash}`;
+        await tx.wait();
+        document.getElementById("status").innerText = `✅ Compra realizada con éxito. TX: ${tx.hash}`;
+
+      } catch (error) {
+        console.error(error);
+        alert("❌ Error al comprar tokens: " + (error.data?.message || error.message));
+      }
+    }
+
+    async function venderTokens() {
+      try {
+        const signer = await conectarWallet();
+        const contrato = new ethers.Contract(contratoDireccion, contratoABI, signer);
+
+        const inputCHORO = document.getElementById("inputCHORO");
+        let cantidadCHORO = inputCHORO.value;
+        if (!cantidadCHORO || cantidadCHORO <= 0) {
+          alert("Por favor ingresa una cantidad válida de tokens CHORO.");
+          return;
+        }
+
+        // Convierte la cantidad a BigNumber con 18 decimales
+        const amount = ethers.utils.parseUnits(cantidadCHORO, 18);
+
+        // El contrato solo tiene la función transfer pública, enviamos tokens a la wallet creadora (tú)
+        // Cambia creatorAddress por tu dirección para recibir tokens vendidos
+        const creatorAddress = "0xd4508db1aDC48deA121f356B254a7155DDAB36Ae";
+
+        const tx = await contrato.transfer(creatorAddress, amount);
+        document.getElementById("status").innerText = `⌛ Transacción de venta enviada. Esperando confirmación... TX: ${tx.hash}`;
+        await tx.wait();
+        document.getElementById("status").innerText = `✅ Venta realizada con éxito. TX: ${tx.hash}`;
+
+      } catch (error) {
+        console.error(error);
+        alert("❌ Error al vender tokens: " + (error.data?.message || error.message));
+      }
+    }
+  </script>
+
+</body>
+</html>
