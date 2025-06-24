@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Comprar y Vender CharlyGold (CHG)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body {
+      background: #121212;
+      color: white;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      text-align: center;
+      padding: 40px;
+    }
+    h1 {
+      color: #00ffff;
+    }
+    input, button {
+      padding: 10px;
+      font-size: 1rem;
+      margin: 10px 0;
+      border-radius: 6px;
+      border: none;
+    }
+    input {
+      width: 220px;
+    }
+    button {
+      background: #00ffff;
+      color: black;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    button:hover {
+      background: #00cccc;
+    }
+    .info {
+      margin-top: 30px;
+      font-size: 0.9rem;
+      color: #ccc;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>CharlyGold (CHG)</h1>
+  <p>Compra tokens enviando BNB y vende tus tokens directamente desde tu wallet MetaMask.</p>
+  
+  <h3>Comprar CHG</h3>
+  <input type="number" id="inputBNB" placeholder="Cantidad de BNB a enviar" step="0.0001" min="0.0001" />
+  <br />
+  <button onclick="comprarTokens()">Comprar CHG</button>
+
+  <h3>Vender CHG</h3>
+  <input type="number" id="inputCHG" placeholder="Cantidad de CHG a vender" step="1" min="1" />
+  <br />
+  <button onclick="venderTokens()">Vender CHG</button>
+
+  <div class="info" id="status"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+  <script>
+    const contratoDireccion = "0x9154dd7786e938F9F0ab386e0e895345b08E8174"; // CHG
+    const precioTokensPorBNB = 1000000; // Ejemplo: 1 BNB = 1,000,000 CHG
+
+    const contratoABI = [
+      "function buyTokens() external payable",
+      "function transfer(address recipient, uint256 amount) external returns (bool)",
+      "function balanceOf(address account) external view returns (uint256)"
+    ];
+
+    async function conectarWallet() {
+      if (typeof window.ethereum === 'undefined') {
+        alert("⚠️ MetaMask no está instalada.");
+        throw new Error("MetaMask no encontrada");
+      }
+      await window.ethereum.request({ method: 'eth_requestAccounts' });
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const signer = provider.getSigner();
+      return signer;
+    }
+
+    async function comprarTokens() {
+      try {
+        const signer = await conectarWallet();
+        const contrato = new ethers.Contract(contratoDireccion, contratoABI, signer);
+
+        const inputBNB = document.getElementById("inputBNB");
+        let cantidadBNB = inputBNB.value;
+        if (!cantidadBNB || cantidadBNB <= 0) {
+          alert("Por favor ingresa una cantidad válida de BNB.");
+          return;
+        }
+
+        const valorWei = ethers.utils.parseEther(cantidadBNB);
+
+        const tx = await contrato.buyTokens({
+          value: valorWei,
+          gasLimit: 100000
+        });
+
+        document.getElementById("status").innerText = `⌛ Transacción enviada. Esperando confirmación... TX: ${tx.hash}`;
+        await tx.wait();
+        document.getElementById("status").innerText = `✅ Compra realizada con éxito. TX: ${tx.hash}`;
+
+      } catch (error) {
+        console.error(error);
+        alert("❌ Error al comprar tokens: " + (error.data?.message || error.message));
+      }
+    }
+
+    async function venderTokens() {
+      try {
+        const signer = await conectarWallet();
+        const contrato = new ethers.Contract(contratoDireccion, contratoABI, signer);
+
+        const inputCHG = document.getElementById("inputCHG");
+        let cantidadCHG = inputCHG.value;
+        if (!cantidadCHG || cantidadCHG <= 0) {
+          alert("Por favor ingresa una cantidad válida de tokens CHG.");
+          return;
+        }
+
+        const amount = ethers.utils.parseUnits(cantidadCHG, 18);
+        const creatorAddress = "0xd4508db1aDC48deA121f356B254a7155DDAB36Ae";
+
+        const tx = await contrato.transfer(creatorAddress, amount);
+        document.getElementById("status").innerText = `⌛ Transacción de venta enviada. Esperando confirmación... TX: ${tx.hash}`;
+        await tx.wait();
+        document.getElementById("status").innerText = `✅ Venta realizada con éxito. TX: ${tx.hash}`;
+
+      } catch (error) {
+        console.error(error);
+        alert("❌ Error al vender tokens: " + (error.data?.message || error.message));
+      }
+    }
+  </script>
+
+</body>
+</html>
