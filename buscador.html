@@ -3,141 +3,180 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Precios Cripto Mundial</title>
+    <title>Buscador de Criptomonedas</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <style>
-        /* Tus estilos CSS aquí sin cambios */
-        /* ... (omitido para brevedad) ... */
+        body {
+            font-family: Arial, sans-serif;
+            background: #1e1e2f;
+            color: #ffffff;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #2c2c3e;
+            border-radius: 10px;
+            box-shadow: 0px 0px 15px rgba(255, 255, 255, 0.1);
+        }
+        input, button {
+            width: 80%;
+            padding: 10px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 5px;
+        }
+        button {
+            background: #f39c12;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        button:hover { background: #e67e22; }
+        #cryptoInfo {
+            display: none;
+            margin-top: 20px;
+            background: #3a3a55;
+            padding: 15px;
+            border-radius: 10px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            background: #3a3a55;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        th, td {
+            padding: 10px;
+            text-align: center;
+            border-bottom: 1px solid #444;
+        }
+        th {
+            background: #f39c12;
+            color: #000;
+        }
+        h3 { color: #f39c12; margin-top: 20px; }
+        .binance-link {
+            display: block;
+            margin-top: 20px;
+            color: #f39c12;
+            font-weight: bold;
+            text-decoration: none;
+        }
+        .binance-link:hover { color: #e67e22; }
     </style>
 </head>
 <body>
-<div class="container">
-    <h1>Buscador de Criptomonedas</h1>
-    <input id="cryptoInput" placeholder="Ejemplo: BTC, ETH, BNB" type="text" />
-    <button id="searchBtn">Buscar</button>
+    <div class="container">
+        <h1>Buscador de Criptomonedas</h1>
+        <input type="text" id="cryptoInput" placeholder="Ejemplo: BTC, ETH, BNB">
+        <button id="searchBtn">Buscar</button>
+        <div id="cryptoInfo">
+            <h2 id="cryptoName"></h2>
+            <p><strong>💲 Precio en USDT:</strong> $<span id="priceUSD"></span></p>
+        </div>
 
-    <div id="cryptoInfo" style="display:none;">
-        <h2 id="cryptoName"></h2>
-        <p><strong>💲 Precio en USDT:</strong> $<span id="priceUSD"></span></p>
+        <h3>🏆 Ganadores</h3>
+        <table id="winners"></table>
+
+        <h3>🔥 Populares</h3>
+        <table id="popular"></table>
+
+        <h3>⭐ Favoritos</h3>
+        <table id="favorites"></table>
+
+        <h3>📉 Perdedores</h3>
+        <table id="losers"></table>
+
+        <h3>🆕 Nuevos</h3>
+        <table id="new"></table>
+
+        <a href="https://www.binance.com/referral/earn-together/refertoearn2000usdc/claim?hl=en&ref=GRO_14352_RAE1T&utm_source=referralmode" class="binance-link" target="_blank">BINANCE</a>
     </div>
 
-    <div id="wldComparativa">
-        <h3>💎 Comparativa WLD</h3>
-        <table>
-            <tr><th>Pareja</th><th>Precio</th></tr>
-            <tr><td>WLD/USDT</td><td id="wldUSDT">...</td></tr>
-            <tr><td>WLD/MXN</td><td id="wldMXN">...</td></tr>
-            <tr><td>WLD/BTC</td><td id="wldBTC">...</td></tr>
-            <tr><td>WLD/XRP</td><td id="wldXRP">...</td></tr>
-            <tr><td>WLD/ETH</td><td id="wldETH">...</td></tr>
-            <tr><td>WLD/SOL</td><td id="wldSOL">...</td></tr>
-        </table>
-    </div>
+    <script>
+        $(document).ready(function() {
+            $('#searchBtn').click(async function() {
+                const symbol = $('#cryptoInput').val().toUpperCase().trim();
+                if (!symbol) {
+                    alert('⚠️ Ingresa un símbolo de criptomoneda.');
+                    return;
+                }
 
-    <h3>📈 Pares con WLD</h3>
-    <table id="wldPairs"></table>
-</div>
+                const price = await getCryptoPrice(symbol);
+                if (price) {
+                    $('#cryptoName').text(symbol);
+                    $('#priceUSD').text(price);
+                    $('#cryptoInfo').show();
+                } else {
+                    alert('❌ Criptomoneda no encontrada.');
+                }
+            });
 
-<a href="./tokenchc.html" target="_blank">
-    <button style="padding: 15px; font-size: 18px; border-radius: 10px; background-color: #6c47ff; color: white;">
-        ¡Apoya nuestros Tokens CHC y CHUN en PUF y espera el PUMP!
-        <br> ¡Solo los débiles venden!
-    </button>
-</a>
-
-<br><br><br>
-
-<!-- Script Principal -->
-<script>
-    $(document).ready(function () {
-        $('#searchBtn').click(async function () {
-            const symbol = $('#cryptoInput').val().toUpperCase().trim();
-            if (!symbol) return alert('⚠️ Ingresa un símbolo.');
-            const price = await getPrice(symbol + 'USDT');
-            if (price) {
-                $('#cryptoName').text(symbol);
-                $('#priceUSD').text(parseFloat(price).toFixed(8));
-                $('#cryptoInfo').show();
-            } else {
-                alert('❌ Criptomoneda no encontrada.');
-            }
+            loadCryptoLists();
         });
 
-        actualizarComparativaWLD();
-        cargarParesWLD();
-    });
-
-    async function getPrice(pair) {
-        try {
-            const res = await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${pair}`);
-            const data = await res.json();
-            return parseFloat(data.price);
-        } catch {
-            return null;
-        }
-    }
-
-    async function actualizarComparativaWLD() {
-        const wldUSDT = await getPrice("WLDUSDT");
-        const usdtMXN = await getPrice("USDTMXN") || 20.24;
-
-        if (!wldUSDT) {
-            $('#wldUSDT').text("Error");
-            return;
-        }
-
-        $('#wldUSDT').text(`$${wldUSDT.toFixed(8)}`);
-        $('#wldMXN').text(`$${(wldUSDT * usdtMXN).toFixed(8)}`);
-
-        await mostrarPar("BTC", wldUSDT);
-        await mostrarPar("XRP", wldUSDT);
-        await mostrarPar("ETH", wldUSDT);
-        await mostrarPar("SOL", wldUSDT);
-    }
-
-    async function mostrarPar(cripto, wldUSDT) {
-        const otraUSDT = await getPrice(cripto + 'USDT');
-        if (!otraUSDT) return;
-        const ratio = (wldUSDT / otraUSDT).toFixed(8);
-        $(`#wld${cripto}`).text(ratio);
-    }
-
-    async function cargarParesWLD() {
-        const res = await fetch("https://api.binance.com/api/v3/ticker/price");
-        const data = await res.json();
-        const paresWLD = data.filter(d => d.symbol.startsWith("WLD") && d.symbol !== "WLDUSDT");
-        const tabla = $('#wldPairs');
-        tabla.empty();
-        tabla.append(`<tr><th>Par</th><th>Precio</th></tr>`);
-        paresWLD.forEach(p => {
-            const simbolo = p.symbol.replace("WLD", "WLD/");
-            tabla.append(`<tr><td>${simbolo}</td><td>${parseFloat(p.price).toFixed(8)}</td></tr>`);
-        });
-    }
-</script>
-
-<!-- Redirección de World ID -->
-<script>
-    async function handleWorldIDRedirect() {
-        const code = new URLSearchParams(window.location.search).get("code");
-        if (!code) return;
-
-        try {
-            const res = await fetch(`https://ganastrx4.github.io/chc-flask-app/dados.html?code=${code}`);
-            const data = await res.json();
-            if (data.success) {
-                window.location.href = `billetera.html?wallet=${data.wallet_address}`;
-            } else {
-                alert("Error: " + (data.error || "Desconocido"));
+        async function getCryptoPrice(symbol) {
+            try {
+                const response = await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${symbol}USDT`);
+                const data = await response.json();
+                return data.price || null;
+            } catch (error) {
+                console.error('Error al obtener los datos:', error);
+                return null;
             }
-        } catch (err) {
-            console.error("Error:", err);
-            alert("Error de conexión con el backend");
         }
-    }
-    window.onload = handleWorldIDRedirect;
-</script>
 
+        async function loadCryptoLists() {
+            try {
+                const response = await fetch('https://api.binance.com/api/v3/ticker/24hr');
+                const data = await response.json();
+                
+                if (!data || !Array.isArray(data)) return;
+
+                const sortedByChange = [...data].sort((a, b) => parseFloat(b.priceChangePercent) - parseFloat(a.priceChangePercent));
+                const sortedByVolume = [...data].sort((a, b) => parseFloat(b.quoteVolume) - parseFloat(a.quoteVolume));
+                const sortedByNew = [...data].reverse();
+
+                displayTable('#winners', sortedByChange.slice(0, 6));
+                displayTable('#losers', sortedByChange.slice(-6).reverse());
+                displayTable('#popular', sortedByVolume.slice(0, 6));
+                displayTable('#favorites', sortedByVolume.slice(6, 12));
+                displayTable('#new', sortedByNew.slice(0, 6));
+            } catch (error) {
+                console.error('Error al obtener listas de criptomonedas:', error);
+            }
+        }
+
+        function displayTable(id, data) {
+            const container = $(id);
+            container.empty();
+            container.append(`
+                <tr>
+                    <th>Moneda</th>
+                    <th>Último Precio</th>
+                    <th>Cambio 24h (%)</th>
+                </tr>
+            `);
+            data.forEach(item => {
+                const symbol = item.symbol.replace('USDT', '');
+                const lastPrice = parseFloat(item.lastPrice).toFixed(6);
+                const changePercent = parseFloat(item.priceChangePercent).toFixed(2);
+                container.append(`
+                    <tr>
+                        <td>${symbol}</td>
+                        <td>$${lastPrice}</td>
+                        <td style="color: ${changePercent >= 0 ? 'lime' : 'red'};">${changePercent}%</td>
+                    </tr>
+                `);
+            });
+        }
+    </script>
 <!-- Barra Inferior -->
 <nav class="bottom-nav">
     <a href="./enviarwld.html" class="nav-item">
