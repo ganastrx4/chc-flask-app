@@ -1,360 +1,435 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Comprar CHCBTC (BSC)</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Comprar CHCBTC (BSC) | MetaMask / WalletConnect</title>
 
+    <!-- Libraries -->
+    <!-- Ethers v5 porque es el stack que ya traías junto con Web3Modal v1 -->
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/web3modal@1.9.10/dist/index.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@walletconnect/web3-provider@1.8.0/dist/umd/index.min.js"></script>
 
     <style>
+        :root {
+            --primary:#007bff;
+            --primary-hover:#0056b3;
+            --success:#28a745;
+            --success-hover:#218838;
+            --danger:#d9534f;
+            --bg:#f3f3f3;
+            --card-bg:#ffffff;
+            --text:#333;
+            --muted:#555;
+            --border:#ddd;
+        }
+        *{box-sizing:border-box;}
         body {
             font-family: Arial, sans-serif;
             padding: 20px;
-            background: #f3f3f3;
+            background: var(--bg);
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             min-height: 100vh;
             margin: 0;
-            box-sizing: border-box;
         }
         .container {
-            background: white;
+            background: var(--card-bg);
             padding: 30px;
             border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            max-width: 400px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            max-width: 420px;
             width: 100%;
             text-align: center;
-            box-sizing: border-box;
         }
-        h2, h3 {
-            color: #333;
-            margin-bottom: 20px;
+        h2,h3{color:var(--text);margin-bottom:20px;}
+        p{color:var(--muted);margin:10px 0;}
+        label{
+            display:block;
+            margin-top:20px;
+            margin-bottom:5px;
+            font-weight:bold;
+            text-align:left;
+            color:var(--muted);
         }
-        button {
-            background-color: #007bff;
-            color: white;
-            padding: 12px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 17px;
-            margin-top: 15px;
-            width: 100%;
-            transition: background-color 0.3s ease, transform 0.2s ease;
+        input[type="number"]{
+            width:100%;
+            padding:10px;
+            margin-top:10px;
+            border:1px solid var(--border);
+            border-radius:5px;
+            font-size:16px;
+            text-align:center;
         }
-        button:hover {
-            background-color: #0056b3;
-            transform: translateY(-2px);
+        button{
+            background-color:var(--primary);
+            color:#fff;
+            padding:12px 20px;
+            border:none;
+            border-radius:5px;
+            cursor:pointer;
+            font-size:17px;
+            margin-top:15px;
+            width:100%;
+            transition:background-color 0.3s ease,transform 0.2s ease;
         }
-        input[type="number"] {
-            width: calc(100% - 22px);
-            padding: 10px;
-            margin-top: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 16px;
-            box-sizing: border-box;
-            text-align: center;
+        button:hover{background-color:var(--primary-hover);transform:translateY(-2px);}        
+        .btn-success{background-color:var(--success);}        
+        .btn-success:hover{background-color:var(--success-hover);}        
+        #status,#account,#currentPrice{
+            margin-top:15px;
+            font-weight:bold;
+            word-wrap:break-word;
+            font-size:15px;
+            min-height:20px;
         }
-        label {
-            display: block;
-            margin-top: 20px;
-            margin-bottom: 5px;
-            font-weight: bold;
-            text-align: left;
-            color: #555;
-        }
-        p {
-            margin-top: 10px;
-            margin-bottom: 10px;
-            color: #444;
-        }
-        #status, #account, #currentPrice {
-            margin-top: 15px;
-            font-weight: bold;
-            color: #333;
-            word-wrap: break-word;
-            font-size: 15px;
-            min-height: 20px;
-        }
-        #status {
-            color: #d9534f;
-            min-height: 40px;
-        }
-        hr {
-            border: 0;
-            height: 1px;
-            background: #eee;
-            margin: 30px 0;
-        }
-        a {
-            color: #007bff;
-            text-decoration: none;
-            margin-top: 8px;
-            display: inline-block;
-            font-size: 15px;
-        }
-        a:hover {
-            text-decoration: underline;
-        }
-        ul {
-            list-style: none; /* Quita los puntos de la lista */
-            padding: 0;
-            margin: 15px 0;
-        }
-        ul li {
-            margin-bottom: 5px;
-        }
+        #status{color:var(--danger);min-height:40px;}
+        #account{color:var(--text);}        
+        #currentPrice{color:var(--text);}        
+        .rateBox{margin-top:15px;font-size:15px;font-weight:bold;color:var(--success);}        
+        .calcOutput{margin-top:5px;font-size:15px;font-weight:bold;color:var(--text);}        
+        hr{border:0;height:1px;background:#eee;margin:30px 0;}
+        a{color:var(--primary);text-decoration:none;margin-top:8px;display:inline-block;font-size:15px;}
+        a:hover{text-decoration:underline;}
+        ul{list-style:none;padding:0;margin:15px 0;}
+        ul li{margin-bottom:5px;}
+        code{background:#f8f8f8;padding:2px 4px;border-radius:4px;font-size:14px;color:#d63384;}
+        .copy-btn{margin-left:4px;padding:2px 6px;font-size:12px;line-height:1;display:inline-block;width:auto;}
+        .msg-ok{color:var(--success);}
     </style>
 </head>
 <body>
-
     <div class="container">
-        <h2>🪙 Comprar <b>CHCBTC</b> (Binance Smart Chain)</h2>
+        <h2>🪙 Comprar <b>CHCBTC</b> (BSC)</h2>
+
+        <div style="font-size:14px;line-height:1.4;margin-bottom:10px;">
+            Contrato: <code id="contractAddr">0x63F547B3749e022B28a5a506dfD3ECEb454f1726</code>
+            <button id="copyAddrBtn" class="copy-btn">Copiar</button>
+        </div>
 
         <button onclick="connectWallet()">🔗 Conectar Wallet</button>
         <p id="account">No conectado</p>
 
-        <button onclick="showPrice()">📈 Ver precio actual</button>
-        <p id="currentPrice">Precio: --</p>
+        <div class="rateBox">Tasa fija: 1 BNB = 100,000 CHCBTC</div>
 
-        <label for="bnbAmount">💰 Monto a enviar en BNB:</label><br>
-        <input type="number" id="bnbAmount" step="0.0001" value="0.01"><br><br>
+        <button onclick="showPrice()">📈 Ver precio contrato (opcional)</button>
+        <p id="currentPrice">Precio contrato: --</p>
 
-        <button onclick="buyTokens()">💸 Comprar CHCBTC</button>
+        <label for="bnbAmount">💰 Monto a enviar en BNB:</label>
+        <input type="number" id="bnbAmount" step="0.0001" value="0.01" min="0" />
+        <div class="calcOutput" id="calcOutput">≈ 1,000.00 CHCBTC</div>
+
+        <button onclick="buyTokens()" class="btn-success">💸 Comprar CHCBTC</button>
         <p id="status"></p>
 
-        <hr>
+        <button onclick="addTokenToMetaMask()">➕ Agregar CHCBTC a MetaMask</button>
+
+        <hr />
         <h3>🔗 Enlaces útiles:</h3>
         <ul>
-            <li><a href="https://bscscan.com/address/0x63F547B3749e022B28a5a506dfD3ECEb454f1726" target="_blank">Contrato en BscScan</a></li>
-            <li><a href="https://www.geckoterminal.com/bsc/pools/0x55abc3f532e31cae7f4fde3c78d906798800f785" target="_blank">Pool en GeckoTerminal</a></li>
+            <li><a href="https://bscscan.com/address/0x63F547B3749e022B28a5a506dfD3ECEb454f1726" target="_blank" rel="noopener">Contrato en BscScan</a></li>
+            <li><a href="https://www.geckoterminal.com/bsc/pools/0x55abc3f532e31cae7f4fde3c78d906798800f785" target="_blank" rel="noopener">Pool en GeckoTerminal</a></li>
         </ul>
     </div>
 
     <script>
-        const CONTRACT_ADDRESS = "0x63F547B3749e022B28a5a506dfD3ECEb454f1726";
-        const ABI = [
-            "function buyTokens() payable",
-            "function pricePerWLD() view returns (uint256)",
-            // Asegúrate de incluir cualquier otra función que tu contrato use, como balanceOf, setPrice, transfer, etc.,
-            // aunque no estén directamente en el flujo de compra/mostrar precio.
-            // Por ejemplo, si usas balanceOf para mostrar el balance del usuario:
-            "function balanceOf(address account) view returns (uint256)",
-            // "function setPrice(uint256) external",
-            // "function transfer(address, uint256) returns (bool)"
-        ];
+    /****************************************************
+     * CONFIGURACIÓN BÁSICA
+     ****************************************************/
+    const CONTRACT_ADDRESS = "0x63F547B3749e022B28a5a506dfD3ECEb454f1726"; // CHCBTC BSC
+    const TOKEN_SYMBOL      = "CHCBTC";
+    const TOKEN_DECIMALS    = 18; // ajusta si tu token usa otro valor
+    const TOKEN_IMAGE       = "https://ganastrx4.github.io/assets/chcbtc-128.png"; // opcional, actualiza si tienes logo
 
-        let provider, signer, contract, web3ModalInstance; // Renombrado de 'web3Modal' a 'web3ModalInstance' para claridad.
-        let connectedWalletProvider; // Para guardar la instancia del proveedor de la wallet
+    // Tasa fija UI: 1 BNB = 100,000 CHCBTC
+    // (Solo para cálculo en pantalla; la entrega real depende de la lógica on-chain en buyTokens())
+    const RATE_TOKENS_PER_BNB = 100000;
 
-        // Opciones para múltiples billeteras
-        const providerOptions = {
-            // Metamask (u otros proveedores inyectados) se detectan automáticamente
-            // Si quieres un control explícito sobre MetaMask, puedes añadirlo así:
-            // injected: {
-            //     display: {
-            //         name: "Injected",
-            //         description: "Connect with the browser injected wallet (e.g. MetaMask)"
-            //     },
-            //     package: null // No se requiere un paquete para proveedores inyectados
-            // },
-            walletconnect: {
-                package: WalletConnectProvider.default, // WalletConnect v1
-                options: {
-                    rpc: {
-                        56: "https://bsc-dataseed.binance.org/" // RPC para BNB Smart Chain
-                    },
-                    network: "binance", // Puede ser "binance" para BNB Smart Chain
-                    // Si usas un Project ID para WalletConnect v2 (aunque estamos en V1), podría ir aquí.
-                    // projectId: "TU_PROJECT_ID_DE_WALLETCONNECT" // Si tienes uno y quieres usarlo
-                }
-            },
-            // Soporte para Binance Chain Wallet (extensión de navegador)
-            binancechainwallet: {
-                package: true // Indica que Web3Modal debe buscar el objeto window.BinanceChain
+    // ABI mínimo para compra + lectura de precio. Ajusta a tu contrato real.
+    const ABI = [
+        "function buyTokens() payable",
+        "function pricePerBNB() view returns (uint256)", // si no existe, showPrice() hará fallback
+        "function balanceOf(address) view returns (uint256)"
+    ];
+
+    let provider, signer, contract, web3ModalInstance, connectedWalletProvider;
+
+    /****************************************************
+     * WEB3MODAL PROVIDER OPTIONS
+     ****************************************************/
+    const providerOptions = {
+        walletconnect: {
+            package: window.WalletConnectProvider.default,
+            options: {
+                rpc: {
+                    56: "https://bsc-dataseed.binance.org/" // BNB Smart Chain RPC
+                },
+                network: "binance"
             }
-            // Puedes añadir más wallets aquí si es necesario (ej. Coinbase Wallet, Torus, etc.)
-            // Consulta la documentación de Web3Modal V1 para otras opciones:
-            // https://github.com/Web3Modal/web3modal#provider-options
-        };
+        },
+        binancechainwallet: {
+            package: true // detecta window.BinanceChain
+        }
+        // Puedes agregar más proveedores aquí (Coinbase, Torus, etc.)
+    };
 
-        // Función para inicializar Web3Modal cuando la página carga
-        window.addEventListener('load', async () => {
-            try {
-                web3ModalInstance = new Web3Modal.default({
-                    cacheProvider: true, // Si quieres que la wallet permanezca conectada al recargar
-                    providerOptions, // Opciones de proveedores configuradas arriba
-                    disableInjectedProvider: false, // Asegura que MetaMask (u otros inyectados) sea una opción
-                    theme: "dark" // Puedes elegir "light", "dark", o "native"
-                });
-                document.getElementById("status").innerText = "Listo para conectar tu wallet.";
-                console.log("✅ Web3Modal V1/V2 inicializado correctamente.");
+    /****************************************************
+     * INIT AL LOAD
+     ****************************************************/
+    window.addEventListener('load', async () => {
+        try {
+            web3ModalInstance = new window.Web3Modal.default({
+                cacheProvider: true,
+                providerOptions,
+                disableInjectedProvider: false,
+                theme: 'dark'
+            });
+            setStatus('Listo para conectar tu wallet.', false);
+            console.log('✅ Web3Modal inicializado');
+            if (web3ModalInstance.cachedProvider) {
+                await connectWallet();
+            }
+        } catch (err) {
+            console.error('❌ Error al inicializar Web3Modal:', err);
+            setStatus('❌ Error crítico: No se pudo inicializar la conexión con la wallet.', true);
+        }
+        // arranca calculadora
+        updateCalc();
+    });
 
-                // Si hay un proveedor cacheado, intenta conectar automáticamente
-                if (web3ModalInstance.cachedProvider) {
-                    await connectWallet();
-                }
+    /****************************************************
+     * UI HELPERS
+     ****************************************************/
+    const elStatus      = document.getElementById('status');
+    const elAccount     = document.getElementById('account');
+    const elCurrentPrice= document.getElementById('currentPrice');
+    const elBnbAmount   = document.getElementById('bnbAmount');
+    const elCalcOutput  = document.getElementById('calcOutput');
+    const elCopyAddrBtn = document.getElementById('copyAddrBtn');
 
-            } catch (error) {
-                console.error("❌ Error al inicializar Web3Modal:", error);
-                document.getElementById("status").innerText = "❌ Error crítico: No se pudo inicializar la conexión con la wallet. Consulta la consola.";
+    function setStatus(msg, isError=true){
+        elStatus.textContent = msg || '';
+        elStatus.style.color = isError ? 'var(--danger)' : 'var(--success)';
+    }
+
+    function shortAddr(addr){
+        if(!addr) return '';
+        return addr.slice(0,6)+'...'+addr.slice(-4);
+    }
+
+    function fmtTokens(num){
+        if(isNaN(num)) return '0';
+        if(num >= 1) return num.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
+        return num.toPrecision(6);
+    }
+
+    function updateCalc(){
+        const v = parseFloat(elBnbAmount.value);
+        if(isNaN(v) || v<=0){
+            elCalcOutput.textContent = '≈ 0 '+TOKEN_SYMBOL;
+            return;
+        }
+        const tokens = v * RATE_TOKENS_PER_BNB;
+        elCalcOutput.textContent = `≈ ${fmtTokens(tokens)} ${TOKEN_SYMBOL}`;
+    }
+    elBnbAmount.addEventListener('input', updateCalc);
+
+    elCopyAddrBtn.addEventListener('click', async() => {
+        try{
+            await navigator.clipboard.writeText(CONTRACT_ADDRESS);
+            elCopyAddrBtn.textContent='Copiado!';
+            setTimeout(()=>{elCopyAddrBtn.textContent='Copiar';},1500);
+        }catch(err){console.error(err);}
+    });
+
+    /****************************************************
+     * WALLET CONNECTION
+     ****************************************************/
+    async function connectWallet(){
+        setStatus('Conectando wallet...', false);
+        try {
+            connectedWalletProvider = await web3ModalInstance.connect();
+            provider = new ethers.providers.Web3Provider(connectedWalletProvider);
+            signer   = provider.getSigner();
+            const address = await signer.getAddress();
+            elAccount.textContent = '✅ Conectado: ' + shortAddr(address);
+            setStatus('Wallet conectada.', false);
+
+            // suscribirse eventos
+            subscribeProvider(connectedWalletProvider);
+
+            // validar red BSC
+            await ensureBscNetwork();
+
+            // instanciar contrato
+            contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, signer);
+            console.log('Contrato instanciado');
+        } catch (err) {
+            console.error('Error al conectar la wallet:', err);
+            let msg = 'Error al conectar la wallet.';
+            if (err?.message?.includes('User closed modal')) msg = 'Conexión cancelada por el usuario.';
+            setStatus('❌ '+msg, true);
+            elAccount.textContent = 'No conectado';
+            if (web3ModalInstance?.cachedProvider) web3ModalInstance.clearCachedProvider();
+        }
+    }
+
+    function subscribeProvider(walletProvider){
+        if(!walletProvider?.on) return;
+        walletProvider.on('accountsChanged', (accounts) => {
+            console.log('Cuentas cambiadas:', accounts);
+            if(!accounts.length){
+                elAccount.textContent='No conectado';
+                setStatus('Wallet desconectada.', true);
+                resetApp();
+            }else{
+                connectWallet();
             }
         });
-
-        // Función para conectar la wallet
-        async function connectWallet() {
-            document.getElementById("status").innerText = "Conectando wallet...";
-            try {
-                // Abre el modal para que el usuario elija su wallet
-                // Guarda la instancia del proveedor para escuchar eventos
-                connectedWalletProvider = await web3ModalInstance.connect();
-
-                // Crea un provider de Ethers.js usando el proveedor de la wallet
-                provider = new ethers.providers.Web3Provider(connectedWalletProvider);
-
-                // Obtiene el signer para enviar transacciones
-                signer = provider.getSigner();
-
-                // Obtiene la dirección de la cuenta conectada
-                const address = await signer.getAddress();
-                document.getElementById("account").innerText = "✅ Conectado: " + address.substring(0, 6) + "..." + address.substring(address.length - 4);
-
-                // Instancia el contrato con el signer
-                contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, signer);
-                document.getElementById("status").innerText = "📦 Contrato listo para usar.";
-
-                // Suscribirse a eventos del proveedor de la wallet
-                subscribeProvider(connectedWalletProvider);
-
-            } catch (e) {
-                console.error("Error al conectar la wallet:", e);
-                let errorMessage = "Error al conectar la wallet.";
-                if (e.message && e.message.includes("User closed modal")) {
-                    errorMessage = "Conexión cancelada por el usuario.";
-                } else if (e.message) {
-                    errorMessage = "Error: " + e.message;
-                }
-                document.getElementById("status").innerText = `❌ ${errorMessage}`;
-                document.getElementById("account").innerText = "No conectado";
-                // Limpiar el caché si hay un error de conexión significativo
-                if (web3ModalInstance.cachedProvider) {
-                    web3ModalInstance.clearCachedProvider();
-                }
-            }
-        }
-
-        // Función para suscribirse a eventos del proveedor de la wallet
-        function subscribeProvider(walletProvider) {
-            if (!walletProvider.on) return; // Si el proveedor no tiene un método 'on', no podemos suscribirnos
-
-            walletProvider.on("accountsChanged", (accounts) => {
-                console.log("Cuentas cambiadas:", accounts);
-                if (accounts.length === 0) {
-                    // Wallet desconectada o todas las cuentas eliminadas
-                    document.getElementById("account").innerText = "No conectado";
-                    document.getElementById("status").innerText = "Wallet desconectada.";
-                    resetApp();
-                } else {
-                    // Cuenta cambiada, reconectar para actualizar el signer y la dirección
-                    connectWallet(); // Re-ejecutar conexión para actualizar estado
-                }
-            });
-
-            walletProvider.on("chainChanged", (chainId) => {
-                console.log("Red cambiada a:", chainId);
-                // Verifica si la red es la esperada (BSC - chainId 56)
-                if (parseInt(chainId) !== 56) {
-                    document.getElementById("status").innerText = "⚠️ Por favor, cambia a la red BNB Smart Chain (BSC - Chain ID 56).";
-                    document.getElementById("account").innerText = "Red incorrecta";
-                    resetApp();
-                } else {
-                    // Reconectar si la red es la correcta para re-inicializar el contrato con la nueva red
-                    connectWallet(); // Re-ejecutar conexión para actualizar estado
-                }
-            });
-
-            walletProvider.on("disconnect", (code, reason) => {
-                console.log("Proveedor desconectado:", code, reason);
-                document.getElementById("account").innerText = "No conectado";
-                document.getElementById("status").innerText = "Wallet desconectada.";
+        walletProvider.on('chainChanged', (chainId) => {
+            console.log('Red cambiada a:', chainId);
+            // chainId puede venir en hex string
+            const id = typeof chainId === 'string' && chainId.startsWith('0x') ? parseInt(chainId,16) : Number(chainId);
+            if(id !== 56){
+                setStatus('⚠️ Cambia a BNB Smart Chain (ChainId 56).', true);
+                elAccount.textContent='Red incorrecta';
                 resetApp();
-            });
-        }
-
-        // Función para resetear el estado de la app si la wallet se desconecta o cambia de red
-        function resetApp() {
-            provider = null;
-            signer = null;
-            contract = null;
-            connectedWalletProvider = null;
-            document.getElementById("currentPrice").innerText = "Precio: --";
-            web3ModalInstance.clearCachedProvider(); // Limpia el caché de Web3Modal
-        }
-
-        async function showPrice() {
-            if (!contract) {
-                document.getElementById("status").innerText = "⚠️ Conecta tu wallet primero para ver el precio.";
-                return;
+            }else{
+                connectWallet();
             }
+        });
+        walletProvider.on('disconnect', (code, reason) => {
+            console.log('Proveedor desconectado:', code, reason);
+            elAccount.textContent='No conectado';
+            setStatus('Wallet desconectada.', true);
+            resetApp();
+        });
+    }
 
-            try {
-                document.getElementById("currentPrice").innerText = "Cargando precio...";
-                const price = await contract.pricePerWLD();
-                // Asumiendo 18 decimales para CHCBTC. AJUSTA SI TU TOKEN TIENE OTROS DECIMALES.
-                const formattedPrice = ethers.utils.formatUnits(price, 18);
-                document.getElementById("currentPrice").innerText = `💹 1 BNB = ${formattedPrice} CHCBTC`;
-                document.getElementById("status").innerText = "";
-            } catch (e) {
-                console.error("Error al obtener el precio:", e);
-                document.getElementById("currentPrice").innerText = "❌ Error al obtener el precio.";
-                document.getElementById("status").innerText = "❌ Error al obtener el precio: " + (e.message || e);
-            }
-        }
+    function resetApp(){
+        provider=null;signer=null;contract=null;connectedWalletProvider=null;
+        elCurrentPrice.textContent='Precio contrato: --';
+        if(web3ModalInstance?.cachedProvider){web3ModalInstance.clearCachedProvider();}
+    }
 
-        async function buyTokens() {
-            if (!contract) {
-                document.getElementById("status").innerText = "⚠️ Conecta tu wallet primero para comprar tokens.";
-                return;
-            }
-
-            try {
-                const amountInBNB = document.getElementById("bnbAmount").value;
-                if (isNaN(parseFloat(amountInBNB)) || parseFloat(amountInBNB) <= 0) {
-                    document.getElementById("status").innerText = "❌ Por favor, introduce un monto válido y positivo en BNB.";
-                    return;
-                }
-
-                document.getElementById("status").innerText = "⏳ Preparando transacción...";
-
-                const tx = await contract.buyTokens({
-                    value: ethers.utils.parseEther(amountInBNB)
+    async function ensureBscNetwork(){
+        if(!provider) return;
+        const net = await provider.getNetwork();
+        if(net.chainId !== 56){
+            try{
+                await connectedWalletProvider.request({
+                    method:'wallet_switchEthereumChain',
+                    params:[{chainId:'0x38'}]
                 });
-
-                document.getElementById("status").innerText = "⏳ Transacción enviada. Esperando confirmación...";
-                await tx.wait();
-
-                document.getElementById("status").innerText = "✅ Compra exitosa. ¡Revisa tu wallet!";
-                document.getElementById("bnbAmount").value = "0.01";
-            } catch (err) {
-                console.error("Error al comprar tokens:", err);
-                let errorMessage = "Error al comprar tokens.";
-                if (err.code === 4001) {
-                    errorMessage = "Transacción cancelada por el usuario.";
-                } else if (err.message && err.message.includes("insufficient funds")) {
-                    errorMessage = "Fondos insuficientes en tu wallet para esta transacción.";
-                } else if (err.message) {
-                    errorMessage = "Error: " + err.message;
-                }
-                document.getElementById("status").innerText = `❌ ${errorMessage}`;
+                setStatus('Red cambiada a BSC.', false);
+            }catch(err){
+                console.warn('No se pudo cambiar automáticamente a BSC:', err);
+                setStatus('Cambia manualmente a BNB Smart Chain (56).', true);
+                throw err;
             }
         }
+    }
+
+    /****************************************************
+     * MOSTRAR PRECIO DEL CONTRATO (OPCIONAL)
+     * Intentamos pricePerBNB(); si no existe, mostramos la tasa fija UI.
+     ****************************************************/
+    async function showPrice(){
+        if(!contract){setStatus('⚠️ Conecta tu wallet primero para ver el precio.', true);return;}
+        try{
+            elCurrentPrice.textContent='Cargando precio...';
+            let onChain;
+            try{ onChain = await contract.pricePerBNB(); }catch(_ignore){}
+            if(onChain){
+                // asume que onChain ya está en tokens por 1 BNB con 18 decimales? depende de tu contrato.
+                // Si realmente pricePerBNB devuelve cuántos CHCBTC se obtienen por 1 BNB *sin* decimales extra,
+                // ajusta esta conversión.
+                const raw = ethers.BigNumber.from(onChain);
+                // Intento heurístico: si raw es grande (>1e9) asumimos que está escalado (18 decimales)
+                let tokensPerBnb;
+                try{
+                    const asStr = ethers.utils.formatUnits(raw, TOKEN_DECIMALS);
+                    tokensPerBnb = parseFloat(asStr);
+                }catch(e){
+                    tokensPerBnb = parseFloat(raw.toString());
+                }
+                if(!isNaN(tokensPerBnb)){
+                    elCurrentPrice.textContent = `💹 1 BNB = ${fmtTokens(tokensPerBnb)} ${TOKEN_SYMBOL} (contrato)`;
+                }else{
+                    elCurrentPrice.textContent = `💹 1 BNB = ${RATE_TOKENS_PER_BNB.toLocaleString()} ${TOKEN_SYMBOL} (UI)`;
+                }
+            }else{
+                elCurrentPrice.textContent = `💹 1 BNB = ${RATE_TOKENS_PER_BNB.toLocaleString()} ${TOKEN_SYMBOL} (UI)`;
+            }
+            setStatus('', false);
+        }catch(err){
+            console.error('Error al obtener el precio:', err);
+            elCurrentPrice.textContent='❌ Error al obtener el precio.';
+            setStatus('❌ Error al obtener el precio: '+(err.message||err), true);
+        }
+    }
+
+    /****************************************************
+     * COMPRAR TOKENS
+     ****************************************************/
+    async function buyTokens(){
+        if(!contract){setStatus('⚠️ Conecta tu wallet primero para comprar tokens.', true);return;}
+        try{
+            const amountInBNB = elBnbAmount.value;
+            if(isNaN(parseFloat(amountInBNB)) || parseFloat(amountInBNB) <= 0){
+                setStatus('❌ Ingresa un monto válido en BNB.', true);
+                return;
+            }
+            setStatus('⏳ Preparando transacción...', false);
+            const tx = await contract.buyTokens({value: ethers.utils.parseEther(amountInBNB)});
+            setStatus('⏳ Transacción enviada. Esperando confirmación...', false);
+            const rcpt = await tx.wait();
+            if(rcpt.status === 1){
+                setStatus('✅ Compra exitosa. ¡Revisa tu wallet!', false);
+                elBnbAmount.value='0.01';
+                updateCalc();
+            }else{
+                setStatus('❌ La transacción falló o fue revertida.', true);
+            }
+        }catch(err){
+            console.error('Error al comprar tokens:', err);
+            if(err.code === 4001){
+                setStatus('Transacción cancelada por el usuario.', true);return;
+            }
+            if(err?.message?.includes('insufficient funds')){
+                setStatus('Fondos insuficientes en tu wallet.', true);return;
+            }
+            setStatus('Error: '+(err.shortMessage||err.message||err), true);
+        }
+    }
+
+    /****************************************************
+     * AGREGAR TOKEN A METAMASK (WATCHASSET)
+     ****************************************************/
+    async function addTokenToMetaMask(){
+        if(!window.ethereum){setStatus('No se detectó MetaMask para agregar token.', true);return;}
+        try{
+            const wasAdded = await window.ethereum.request({
+                method:'wallet_watchAsset',
+                params:{
+                    type:'ERC20',
+                    options:{
+                        address: CONTRACT_ADDRESS,
+                        symbol:  TOKEN_SYMBOL,
+                        decimals: TOKEN_DECIMALS,
+                        image: TOKEN_IMAGE
+                    }
+                }
+            });
+            if(wasAdded){setStatus('Token agregado a MetaMask.', false);}else{setStatus('Token no agregado.', true);}            
+        }catch(err){
+            console.error('Error al agregar token:', err);
+            setStatus('Error al agregar token: '+(err.message||err), true);
+        }
+    }
     </script>
 </body>
 </html>
