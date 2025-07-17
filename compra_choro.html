@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Comprar CHORO (BSC) | MetaMask / WalletConnect</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet" />
+  <!-- Ethers v5 (para compatibilidad con Web3Modal v1) -->
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/web3modal@1.9.10/dist/index.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@walletconnect/web3-provider@1.8.0/dist/umd/index.min.js"></script>
+  
+  <style>
+    :root {
+      --primary-color:#007bff;
+      --primary-hover:#0069d9;
+      --secondary-color:#28a745;
+      --secondary-hover:#218838;
+      --bg-light:#f8f9fa;
+      --text-dark:#343a40;
+      --card-bg:#ffffff;
+      --border-color:#e9ecef;
+      --shadow:rgba(0,0,0,0.08);
+    }
+    *{box-sizing:border-box;}
+    body{
+      font-family:'Poppins',sans-serif;
+      margin:0;
+      padding:20px;
+      background-color:var(--bg-light);
+      color:var(--text-dark);
+      line-height:1.6;
+      display:flex;
+      justify-content:center;
+      align-items:flex-start;
+      min-height:100vh;
+    }
+    .container{
+      max-width:480px;
+      width:100%;
+      background-color:var(--card-bg);
+      border-radius:12px;
+      box-shadow:0 8px 20px var(--shadow);
+      padding:40px 30px 60px 30px;
+      text-align:center;
+    }
+    h1,h2,h3{margin:0 0 20px 0;font-weight:700;}
+    h1{font-size:2em;color:var(--primary-color);}  
+    p{font-size:1.05em;margin-bottom:24px;color:#6c757d;}
+    
+    .token-info{
+      background-color:#e2f0ff;
+      border-left:5px solid var(--primary-color);
+      padding:15px 20px;
+      margin:30px auto;
+      border-radius:8px;
+      max-width:100%;
+      font-size:0.95em;
+      color:#0056b3;
+      text-align:left;
+      word-break:break-all;
+    }
+    .token-info strong{color:#004085;}
+    .token-info code{display:block;margin-top:4px;font-size:0.9em;color:#d63384;background:#f8f9fa;padding:2px 4px;border-radius:4px;}
+    .copy-btn{
+      margin-top:8px;background:var(--primary-color);color:#fff;padding:4px 10px;font-size:0.8em;border:none;border-radius:4px;cursor:pointer;
+    }
+    .copy-btn:hover{background:var(--primary-hover);}  
+
+    /* Calculadora */
+    .buy-box{margin:40px auto 10px auto;max-width:100%;text-align:left;}
+    .buy-box h2{margin:0 0 10px 0;font-size:1.6em;color:var(--secondary-color);font-weight:600;text-align:center;}
+    .rate-line{text-align:center;margin-bottom:15px;font-size:1.05em;font-weight:600;color:var(--text-dark);}    
+    .rate-line span{color:var(--secondary-color);}  
+    .buy-form-row{display:flex;gap:10px;align-items:center;margin-bottom:15px;}
+    .buy-form-row label{flex:0 0 70px;font-size:0.95em;font-weight:600;}
+    .buy-form-row input{flex:1;padding:10px 12px;font-size:1em;border:1px solid var(--border-color);border-radius:6px;}
+    .buy-form-row output{flex:1;padding:10px 12px;background:#e9ecef;border-radius:6px;font-size:1em;min-height:42px;display:flex;align-items:center;justify-content:flex-start;color:var(--text-dark);border:1px solid var(--border-color);}  
+    .buy-actions{text-align:center;margin-top:10px;}
+    .buy-direct-btn{display:inline-block;background-color:var(--secondary-color);color:#fff;padding:12px 25px;border-radius:5px;text-decoration:none;font-weight:600;font-size:1em;transition:background-color 0.3s ease,transform 0.2s ease;cursor:pointer;border:none;}
+    .buy-direct-btn:hover{background-color:var(--secondary-hover);transform:translateY(-1px);}  
+    .buy-msg{margin-top:8px;font-size:0.9em;min-height:1.2em;text-align:center;}
+    .buy-msg.error{color:#dc3545;}
+    .buy-msg.success{color:var(--secondary-color);}  
+
+    .links-box{margin-top:40px;text-align:left;}
+    .links-box h3{text-align:center;font-size:1.2em;color:var(--text-dark);margin-bottom:10px;}
+    .links-box ul{list-style:none;padding:0;margin:0;}
+    .links-box li{margin-bottom:8px;}
+    .links-box a{color:var(--primary-color);text-decoration:none;font-weight:600;font-size:0.95em;}
+    .links-box a:hover{text-decoration:underline;}
+
+    footer{margin-top:50px;font-size:0.85em;color:#888;}
+
+    @media (max-width:600px){
+      .container{padding:25px;}
+      h1{font-size:1.8em;}
+      .buy-form-row{flex-direction:column;align-items:stretch;}
+      .buy-form-row label{width:100%;}
+      .buy-form-row input,.buy-form-row output{width:100%;}
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🪙 Comprar <span style="color:#F0B90B;">CHORO</span> (BSC)</h1>
+    <p>Compra el token <b>CHORO</b> en la red <b>BNB Smart Chain</b> usando MetaMask, WalletConnect u otras wallets compatibles.</p>
+
+    <div class="token-info">
+      <strong>Dirección del contrato (BSC):</strong>
+      <code id="contractAddr">0x113345bee2bfeb3c4b65dc5c7f3e1d864d5b930f</code>
+      <button type="button" class="copy-btn" id="copyAddrBtn">Copiar</button>
+    </div>
+
+    <!-- Calculadora de compra -->
+    <section class="buy-box" id="buyBox">
+      <h2>Compra directa (Contrato)</h2>
+      <!-- NOTA: Ajusta la tasa cuando la definas. Por ahora placeholder. -->
+      <div class="rate-line">Tasa fija: <span id="rateLineSpan">definir (ej: 1 BNB = 100,000 CHORO)</span></div>
+      <div class="buy-form-row">
+        <label for="bnbInput">BNB</label>
+        <input type="number" id="bnbInput" min="0" step="0.000000000000000001" placeholder="Cantidad de BNB" />
+      </div>
+      <div class="buy-form-row">
+        <label for="choroOutput">CHORO</label>
+        <output id="choroOutput">0</output>
+      </div>
+      <div class="buy-actions">
+        <button id="buyDirectBtn" class="buy-direct-btn">Comprar con Wallet</button>
+        <div id="buyMsg" class="buy-msg"></div>
+      </div>
+    </section>
+
+    <div class="links-box">
+      <h3>🔗 Enlaces útiles:</h3>
+      <ul>
+        <li><a href="https://apespace.io/bsc/0x113345bee2bfeb3c4b65dc5c7f3e1d864d5b930f" target="_blank" rel="noopener">Token en ApeSpace</a></li>
+        <li><a href="https://dexscreener.com/bsc/0x113345bee2bfeb3c4b65dc5c7f3e1d864d5b930f" target="_blank" rel="noopener">Buscar en Dexscreener</a></li>
+        <li><a href="https://bscscan.com/token/0x113345bee2bfeb3c4b65dc5c7f3e1d864d5b930f" target="_blank" rel="noopener">Contrato en BscScan</a></li>
+        <li><a href="https://pancakeswap.finance/swap?outputCurrency=0x113345bee2bfeb3c4b65dc5c7f3e1d864d5b930f" target="_blank" rel="noopener">Comprar en PancakeSwap</a></li>
+      </ul>
+    </div>
+
+    <footer>
+      <p>&copy; 2025 CHORO Token. Todos los derechos reservados.</p>
+    </footer>
+  </div>
+
+  <script>
+    /************************************
+     * CONFIGURACIÓN TOKEN CHORO
+     ************************************/
+    const CHORO_CONTRACT = "0x113345bee2bfeb3c4b65dc5c7f3e1d864d5b930f"; // BSC
+    const TOKEN_SYMBOL   = "CHORO";
+    const TOKEN_DECIMALS = 18; // <-- AJUSTA si tu token usa otros decimales
+
+    /*
+      >>> IMPORTANTE <<<
+      Define tu tasa fija aquí si tu contrato de venta la usa directamente.
+      Ejemplo: 1 BNB = 100000 CHORO  => RATE_TOKENS_PER_BNB = 100000
+      Por ahora lo dejo en null para que la UI no muestre conversiones falsas.
+    */
+    let RATE_TOKENS_PER_BNB = null; // cambia a número (ej: 100000) cuando confirmes la tasa.
+
+    /************************************
+     * ABI DE COMPRA
+     * Ajusta según tu contrato. He dejado varias firmas opcionales.
+     ************************************/
+    const SALE_CONTRACT_ABI = [
+      // Compra simple payable sin argumentos
+      "function buyTokens() payable",
+      // Algunas ventas usan buy() payable
+      "function buy() payable",
+      // Precio on-chain opcional
+      "function pricePerBNB() view returns (uint256)",
+      // Token estándar
+      "function balanceOf(address) view returns (uint256)"
+    ];
+    const SALE_CONTRACT_ADDRESS = CHORO_CONTRACT; // Cambia si usas contrato de venta separado
+
+    /************************************
+     * ELEMENTOS DOM
+     ************************************/
+    const $bnbInput      = document.getElementById('bnbInput');
+    const $choroOut      = document.getElementById('choroOutput');
+    const $buyBtn        = document.getElementById('buyDirectBtn');
+    const $buyMsg        = document.getElementById('buyMsg');
+    const $copyAddrBtn   = document.getElementById('copyAddrBtn');
+    const $contractAddr  = document.getElementById('contractAddr');
+    const $rateLineSpan  = document.getElementById('rateLineSpan');
+
+    /************************************
+     * FORMATEO / UTILIDADES
+     ************************************/
+    function fmt(num,dec=4){
+      if(isNaN(num)) return '0';
+      if(num>=1) return num.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:dec});
+      return num.toPrecision(8);
+    }
+
+    function updateOutput(){
+      const bnb = parseFloat($bnbInput.value);
+      if(isNaN(bnb) || bnb<=0 || RATE_TOKENS_PER_BNB===null){
+        $choroOut.textContent = '0';
+        return;
+      }
+      const tokens = bnb * RATE_TOKENS_PER_BNB;
+      $choroOut.textContent = fmt(tokens,2) + ' ' + TOKEN_SYMBOL;
+    }
+    $bnbInput?.addEventListener('input',updateOutput);
+
+    // Permitir que configures la tasa dinámicamente desde la consola
+    window.setChoroRate = function(v){
+      if(typeof v==='number' && v>0){
+        RATE_TOKENS_PER_BNB = v;
+        $rateLineSpan.textContent = `1 BNB = ${v.toLocaleString()} ${TOKEN_SYMBOL}`;
+        updateOutput();
+      }else{
+        RATE_TOKENS_PER_BNB = null;
+        $rateLineSpan.textContent = 'definir (ej: 1 BNB = 100,000 CHORO)';
+        updateOutput();
+      }
+    };
+
+    // Copiar dirección
+    $copyAddrBtn?.addEventListener('click',async()=>{
+      try{
+        await navigator.clipboard.writeText(CHORO_CONTRACT);
+        $copyAddrBtn.textContent='Copiado!';
+        setTimeout(()=>{$copyAddrBtn.textContent='Copiar';},1500);
+      }catch(err){console.error(err);}
+    });
+
+    /************************************
+     * CONEXIÓN WALLET (Web3Modal)
+     ************************************/
+    let provider, signer, saleContract, web3ModalInstance, connectedWalletProvider;
+
+    const providerOptions = {
+      walletconnect:{
+        package: WalletConnectProvider.default,
+        options:{
+          rpc:{56:"https://bsc-dataseed.binance.org/"},
+          network:"binance"
+        }
+      },
+      binancechainwallet:{package:true}
+    };
+
+    window.addEventListener('load',async()=>{
+      try{
+        web3ModalInstance = new Web3Modal.default({
+          cacheProvider:true,
+          providerOptions,
+          disableInjectedProvider:false,
+          theme:'dark'
+        });
+        $buyMsg.textContent='Listo para conectar tu wallet.';
+      }catch(err){
+        console.error('Error init Web3Modal',err);
+        $buyMsg.textContent='❌ Error inicializando Web3Modal.';
+      }
+    });
+
+    async function connectWallet(){
+      $buyMsg.textContent='Conectando wallet...';
+      try{
+        connectedWalletProvider = await web3ModalInstance.connect();
+        subscribeProvider(connectedWalletProvider);
+        provider = new ethers.providers.Web3Provider(connectedWalletProvider);
+        signer   = provider.getSigner();
+
+        // Checar red
+        const net = await provider.getNetwork();
+        if(net.chainId !== 56){
+          try{
+            await connectedWalletProvider.request({
+              method:'wallet_switchEthereumChain',
+              params:[{chainId:'0x38'}]
+            });
+          }catch(switchErr){
+            $buyMsg.textContent='Cambia a BNB Smart Chain (56).';
+            $buyMsg.className='buy-msg error';
+            return;
+          }
+        }
+
+        const addr = await signer.getAddress();
+        $buyMsg.textContent=`✅ Wallet conectada: ${addr.substring(0,6)}...${addr.slice(-4)}`;
+        $buyMsg.className='buy-msg success';
+
+        saleContract = new ethers.Contract(SALE_CONTRACT_ADDRESS, SALE_CONTRACT_ABI, signer);
+      }catch(err){
+        console.error('connectWallet error',err);
+        $buyMsg.textContent='❌ Error al conectar wallet.';
+        $buyMsg.className='buy-msg error';
+        if(web3ModalInstance?.cachedProvider){web3ModalInstance.clearCachedProvider();}
+      }
+    }
+
+    function subscribeProvider(walletProvider){
+      if(!walletProvider.on) return;
+      walletProvider.on('accountsChanged',()=>{connectWallet();});
+      walletProvider.on('chainChanged',(chainId)=>{
+        if(parseInt(chainId)!==56){
+          $buyMsg.textContent='⚠️ Cambia a BSC (56).';
+          $buyMsg.className='buy-msg error';
+        }else{connectWallet();}
+      });
+      walletProvider.on('disconnect',()=>{
+        resetApp();
+        $buyMsg.textContent='Wallet desconectada.';
+        $buyMsg.className='buy-msg error';
+      });
+    }
+
+    function resetApp(){
+      provider=null;signer=null;saleContract=null;connectedWalletProvider=null;
+      if(web3ModalInstance?.cachedProvider){web3ModalInstance.clearCachedProvider();}
+    }
+
+    /************************************
+     * MOSTRAR PRECIO ON-CHAIN (OPCIONAL)
+     ************************************/
+    async function showPrice(){
+      if(!saleContract){$buyMsg.textContent='⚠️ Conecta tu wallet primero.';return;}
+      $buyMsg.textContent='Leyendo precio...';
+      try{
+        let price;
+        if(saleContract.pricePerBNB){
+          price = await saleContract.pricePerBNB();
+        }else if(saleContract.pricePerWLD){
+          price = await saleContract.pricePerWLD();
+        }
+        if(price){
+          const p = ethers.utils.formatUnits(price,0); // asume entero tokens por BNB
+          $rateLineSpan.textContent = `1 BNB = ${Number(p).toLocaleString()} ${TOKEN_SYMBOL}`;
+          RATE_TOKENS_PER_BNB = Number(p);
+          updateOutput();
+          $buyMsg.textContent='Precio actualizado del contrato.';
+          $buyMsg.className='buy-msg success';
+        }else{
+          $buyMsg.textContent='El contrato no expone precio. Define manual con setChoroRate(n).';
+          $buyMsg.className='buy-msg error';
+        }
+      }catch(err){
+        console.error('showPrice error',err);
+        $buyMsg.textContent='❌ Error al leer precio.';
+        $buyMsg.className='buy-msg error';
+      }
+    }
+
+    /************************************
+     * COMPRAR TOKENS
+     ************************************/
+    async function buyDirect(){
+      if(!saleContract){$buyMsg.textContent='⚠️ Conecta tu wallet primero.';return;}
+      const bnb = parseFloat($bnbInput.value);
+      if(isNaN(bnb)||bnb<=0){
+        $buyMsg.textContent='Ingresa cantidad válida de BNB.';
+        $buyMsg.className='buy-msg error';
+        return;
+      }
+      $buyMsg.textContent='Enviando transacción...';
+      $buyMsg.className='buy-msg';
+      try{
+        const weiValue = ethers.utils.parseEther(String(bnb));
+        let tx;
+        if(saleContract.buyTokens){
+          tx = await saleContract.buyTokens({value:weiValue});
+        }else if(saleContract.buy){
+          tx = await saleContract.buy({value:weiValue});
+        }else{
+          // fallback: simple transferencia directa (no recomendado si no mintea)
+          tx = await signer.sendTransaction({to:SALE_CONTRACT_ADDRESS,value:weiValue});
+        }
+        $buyMsg.textContent='Esperando confirmación...';
+        const rcpt = await tx.wait();
+        if(rcpt?.status===1){
+          $buyMsg.textContent='✅ Compra exitosa. Revisa tu wallet para ver tus CHORO!';
+          $buyMsg.className='buy-msg success';
+        }else{
+          $buyMsg.textContent='La transacción fue revertida.';
+          $buyMsg.className='buy-msg error';
+        }
+      }catch(err){
+        console.error('buyDirect error',err);
+        let msg='Error al comprar';
+        if(err?.code===4001) msg='Transacción cancelada por el usuario';
+        else if(err?.message?.includes('insufficient funds')) msg='Fondos insuficientes';
+        else if(err?.shortMessage) msg=err.shortMessage;
+        else if(err?.message) msg=err.message;
+        $buyMsg.textContent='❌ '+msg;
+        $buyMsg.className='buy-msg error';
+      }
+    }
+
+    /************************************
+     * AGREGAR TOKEN A METAMASK
+     ************************************/
+    async function addTokenToMetaMask(){
+      if(!window.ethereum){return;}
+      try{
+        const wasAdded = await window.ethereum.request({
+          method:'wallet_watchAsset',
+          params:{
+            type:'ERC20',
+            options:{
+              address:CHORO_CONTRACT,
+              symbol:TOKEN_SYMBOL,
+              decimals:TOKEN_DECIMALS,
+              image:''
+            }
+          }
+        });
+        if(wasAdded){$buyMsg.textContent='Token agregado a MetaMask.';$buyMsg.className='buy-msg success';}
+      }catch(err){console.error('addTokenToMetaMask',err);}
+    }
+
+    /************************************
+     * ENLACE UI -> FUNCIONES
+     ************************************/
+    document.getElementById('buyDirectBtn')?.addEventListener('click',buyDirect);
+    // Creamos botón dinámico para conectar wallet y ver precio
+    // (Se inyectarán al vuelo por conveniencia)
+    const extraBtnsWrap = document.createElement('div');
+    extraBtnsWrap.style.marginTop='25px';
+    extraBtnsWrap.style.display='grid';
+    extraBtnsWrap.style.gridTemplateColumns='1fr';
+    extraBtnsWrap.style.gap='10px';
+
+    const btnConnect = document.createElement('button');
+    btnConnect.textContent='🔗 Conectar Wallet';
+    btnConnect.type='button';
+    btnConnect.style.width='100%';
+    btnConnect.addEventListener('click',connectWallet);
+
+    const btnShowPrice = document.createElement('button');
+    btnShowPrice.textContent='📈 Leer precio contrato';
+    btnShowPrice.type='button';
+    btnShowPrice.style.width='100%';
+    btnShowPrice.addEventListener('click',showPrice);
+
+    const btnAddMM = document.createElement('button');
+    btnAddMM.textContent='➕ Agregar CHORO a MetaMask';
+    btnAddMM.type='button';
+    btnAddMM.style.width='100%';
+    btnAddMM.addEventListener('click',addTokenToMetaMask);
+
+    extraBtnsWrap.appendChild(btnConnect);
+    extraBtnsWrap.appendChild(btnShowPrice);
+    extraBtnsWrap.appendChild(btnAddMM);
+
+    document.querySelector('.buy-box').appendChild(extraBtnsWrap);
+
+    // Inicializar calculadora
+    updateOutput();
+  </script>
+</body>
+</html>
