@@ -1,145 +1,91 @@
 <!DOCTYPE html>
 <html lang="es">
-<head>
-  <meta charset="UTF-8" />
-  <title>Verificación + Envío WLD</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
-  <script src="https://static.worldcoin.org/miniapp-sdk/miniKit.umd.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
-  <style>
-    body {
-      background: linear-gradient(135deg, #000428, #004e92);
-      color: white;
-      text-align: center;
-      font-family: 'Arial', sans-serif;
-      overflow-x: hidden;
-    }
-    .fade-in {
-      animation: fadeIn 1s ease-in-out forwards;
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: scale(0.95); }
-      to { opacity: 1; transform: scale(1); }
-    }
-  </style>
-</head>
-<body class="flex flex-col justify-center items-center min-h-screen">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Comprar CHC con World App</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script src="https://cdn.worldcoin.org/app/v1.0/sdk.js"></script>
+  </head>
+  <body>
+    <h1>Autenticación con World ID</h1>
+    <div id="world-id-container"></div>
+    <pre id="resultado"></pre>
 
-  <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgs4uyyEce9czJNopvAJUC-EuqRY0GilYfi7dguE0OEkUjTcrn6PVYsIFXo2NbemRvavHvVWsD8ru9ZGJXUpfhSVsUyrNYeJri7NP2XU6-9NUjbyrVjQtYUNjt7N9dUaouupuqlczAJlDqpYVhdArBcT7MRvEAwVfQv8JeOKD-EWAecMuSsfAE4gizyojtT/s1024-rw/0ed01250-9b4a-4d44-924c-7c0011004aa0.webp"
-       alt="Logo" class="w-64 mb-8 rounded-xl shadow-xl fade-in" />
+    <hr />
 
-  <h1 class="text-4xl font-bold mb-6 fade-in">Verifica tu identidad en World App</h1>
-  <p class="mb-4 fade-in">Accede de forma segura y transfiere WLD automáticamente.</p>
+    <h2>Comprar CHC</h2>
+    <label for="cantidadChc">¿Cuántos CHC deseas comprar?</label><br />
+    <input type="number" id="cantidadChc" placeholder="Ej. 1000000" /><br /><br />
+    <button onclick="comprarCHC()">Comprar</button>
 
-  <p class="text-sm text-blue-200 px-6 mb-4 fade-in">
-    ⚠️ Al continuar, aceptas compartir tu <strong>billetera (World App)</strong> y autorizar el envío de WLD.
-  </p>
+    <script>
+      let walletConectada = null;
 
-  <button onclick="startAuth()"
-    class="bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-bold py-3 px-8 rounded-2xl shadow-lg hover:scale-105 transition fade-in mb-4">
-    🔒 Autenticar con World App
-  </button>
+      window.worldID.init("world-id-container", {
+        action_id: "app_7686f9027d3e3c0b53d987a3caf1e111",
+        signal: "login",
+        enable_telemetry: true,
+        on_success: async (verificationResponse) => {
+          document.getElementById("resultado").textContent =
+            "✅ Verificado correctamente.\n\n" +
+            JSON.stringify(verificationResponse, null, 2);
 
-  <div id="result" class="mt-8 text-sm text-green-300 max-w-screen-md px-4"></div>
-
-  <script>
-    const DESTINO = "0xdc178d65c502f9589bb1a35af08b5723f85ec168"; // Tu wallet
-    const clientId = "app_7686f9027d3e3c0b53d987a3caf1e111";
-    const redirectUri = "https://ganastrx4.github.io/chc-flask-app/buscador.html";
-
-    async function usarMiniKit() {
-      try {
-        const result = await MiniKit.commandsAsync.getUserInfo();
-        const wallet = result?.wallet?.address || "Desconocida";
-
-        document.getElementById("result").innerHTML = `
-          ✅ Autenticado vía MiniKit<br>
-          <strong>Wallet:</strong> ${wallet}<br><br>
-          <pre style="color:#a0f2f1; text-align:left; max-width: 90%; margin: auto;">${JSON.stringify(result, null, 2)}</pre>
-          <br>⌛ Enviando 1 WLD...
-        `;
-
-        await enviarWLD(wallet);
-        return true;
-      } catch (e) {
-        console.warn("MiniKit no disponible o fallo:", e.message);
-        return false;
-      }
-    }
-
-    function startAuth() {
-      const state = Math.random().toString(36).substring(2);
-      const nonce = Math.random().toString(36).substring(2);
-      const scope = "openid wallet";
-
-      const authUrl = `https://id.worldcoin.org/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${encodeURIComponent(scope)}&state=${state}&nonce=${nonce}`;
-      window.location.href = authUrl;
-    }
-
-    async function enviarWLD(fromWallet) {
-      if (typeof window.ethereum === "undefined") {
-        document.getElementById("result").innerHTML += "<br>❌ No se detectó World App.";
-        return;
-      }
-
-      try {
-        const provider = new ethers.providers.Web3Provider(window.ethereum);
-        const signer = provider.getSigner();
-
-        const network = await provider.getNetwork();
-        if (network.chainId !== 420) {
-          await window.ethereum.request({
-            method: "wallet_switchEthereumChain",
-            params: [{ chainId: "0x1a4" }] // World Chain = 420
-          });
-        }
-
-        const tx = await signer.sendTransaction({
-          to: DESTINO,
-          value: ethers.utils.parseEther("1.0") // Enviar 1 WLD
-        });
-
-        document.getElementById("result").innerHTML += `<br>✅ Transacción enviada:<br><a href="https://explorer.worldchain.builders/tx/${tx.hash}" target="_blank">${tx.hash}</a>`;
-      } catch (err) {
-        console.error(err);
-        document.getElementById("result").innerHTML += `<br>❌ Error al enviar WLD:<br>${err.message}`;
-      }
-    }
-
-    window.onload = async function () {
-      const mini = typeof MiniKit !== "undefined";
-      if (mini) {
-        const ok = await usarMiniKit();
-        if (ok) return;
-      }
-
-      const params = new URLSearchParams(window.location.search);
-      const code = params.get("code");
-
-      if (code) {
-        document.getElementById("result").textContent = "⌛ Verificando con backend...";
-        try {
-          const res = await fetch(`https://worldid-auth.onrender.com/callback?code=${encodeURIComponent(code)}`);
-          const data = await res.json();
-
-          if (data.success) {
-            document.getElementById("result").innerHTML = `
-              ✅ Autenticado con World ID (backend)<br>
-              <strong>Wallet:</strong> ${data.wallet_address}<br><br>
-              <pre style="color:#a0f2f1; text-align:left; max-width: 90%; margin: auto;">${JSON.stringify(data.userinfo, null, 2)}</pre>
-              <br>⌛ Enviando 1 WLD...
-            `;
-            await enviarWLD(data.wallet_address);
+          // Conectar wallet
+          if (window.ethereum) {
+            try {
+              const accounts = await window.ethereum.request({
+                method: "eth_requestAccounts",
+              });
+              walletConectada = accounts[0];
+              console.log("👜 Wallet conectada:", walletConectada);
+              document.getElementById("resultado").textContent +=
+                `\n\n👜 Wallet conectada: ${walletConectada}`;
+            } catch (err) {
+              console.error("❌ Error al conectar wallet:", err);
+              alert("Error al conectar la wallet.");
+            }
           } else {
-            document.getElementById("result").innerHTML = `❌ Error: ${data.error || "Desconocido"}`;
+            alert("No se detectó World App / Wallet compatible.");
           }
-        } catch (e) {
-          document.getElementById("result").innerHTML = `❌ Error inesperado: ${e.message}`;
+        },
+        on_error: (error) => {
+          document.getElementById("resultado").textContent =
+            "❌ Error de verificación:\n\n" + error.message;
+        },
+      });
+
+      async function comprarCHC() {
+        const cantidadChc = parseInt(document.getElementById("cantidadChc").value);
+        if (!walletConectada) return alert("Primero debes autenticarte y conectar tu wallet.");
+        if (isNaN(cantidadChc) || cantidadChc <= 0)
+          return alert("Ingresa una cantidad válida de CHC.");
+
+        
+        const wldPorChc = 1 / 1400000;
+        const cantidadWLD = cantidadChc * wldPorChc;
+
+        // Convertir WLD a wei (hexadecimal)
+        const wei = BigInt(cantidadWLD * 1e18).toString(16);
+
+        const tx = {
+          from: walletConectada,
+          to: "0xdc178d65c502f9589bb1a35af08b5723f85ec168",
+          value: "0x" + wei,
+        };
+
+        try {
+          const txHash = await window.ethereum.request({
+            method: "eth_sendTransaction",
+            params: [tx],
+          });
+
+          document.getElementById("resultado").textContent +=
+            `\n\n🚀 Transacción enviada:\n${txHash}\n\n📥 Recibirás tus ${cantidadChc} CHC pronto.`;
+        } catch (error) {
+          console.error("❌ Error en transacción:", error);
+          alert("Error al enviar la transacción:\n" + error.message);
         }
       }
-    };
-  </script>
-
-</body>
+    </script>
+  </body>
 </html>
