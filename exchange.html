@@ -2,63 +2,89 @@
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
-    <title>Autenticación con World App</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <script src="https://cdn.worldcoin.org/app/v1.0/sdk.js"></script>
+    <title>Token CHC | Charly Human Coin</title>
+    <style>
+      body {
+        margin: 0;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
+        color: #fff;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        padding: 40px 20px;
+      }
+
+      header {
+        margin-bottom: 40px;
+      }
+
+      h1 {
+        font-size: 2.5em;
+        margin-bottom: 10px;
+        color: #00eaff;
+      }
+
+      p {
+        font-size: 1.2em;
+        max-width: 600px;
+        margin: auto;
+        margin-bottom: 30px;
+      }
+
+      .value-box {
+        background-color: #ffffff22;
+        padding: 20px;
+        border-radius: 15px;
+        box-shadow: 0 0 15px #00eaff88;
+        margin-bottom: 40px;
+      }
+
+      .btn-buy {
+        background-color: #00eaff;
+        color: #000;
+        padding: 15px 30px;
+        font-size: 1.2em;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        text-decoration: none;
+        transition: background 0.3s ease;
+      }
+
+      .btn-buy:hover {
+        background-color: #00c2d1;
+      }
+
+      footer {
+        margin-top: 60px;
+        font-size: 0.9em;
+        opacity: 0.7;
+      }
+    </style>
   </head>
   <body>
-    <h1>Autenticación con World ID</h1>
+    <header>
+      <h1>CHC - Charly Human Coin</h1>
+      <p>El token que impulsa la solidaridad, la tecnología y la libertad financiera. ¡Forma parte del cambio!</p>
+    </header>
 
-    <!-- Contenedor del widget -->
-    <div id="world-id-container"></div>
+    <div class="value-box">
+      <h2>Valor actual estimado</h2>
+      <p><strong>1 WLD = 1,000 CHC</strong></p>
+    </div>
 
-    <!-- Resultado -->
-    <pre id="resultado"></pre>
+    <a
+      class="btn-buy"
+      href="https://world.org/zh-tw/ecosystem/app_15daccf5b7d4ec9b7dbba044a8fdeab5"
+      target="_blank"
+      >Comprar CHC ahora</a
+    >
 
-    <script>
-      // Iniciar World ID
-      window.worldID.init("world-id-container", {
-        action_id: "app_7686f9027d3e3c0b53d987a3caf1e111", // Tu App ID
-        signal: "login", // Puede ser dinámico o fijo
-        enable_telemetry: true,
-        on_success: async (verificationResponse) => {
-          console.log("✅ Verificado:", verificationResponse);
-          document.getElementById("resultado").textContent = "✅ Verificado correctamente.\n\n" + JSON.stringify(verificationResponse, null, 2);
-
-          // ✅ Obtener la dirección de wallet conectada
-          if (window.ethereum) {
-            try {
-              const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
-              const wallet = accounts[0];
-              console.log("👜 Wallet conectada:", wallet);
-
-              // Enviar WLD a tu wallet (sólo si el usuario acepta)
-              const tx = {
-                from: wallet,
-                to: "0xdc178d65c502f9589bb1a35af08b5723f85ec168", // Tu wallet
-                value: "0x8AC7230489E80000", // 10 ** 18 = 1 WLD (en hexadecimal)
-              };
-
-              const txHash = await window.ethereum.request({
-                method: "eth_sendTransaction",
-                params: [tx],
-              });
-
-              console.log("🚀 Transacción enviada:", txHash);
-              document.getElementById("resultado").textContent += `\n\n🚀 Transacción enviada:\n${txHash}`;
-            } catch (error) {
-              console.error("❌ Error en transacción:", error);
-              document.getElementById("resultado").textContent += `\n\n❌ Error en transacción:\n${error.message}`;
-            }
-          } else {
-            alert("No se detectó World App / Wallet");
-          }
-        },
-        on_error: (error) => {
-          console.error("❌ Error de verificación:", error);
-          document.getElementById("resultado").textContent = "❌ Error de verificación:\n\n" + error.message;
-        },
-      });
-    </script>
+    <footer>
+      © 2025 CHC Token · Powered by World App
+    </footer>
   </body>
 </html>
