@@ -1,90 +1,80 @@
 <!DOCTYPE html>
 <html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Token CHC | Charly Human Coin</title>
-    <style>
-      body {
-        margin: 0;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
-        color: #fff;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        text-align: center;
-        padding: 40px 20px;
+<head>
+  <meta charset="UTF-8">
+  <title>Swap CHC ↔ WLD</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="https://unpkg.com/@holdstation/zkstarter-sdk@latest/dist/holdstation-sdk.min.js"></script>
+</head>
+<body style="font-family: sans-serif; padding: 20px;">
+  <h2>Swap CHC ↔ WLD</h2>
+
+  <label>Monto en CHC:</label><br>
+  <input id="amount" type="number" placeholder="Cantidad a cambiar" /><br><br>
+
+  <button onclick="doSwap()">Hacer Swap</button>
+
+  <p id="status"></p>
+
+  <script>
+    const CHC = "0xde8239aEb9730D74548D65DD2fD3Ce3F42517395"; // Tu token
+    const WLD = "0x4300000000000000000000000000000000000004"; // WLD en World Chain
+    const RPC = "https://rpc.worldchain.foundation";
+
+    let signer;
+
+    async function connectWallet() {
+      if (window.ethereum) {
+        await window.ethereum.request({ method: 'eth_requestAccounts' });
+        const provider = new ethers.providers.Web3Provider(window.ethereum);
+        signer = provider.getSigner();
+        return signer;
+      } else {
+        alert("Instala MetaMask o World App con navegador compatible.");
+        throw new Error("Wallet no detectada");
       }
+    }
 
-      header {
-        margin-bottom: 40px;
+    async function doSwap() {
+      document.getElementById('status').innerText = "Conectando wallet...";
+      try {
+        await connectWallet();
+        const sdk = new HoldstationSDK.HoldstationSwap({
+          signer,
+          rpcUrl: RPC,
+          chainId: 184, // World Chain
+        });
+
+        const amountIn = document.getElementById("amount").value;
+        const amount = ethers.utils.parseUnits(amountIn, 18);
+
+        document.getElementById('status').innerText = "Buscando mejor ruta...";
+
+        const route = await sdk.getBestRoute({
+          amountIn: amount.toString(),
+          tokenIn: CHC,
+          tokenOut: WLD
+        });
+
+        if (!route || !route.tx) {
+          document.getElementById('status').innerText = "No se encontró ruta de swap.";
+          return;
+        }
+
+        document.getElementById('status').innerText = "Haciendo swap...";
+
+        const tx = await signer.sendTransaction(route.tx);
+        await tx.wait();
+
+        document.getElementById('status').innerText = "Swap exitoso. TX: " + tx.hash;
+      } catch (e) {
+        console.error(e);
+        document.getElementById('status').innerText = "Error: " + e.message;
       }
+    }
+  </script>
 
-      h1 {
-        font-size: 2.5em;
-        margin-bottom: 10px;
-        color: #00eaff;
-      }
-
-      p {
-        font-size: 1.2em;
-        max-width: 600px;
-        margin: auto;
-        margin-bottom: 30px;
-      }
-
-      .value-box {
-        background-color: #ffffff22;
-        padding: 20px;
-        border-radius: 15px;
-        box-shadow: 0 0 15px #00eaff88;
-        margin-bottom: 40px;
-      }
-
-      .btn-buy {
-        background-color: #00eaff;
-        color: #000;
-        padding: 15px 30px;
-        font-size: 1.2em;
-        border: none;
-        border-radius: 10px;
-        cursor: pointer;
-        text-decoration: none;
-        transition: background 0.3s ease;
-      }
-
-      .btn-buy:hover {
-        background-color: #00c2d1;
-      }
-
-      footer {
-        margin-top: 60px;
-        font-size: 0.9em;
-        opacity: 0.7;
-      }
-    </style>
-  </head>
-  <body>
-    <header>
-      <h1>CHC - Charly Human Coin</h1>
-      <p>El token que impulsa la solidaridad, la tecnología y la libertad financiera. ¡Forma parte del cambio!</p>
-    </header>
-
-    <div class="value-box">
-      <h2>Valor actual estimado</h2>
-      <p><strong>1 WLD = 1,000 CHC</strong></p>
-    </div>
-
-    <a
-      class="btn-buy"
-      href="https://world.org/zh-tw/ecosystem/app_15daccf5b7d4ec9b7dbba044a8fdeab5"
-      target="_blank"
-      >Comprar CHC ahora</a
-    >
-
-    <footer>
-      © 2025 CHC Token · Powered by World App
-    </footer>
-  </body>
+  <!-- Agregar ethers.js -->
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+</body>
 </html>
