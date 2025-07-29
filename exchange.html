@@ -76,5 +76,26 @@
 
   <!-- Agregar ethers.js -->
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+  <script src="https://cdn.worldcoin.org/app/v1.0/sdk.js"></script>
+<div id="world-id-container"></div>
+<script>
+  window.worldID.init({
+    action_id: "app_7686f9027d3e3c0b53d987a3caf1e111", // Tu CLIENT_ID
+    signal: "chc-swap-access",
+    enable_telemetry: true,
+    app_name: "CHC Exchange",
+    theme: "light",
+    container_id: "world-id-container",
+    on_success: async (proof) => {
+      console.log("✅ Usuario autenticado con World App");
+      // Puedes activar aquí el botón de swap
+      document.getElementById('swap-section').style.display = 'block';
+    },
+    on_error: (err) => {
+      console.error("❌ Error al autenticar", err);
+    }
+  });
+</script>
+
 </body>
 </html>
