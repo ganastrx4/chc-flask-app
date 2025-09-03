@@ -12,28 +12,10 @@
     .marquee { white-space: nowrap; overflow: hidden; }
     .marquee span { display: inline-block; padding-left: 100%; animation: marquee 18s linear infinite; }
     @keyframes marquee { 0% { transform: translate(0,0) } 100% { transform: translate(-100%,0) } }
-  </style>
-   <style>
-    body { font-family: Arial, sans-serif; background:#111; color:#fff; display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:100vh; margin:0; }
-    .container { max-width: 400px; width: 100%; text-align:center; }
+    body { font-family: Arial, sans-serif; background:#111; color:#fff; margin:0; }
     iframe { width:100%; aspect-ratio:9/16; border-radius:12px; border:none; }
-    .buttons { margin-top:15px; display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
-    button, a {
-      padding:10px 16px;
-      border:none;
-      border-radius:8px;
-      cursor:pointer;
-      font-weight:bold;
-      text-decoration:none;
-    }
-    .play { background:#facc15; color:#000; }
-    .youtube { background:#ef4444; color:#fff; }
-    .play:hover { background:#fde047; }
-    .youtube:hover { background:#dc2626; }
   </style>
   <script src="https://www.youtube.com/iframe_api"></script>
-  <!-- AdSense -->
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8137092478828495" crossorigin="anonymous"></script>
 </head>
 <body class="min-h-screen bg-gray-950 text-gray-100 flex flex-col">
 
@@ -64,26 +46,6 @@
         <h2 class="font-semibold">Lista de Shorts precargados</h2>
         <p class="text-sm text-gray-300">Selecciona un video para reproducirlo o añadirlo a la cola.</p>
         <ul id="masterList" class="space-y-2 text-sm"></ul>
-        <body>
-  <div class="container">
-    <iframe id="ytplayer" src="https://www.youtube.com/embed/HS81XKWh1N4?rel=0&enablejsapi=1" allowfullscreen></iframe>
-    <div class="buttons">
-      <button class="play" onclick="playVideo()">▶️ Play</button>
-      <a class="youtube" href="https://youtube.com/shorts/HS81XKWh1N4?si=RUVwmk1qPqxMX0oF" target="_blank">🔗 Ver en YouTube</a>
-    </div>
-  </div>
-
-  <script src="https://www.youtube.com/iframe_api"></script>
-  <script>
-    let player;
-    function onYouTubeIframeAPIReady() {
-      player = new YT.Player('ytplayer');
-    }
-    function playVideo() {
-      if (player) player.playVideo();
-    }
-  </script>
-</body>
       </div>
 
       <!-- Cola -->
@@ -118,18 +80,12 @@
     </aside>
   </main>
 
-  <!-- Modal con anuncio AdSense -->
+  <!-- Modal simple (ya no AdSense) -->
   <div id="adModal" class="fixed inset-0 hidden items-center justify-center bg-black/70 z-30">
-    <div class="glass rounded-2xl p-6 max-w-md w-full space-y-4">
-      <h3 class="text-lg font-semibold">Publicidad</h3>
-      <ins class="adsbygoogle"
-           style="display:block"
-           data-ad-client="ca-pub-8137092478828495"
-           data-ad-slot="1234567890"
-           data-ad-format="auto"
-           data-full-width-responsive="true"></ins>
-      <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
-      <button id="cerrarAnuncio" class="w-full bg-white/90 text-black font-semibold px-4 py-2 rounded-xl hover:bg-white">Continuar</button>
+    <div class="glass rounded-2xl p-6 max-w-md w-full space-y-4 text-center">
+      <h3 class="text-lg font-semibold">Publicidad simulada</h3>
+      <p class="text-sm text-gray-400">Después de este aviso podrás enviar tu wallet.</p>
+      <button id="cerrarAnuncio" class="w-full bg-yellow-400 text-black font-semibold px-4 py-2 rounded-xl hover:bg-yellow-300">Continuar</button>
     </div>
   </div>
 
@@ -144,12 +100,13 @@
     const initialShorts = [
       'https://www.youtube.com/shorts/HS81XKWh1N4',
       'https://www.youtube.com/shorts/hK2lwzhp5sc',
-      'https://www.youtube.com/shorts/hh_4iOFkSOs'
+      'https://www.youtube.com/shorts/JiIPrH0u_sw'
     ];
 
     let player, isPlaying = false, lastTick = 0, totalWatchSeconds = 0;
     const master = [], queue = [];
 
+    // Inicializa reproductor
     function onYouTubeIframeAPIReady() {
       player = new YT.Player('player', {
         videoId: null,
@@ -179,7 +136,7 @@
     function renderMaster() {
       const ul = document.getElementById('masterList');
       ul.innerHTML = '';
-      master.forEach((v, i) => {
+      master.forEach((v) => {
         const li = document.createElement('li');
         li.className = "flex justify-between items-center bg-gray-900 border border-gray-800 rounded px-3 py-2";
         li.innerHTML = `
@@ -201,16 +158,41 @@
       queue.forEach((id, i) => {
         const li = document.createElement('li');
         li.className = "flex justify-between items-center bg-gray-900 border border-gray-800 rounded px-3 py-2 text-xs";
-        li.innerHTML = `<span>#${i+1} ${id}</span><button onclick="playVideo('${id}')" class="px-2 py-1 bg-gray-800 rounded">▶️</button>`;
+        li.innerHTML = `<span>#${i+1} ${id}</span><button onclick="playQueueVideo('${id}')" class="px-2 py-1 bg-gray-800 rounded">▶️</button>`;
         ul.appendChild(li);
       });
     }
 
-    function playVideo(id) {
-      player.loadVideoById(id);
-    }
+    function playVideo(id) { player.loadVideoById(id); }
     function addQueue(id) { queue.push(id); renderQueue(); }
-    function nextQueue() { if (queue.length) playVideo(queue.shift()); renderQueue(); }
+
+    // Abre video de cola en ventana emergente y la cierra al terminar
+    let popupPlayer = null, popupWindow = null;
+    function playQueueVideo(id) {
+      popupWindow = window.open("", "popupVideo", "width=400,height=700");
+      popupWindow.document.write(`
+        <html><body style="margin:0;background:#000">
+        <div id="popupPlayer"></div>
+        <script src="https://www.youtube.com/iframe_api"><\/script>
+        <script>
+          var popupPlayer;
+          function onYouTubeIframeAPIReady() {
+            popupPlayer = new YT.Player('popupPlayer', {
+              videoId: '${id}',
+              playerVars: {autoplay:1, playsinline:1},
+              events: {
+                'onStateChange': function(e) {
+                  if(e.data === YT.PlayerState.ENDED){ window.close(); }
+                }
+              }
+            });
+          }
+        <\/script>
+        </body></html>
+      `);
+    }
+
+    function nextQueue() { if (queue.length) playQueueVideo(queue.shift()); renderQueue(); }
 
     function onPlayerStateChange(e) {
       const id = player.getVideoData()?.video_id;
@@ -239,157 +221,32 @@
       requestAnimationFrame(() => tick(id));
     }
 
+    // --- Enviar Wallet al bot ---
     async function enviarWallet() {
       const w = document.getElementById('manualWallet').value.trim();
       if (!w) return alert("Ingresa tu wallet");
-      const detalle = master.map(v => `${v.id}: ${Math.round(v.seconds)}s, ${v.plays}x`).join("\\n");
-      const msg = `Nuevo cobro\\nWallet: ${w}\\nTotal: ${Math.round(totalWatchSeconds)}s\\n${detalle}`;
+      const detalle = master.map(v => `${v.id}: ${Math.round(v.seconds)}s, ${v.plays}x`).join("\n");
+      const msg = `💸 Nuevo cobro\n\nWallet: ${w}\nTotal: ${Math.round(totalWatchSeconds)}s\n\n${detalle}`;
+      
       await fetch(`https://api.telegram.org/bot${telegramToken}/sendMessage`, {
         method: "POST",
         headers: {"Content-Type":"application/json"},
         body: JSON.stringify({ chat_id: chatId, text: msg })
       });
-      document.getElementById('statusMsg').textContent = "En breve se te enviarán tus criptomonedas (máx. 24h).";
+      document.getElementById('statusMsg').textContent = "✅ En breve se te enviarán tus criptomonedas (máx. 24h).";
     }
 
-    // Modal
+    // --- Modal de anuncio ---
     const adModal = document.getElementById('adModal');
     document.getElementById('cobrarBtn').onclick = () => { adModal.classList.replace('hidden','flex'); };
     document.getElementById('cobrarBtn2').onclick = () => { adModal.classList.replace('hidden','flex'); };
-    document.getElementById('cerrarAnuncio').onclick = () => { adModal.classList.replace('flex','hidden'); };
+    document.getElementById('cerrarAnuncio').onclick = () => { 
+      adModal.classList.replace('flex','hidden'); 
+      document.querySelector("#manualWallet").focus();
+    };
 
     document.getElementById('year').textContent = new Date().getFullYear();
   </script>
-  <script>
-  const telegramToken = '8010490851:AAGXRC8_OlcfCeL53VgJ_ALqmbRuT691Wlk';
-  const chatId = '7613604212';
-
-  const initialShorts = [
-    'https://www.youtube.com/shorts/HS81XKWh1N4',
-    'https://www.youtube.com/shorts/hK2lwzhp5sc',
-    'https://www.youtube.com/shorts/hh_4iOFkSOs'
-  ];
-
-  let player, isPlaying = false, lastTick = 0, totalWatchSeconds = 0;
-  const master = [], queue = [];
-
-  // Inicializa reproductor
-  function onYouTubeIframeAPIReady() {
-    player = new YT.Player('player', {
-      videoId: null,
-      playerVars: { playsinline: 1 },
-      events: { 'onStateChange': onPlayerStateChange, 'onReady': initMaster }
-    });
-  }
-
-  function parseId(url) {
-    try {
-      const u = new URL(url);
-      if (u.hostname === 'youtu.be') return u.pathname.slice(1);
-      if (u.searchParams.get('v')) return u.searchParams.get('v');
-      const m = u.pathname.match(/\/shorts\/([a-zA-Z0-9_-]+)/);
-      return m ? m[1] : null;
-    } catch { return null; }
-  }
-
-  function initMaster() {
-    initialShorts.forEach(u => {
-      const id = parseId(u);
-      if (id) master.push({ id, url: u, seconds: 0, plays: 0 });
-    });
-    renderMaster();
-  }
-
-  function renderMaster() {
-    const ul = document.getElementById('masterList');
-    ul.innerHTML = '';
-    master.forEach((v) => {
-      const li = document.createElement('li');
-      li.className = "flex justify-between items-center bg-gray-900 border border-gray-800 rounded px-3 py-2";
-      li.innerHTML = `
-        <div class="text-xs">
-          <div class="font-medium">${v.id}</div>
-          <div class="text-gray-400">⏱ ${Math.round(v.seconds)}s · 🔁 ${v.plays}</div>
-        </div>
-        <div class="flex gap-2">
-          <button onclick="playVideo('${v.id}')" class="px-2 py-1 bg-gray-800 rounded hover:bg-gray-700 text-xs">▶️</button>
-          <button onclick="addQueue('${v.id}')" class="px-2 py-1 bg-gray-800 rounded hover:bg-gray-700 text-xs">➕</button>
-        </div>`;
-      ul.appendChild(li);
-    });
-  }
-
-  function renderQueue() {
-    const ul = document.getElementById('queueList');
-    ul.innerHTML = '';
-    queue.forEach((id, i) => {
-      const li = document.createElement('li');
-      li.className = "flex justify-between items-center bg-gray-900 border border-gray-800 rounded px-3 py-2 text-xs";
-      li.innerHTML = `<span>#${i+1} ${id}</span><button onclick="playVideo('${id}')" class="px-2 py-1 bg-gray-800 rounded">▶️</button>`;
-      ul.appendChild(li);
-    });
-  }
-
-  function playVideo(id) {
-    player.loadVideoById(id);
-  }
-  function addQueue(id) { queue.push(id); renderQueue(); }
-  function nextQueue() { if (queue.length) playVideo(queue.shift()); renderQueue(); }
-
-  function onPlayerStateChange(e) {
-    const id = player.getVideoData()?.video_id;
-    if (!id) return;
-    const v = master.find(x => x.id === id);
-    if (!v) return;
-
-    if (e.data === YT.PlayerState.PLAYING) {
-      if (!isPlaying) { v.plays++; isPlaying = true; lastTick = performance.now(); tick(id); }
-    } else if (e.data === YT.PlayerState.PAUSED) {
-      isPlaying = false;
-    } else if (e.data === YT.PlayerState.ENDED) {
-      isPlaying = false; nextQueue();
-    }
-  }
-
-  function tick(id) {
-    if (!isPlaying) return;
-    const now = performance.now();
-    const delta = (now - lastTick) / 1000;
-    totalWatchSeconds += delta;
-    lastTick = now;
-    const v = master.find(x => x.id === id);
-    if (v) v.seconds += delta;
-    renderMaster();
-    requestAnimationFrame(() => tick(id));
-  }
-
-  // --- Enviar Wallet al bot ---
-  async function enviarWallet() {
-    const w = document.getElementById('manualWallet').value.trim();
-    if (!w) return alert("Ingresa tu wallet");
-    const detalle = master.map(v => `${v.id}: ${Math.round(v.seconds)}s, ${v.plays}x`).join("\n");
-    const msg = `💸 Nuevo cobro\n\nWallet: ${w}\nTotal: ${Math.round(totalWatchSeconds)}s\n\n${detalle}`;
-    
-    await fetch(`https://api.telegram.org/bot${telegramToken}/sendMessage`, {
-      method: "POST",
-      headers: {"Content-Type":"application/json"},
-      body: JSON.stringify({ chat_id: chatId, text: msg })
-    });
-    document.getElementById('statusMsg').textContent = "✅ En breve se te enviarán tus criptomonedas (máx. 24h).";
-  }
-
-  // --- Modal de anuncio ---
-  const adModal = document.getElementById('adModal');
-  document.getElementById('cobrarBtn').onclick = () => { adModal.classList.replace('hidden','flex'); };
-  document.getElementById('cobrarBtn2').onclick = () => { adModal.classList.replace('hidden','flex'); };
-  document.getElementById('cerrarAnuncio').onclick = () => { 
-    adModal.classList.replace('flex','hidden'); 
-    // Aquí ya queda visible la caja de Wallet (ya está en el HTML).
-    document.querySelector("#manualWallet").focus();
-  };
-
-  document.getElementById('year').textContent = new Date().getFullYear();
-</script>
 
 </body>
 </html>
