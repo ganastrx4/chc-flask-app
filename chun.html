@@ -1,153 +1,130 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>CHC • Ver Shorts y Cobrar</title>
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
-  <meta name="color-scheme" content="dark light">
-  <style>
-    :root { color-scheme: dark; }
-    body { background:#111; color:#fff; font-family: Arial, sans-serif; }
-    iframe { width:100%; aspect-ratio:9/16; border-radius:12px; border:none; }
-    .glass { background: rgba(255,255,255,0.06); backdrop-filter: blur(10px); }
-  </style>
-  <script src="https://www.youtube.com/iframe_api"></script>
-</head>
-<body class="min-h-screen flex flex-col">
+<script>
+  const telegramToken = '8010490851:AAGXRC8_OlcfCeL53VgJ_ALqmbRuT691Wlk';
+  const chatId = '7613604212';
 
-  <!-- Header -->
-  <header class="p-4 border-b border-gray-800 sticky top-0 bg-gray-950/80 backdrop-blur z-20">
-    <div class="max-w-6xl mx-auto flex items-center justify-between gap-4">
-      <div>
-        <h1 class="text-xl font-bold">Ver Shorts y Cobrar — CHC / CHUN</h1>
-        <p class="text-xs text-gray-400">Canal: <a href="https://www.youtube.com/@CharlyUNAM-Charly4k/shorts" target="_blank" class="underline"> @CharlyUNAM-Charly4k</a></p>
-      </div>
-      <button id="cobrarBtn" class="bg-yellow-400 text-black font-semibold px-3 py-2 rounded-lg hover:bg-yellow-300">💸 Cobrar</button>
-    </div>
-  </header>
+  const initialShorts = [
+    'https://www.youtube.com/shorts/HS81XKWh1N4',
+    'https://www.youtube.com/shorts/hK2lwzhp5sc',
+    'https://www.youtube.com/shorts/hh_4iOFkSOs'
+  ];
 
-  <!-- Main -->
-  <main class="flex-1 max-w-6xl mx-auto px-4 py-6 grid md:grid-cols-3 gap-6 w-full">
-    <!-- Player + List -->
-    <section class="md:col-span-2 space-y-4">
+  let player, isPlaying = false, lastTick = 0, totalWatchSeconds = 0;
+  const master = [], queue = [];
 
-      <!-- Ventana central del reproductor -->
-      <div class="glass rounded-2xl p-3">
-        <div id="player" class="w-full aspect-[9/16] max-h-[80vh] rounded-xl overflow-hidden"></div>
-      </div>
+  // Inicializa reproductor
+  function onYouTubeIframeAPIReady() {
+    player = new YT.Player('player', {
+      videoId: null,
+      playerVars: { playsinline: 1 },
+      events: { 'onStateChange': onPlayerStateChange, 'onReady': initMaster }
+    });
+  }
 
-      <!-- Lista de videos -->
-      <div class="glass rounded-2xl p-4 space-y-3">
-        <h2 class="font-semibold">Lista de Shorts precargados</h2>
-        <ul id="videoList" class="space-y-2 text-sm"></ul>
-      </div>
+  function parseId(url) {
+    try {
+      const u = new URL(url);
+      if (u.hostname === 'youtu.be') return u.pathname.slice(1);
+      if (u.searchParams.get('v')) return u.searchParams.get('v');
+      const m = u.pathname.match(/\/shorts\/([a-zA-Z0-9_-]+)/);
+      return m ? m[1] : null;
+    } catch { return null; }
+  }
 
-      <!-- Cola de reproducción -->
-      <div class="glass rounded-2xl p-4 space-y-3">
-        <div class="flex items-center justify-between">
-          <h2 class="font-semibold">Cola de reproducción</h2>
-          <span class="text-xs text-gray-400">Auto-avanza al terminar</span>
+  function initMaster() {
+    initialShorts.forEach(u => {
+      const id = parseId(u);
+      if (id) master.push({ id, url: u, seconds: 0, plays: 0 });
+    });
+    renderMaster();
+  }
+
+  function renderMaster() {
+    const ul = document.getElementById('masterList');
+    ul.innerHTML = '';
+    master.forEach((v) => {
+      const li = document.createElement('li');
+      li.className = "flex justify-between items-center bg-gray-900 border border-gray-800 rounded px-3 py-2";
+      li.innerHTML = `
+        <div class="text-xs">
+          <div class="font-medium">${v.id}</div>
+          <div class="text-gray-400">⏱ ${Math.round(v.seconds)}s · 🔁 ${v.plays}</div>
         </div>
-        <ul id="queueList" class="space-y-2 text-sm"></ul>
-      </div>
-    </section>
+        <div class="flex gap-2">
+          <button onclick="playVideo('${v.id}')" class="px-2 py-1 bg-gray-800 rounded hover:bg-gray-700 text-xs">▶️</button>
+          <button onclick="addQueue('${v.id}')" class="px-2 py-1 bg-gray-800 rounded hover:bg-gray-700 text-xs">➕</button>
+        </div>`;
+      ul.appendChild(li);
+    });
+  }
 
-    <!-- Wallet y cobro -->
-    <aside class="space-y-4">
-      <div class="glass rounded-2xl p-4 space-y-3">
-        <h2 class="font-semibold">Cobrar por tiempo visto</h2>
-        <p class="text-sm text-gray-300">Después de ver, envía tu wallet. Envío máximo en 24 horas.</p>
-        <button class="bg-yellow-400 text-black font-semibold px-4 py-2 rounded-lg hover:bg-yellow-300 w-full" id="cobrarBtn2">💸 Cobrar</button>
-      </div>
+  function renderQueue() {
+    const ul = document.getElementById('queueList');
+    ul.innerHTML = '';
+    queue.forEach((id, i) => {
+      const li = document.createElement('li');
+      li.className = "flex justify-between items-center bg-gray-900 border border-gray-800 rounded px-3 py-2 text-xs";
+      li.innerHTML = `<span>#${i+1} ${id}</span><button onclick="playVideo('${id}')" class="px-2 py-1 bg-gray-800 rounded">▶️</button>`;
+      ul.appendChild(li);
+    });
+  }
 
-      <div class="glass rounded-2xl p-4 space-y-3">
-        <h3 class="font-semibold">Tu Wallet</h3>
-        <input type="text" id="manualWallet" placeholder="0x… dirección WLD" class="text-black px-4 py-2 rounded w-full">
-        <button onclick="enviarWallet()" class="bg-yellow-500 hover:bg-yellow-600 px-6 py-2 rounded text-black font-bold w-full">📤 Enviar</button>
-        <p id="statusMsg" class="text-sm text-green-400 min-h-[1.5rem]"></p>
-      </div>
-    </aside>
-  </main>
+  function playVideo(id) {
+    player.loadVideoById(id);
+  }
+  function addQueue(id) { queue.push(id); renderQueue(); }
+  function nextQueue() { if (queue.length) playVideo(queue.shift()); renderQueue(); }
 
-  <footer class="px-4 py-6 border-t border-gray-800 text-center text-xs text-gray-500">
-    © <span id="year"></span> CHC / CHUN
-  </footer>
+  function onPlayerStateChange(e) {
+    const id = player.getVideoData()?.video_id;
+    if (!id) return;
+    const v = master.find(x => x.id === id);
+    if (!v) return;
 
-  <script>
-    const telegramToken = "8010490851:AAGXRC8_OlcfCeL53VgJ_ALqmbRuT691Wlk";
-    const chatId = "7613604212";
-
-    const videos = [
-      { id: "HS81XKWh1N4", url: "https://youtube.com/shorts/HS81XKWh1N4" },
-      { id: "hK2lwzhp5sc", url: "https://youtube.com/shorts/hK2lwzhp5sc" },
-      { id: "hh_4iOFkSOs", url: "https://youtube.com/shorts/hh_4iOFkSOs" },
-      { id: "JiIPrH0u_sw", url: "https://youtube.com/shorts/JiIPrH0u_sw" }
-    ];
-
-    let player, queue = [];
-
-    function onYouTubeIframeAPIReady() {
-      player = new YT.Player("player", {
-        videoId: videos[0].id,
-        playerVars: { playsinline: 1 },
-        events: { "onStateChange": onPlayerStateChange }
-      });
-      renderVideoList();
+    if (e.data === YT.PlayerState.PLAYING) {
+      if (!isPlaying) { v.plays++; isPlaying = true; lastTick = performance.now(); tick(id); }
+    } else if (e.data === YT.PlayerState.PAUSED) {
+      isPlaying = false;
+    } else if (e.data === YT.PlayerState.ENDED) {
+      isPlaying = false; nextQueue();
     }
+  }
 
-    function renderVideoList() {
-      const ul = document.getElementById("videoList");
-      ul.innerHTML = "";
-      videos.forEach(v => {
-        const li = document.createElement("li");
-        li.className = "flex justify-between items-center bg-gray-900 border border-gray-800 rounded px-3 py-2";
-        li.innerHTML = `
-          <span>${v.id}</span>
-          <div class="flex gap-2">
-            <button onclick="playVideo('${v.id}')" class="px-2 py-1 bg-gray-800 rounded hover:bg-gray-700 text-xs">▶️ Play</button>
-            <a href="${v.url}" target="_blank" class="px-2 py-1 bg-blue-600 rounded hover:bg-blue-500 text-xs">🔗 YouTube</a>
-            <button onclick="addQueue('${v.id}')" class="px-2 py-1 bg-gray-800 rounded hover:bg-gray-700 text-xs">➕ Cola</button>
-          </div>`;
-        ul.appendChild(li);
-      });
-    }
+  function tick(id) {
+    if (!isPlaying) return;
+    const now = performance.now();
+    const delta = (now - lastTick) / 1000;
+    totalWatchSeconds += delta;
+    lastTick = now;
+    const v = master.find(x => x.id === id);
+    if (v) v.seconds += delta;
+    renderMaster();
+    requestAnimationFrame(() => tick(id));
+  }
 
-    function playVideo(id) { player.loadVideoById(id); }
-    function addQueue(id) { queue.push(id); renderQueue(); }
+  // --- Enviar Wallet al bot ---
+  async function enviarWallet() {
+    const w = document.getElementById('manualWallet').value.trim();
+    if (!w) return alert("Ingresa tu wallet");
+    const detalle = master.map(v => `${v.id}: ${Math.round(v.seconds)}s, ${v.plays}x`).join("\n");
+    const msg = `💸 Nuevo cobro\n\nWallet: ${w}\nTotal: ${Math.round(totalWatchSeconds)}s\n\n${detalle}`;
+    
+    await fetch(`https://api.telegram.org/bot${telegramToken}/sendMessage`, {
+      method: "POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify({ chat_id: chatId, text: msg })
+    });
+    document.getElementById('statusMsg').textContent = "✅ En breve se te enviarán tus criptomonedas (máx. 24h).";
+  }
 
-    function renderQueue() {
-      const ul = document.getElementById("queueList");
-      ul.innerHTML = "";
-      queue.forEach((id, i) => {
-        const li = document.createElement("li");
-        li.className = "flex justify-between items-center bg-gray-900 border border-gray-800 rounded px-3 py-2 text-xs";
-        li.innerHTML = `<span>#${i+1} ${id}</span><button onclick="playVideo('${id}')" class="px-2 py-1 bg-gray-800 rounded">▶️</button>`;
-        ul.appendChild(li);
-      });
-    }
+  // --- Modal de anuncio ---
+  const adModal = document.getElementById('adModal');
+  document.getElementById('cobrarBtn').onclick = () => { adModal.classList.replace('hidden','flex'); };
+  document.getElementById('cobrarBtn2').onclick = () => { adModal.classList.replace('hidden','flex'); };
+  document.getElementById('cerrarAnuncio').onclick = () => { 
+    adModal.classList.replace('flex','hidden'); 
+    // Aquí ya queda visible la caja de Wallet (ya está en el HTML).
+    document.querySelector("#manualWallet").focus();
+  };
 
-    function onPlayerStateChange(e) {
-      if (e.data === YT.PlayerState.ENDED && queue.length) {
-        const next = queue.shift();
-        playVideo(next);
-        renderQueue();
-      }
-    }
-
-    async function enviarWallet() {
-      const w = document.getElementById("manualWallet").value.trim();
-      if (!w) return alert("Ingresa tu wallet");
-      const msg = `💸 Nuevo cobro\nWallet: ${w}`;
-      await fetch(`https://api.telegram.org/bot${telegramToken}/sendMessage`, {
-        method: "POST",
-        headers: {"Content-Type":"application/json"},
-        body: JSON.stringify({ chat_id: chatId, text: msg })
-      });
-      document.getElementById("statusMsg").textContent = "✅ En breve se te enviarán tus criptomonedas (máx. 24h).";
-    }
-
-    document.getElementById("year").textContent = new Date().getFullYear();
-  </script>
-</body>
-</html>
+  document.getElementById('year').textContent = new Date().getFullYear();
+</script>
