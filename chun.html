@@ -2,130 +2,225 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <title>Reproductor de Shorts - CHC/CHUN</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CHC • Ver Shorts y Cobrar</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+  <meta name="color-scheme" content="dark light">
+  <style>
+    :root { color-scheme: dark; }
+    .glass { background: rgba(255,255,255,0.06); backdrop-filter: blur(10px); }
+    .marquee { white-space: nowrap; overflow: hidden; }
+    .marquee span { display: inline-block; padding-left: 100%; animation: marquee 18s linear infinite; }
+    @keyframes marquee { 0% { transform: translate(0,0) } 100% { transform: translate(-100%,0) } }
+  </style>
   <script src="https://www.youtube.com/iframe_api"></script>
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8137092478828495"
-     crossorigin="anonymous"></script>
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <!-- AdSense -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8137092478828495" crossorigin="anonymous"></script>
 </head>
-<body class="bg-gray-100 text-gray-900">
+<body class="min-h-screen bg-gray-950 text-gray-100 flex flex-col">
 
-  <div class="flex flex-col md:flex-row h-screen max-w-screen mx-auto">
-    <!-- Panel del reproductor -->
-    <div class="flex-1 flex flex-col items-center justify-start p-2">
-      <div class="w-full max-w-md">
-        <div id="player" class="w-full aspect-video rounded-2xl shadow-md bg-black"></div>
+  <!-- Header -->
+  <header class="p-4 md:p-6 border-b border-gray-800 sticky top-0 bg-gray-950/80 backdrop-blur z-20">
+    <div class="max-w-6xl mx-auto flex items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-2xl bg-yellow-400 flex items-center justify-center text-black font-extrabold">CH</div>
+        <div>
+          <h1 class="text-lg md:text-2xl font-bold">Ver Shorts y Cobrar — CHC / CHUN</h1>
+          <p class="text-xs md:text-sm text-gray-400">Canal: <a class="underline hover:text-yellow-400" target="_blank" href="https://www.youtube.com/@CharlyUNAM-Charly4k/shorts">@CharlyUNAM-Charly4k</a></p>
+        </div>
       </div>
-
-      <!-- Anuncio AdSense -->
-      <div class="w-full max-w-md my-4">
-        <ins class="adsbygoogle"
-             style="display:block"
-             data-ad-client="ca-pub-8137092478828495"
-             data-ad-slot="1234567890"
-             data-ad-format="auto"
-             data-full-width-responsive="true"></ins>
-        <script>
-          (adsbygoogle = window.adsbygoogle || []).push({});
-        </script>
-      </div>
-
-      <!-- Botón de enviar -->
-      <div class="mt-2 w-full max-w-md">
-        <input id="wallet" type="text" placeholder="Tu wallet CHC/CHUN"
-               class="w-full p-2 rounded-lg border border-gray-300 focus:ring focus:ring-blue-400">
-        <button onclick="enviarWallet()"
-                class="mt-2 w-full p-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 shadow">
-          Enviar
-        </button>
-      </div>
+      <button id="cobrarBtn" class="bg-yellow-400 text-black font-semibold px-3 md:px-4 py-2 rounded-xl hover:bg-yellow-300 transition text-sm md:text-base">💸 Cobrar</button>
     </div>
+  </header>
 
-    <!-- Panel de lista -->
-    <div class="w-full md:w-1/3 p-2 bg-white shadow-inner overflow-y-auto">
-      <h2 class="text-lg font-bold mb-2">Lista de Videos</h2>
-      <div id="lista-videos" class="space-y-2"></div>
+  <main class="flex-1 max-w-6xl mx-auto px-4 py-6 grid md:grid-cols-3 gap-6 w-full">
+    <!-- Player + Cola -->
+    <section class="md:col-span-2 space-y-4">
+      <!-- Reproductor -->
+      <div class="glass rounded-2xl p-3">
+        <div id="player" class="w-full aspect-[9/16] max-h-[80vh] rounded-xl overflow-hidden"></div>
+      </div>
+
+      <!-- Lista de Shorts -->
+      <div class="glass rounded-2xl p-4 space-y-3">
+        <h2 class="font-semibold">Lista de Shorts precargados</h2>
+        <p class="text-sm text-gray-300">Selecciona un video para reproducirlo o añadirlo a la cola.</p>
+        <ul id="masterList" class="space-y-2 text-sm"></ul>
+      </div>
+
+      <!-- Cola -->
+      <div class="glass rounded-2xl p-4 space-y-3">
+        <div class="flex items-center justify-between">
+          <h2 class="font-semibold">Cola de reproducción</h2>
+          <div class="text-xs text-gray-400">Auto-avanza al terminar</div>
+        </div>
+        <ul id="queueList" class="space-y-2 text-sm"></ul>
+      </div>
+
+      <div class="marquee text-xs text-gray-500"><span>Gracias por apoyar el ecosistema CHC/CHUN ✨</span></div>
+    </section>
+
+    <!-- Cobro / Wallet -->
+    <aside class="space-y-4">
+      <div class="glass rounded-2xl p-4 space-y-3">
+        <h2 class="font-semibold">Cobrar por tiempo visto</h2>
+        <p class="text-sm text-gray-300">Después del anuncio podrás enviar tu wallet. Envío máximo en 24 horas.</p>
+        <button class="bg-yellow-400 text-black font-semibold px-4 py-2 rounded-lg hover:bg-yellow-300 w-full" id="cobrarBtn2">💸 Cobrar</button>
+      </div>
+
+      <div class="glass rounded-2xl p-4 space-y-3">
+        <h3 class="font-semibold">Tu Wallet</h3>
+        <div class="space-y-2">
+          <a target="_blank" href="https://worldcoin.org/mini-app?app_id=app_a4f7f3e62c1de0b9490a5260cb390b56" class="block text-center px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 hover:bg-gray-700 text-sm">Abrir UNO y copiar</a>
+          <input type="text" id="manualWallet" placeholder="0x… dirección WLD" class="text-black px-4 py-2 rounded w-full">
+          <button onclick="enviarWallet()" class="bg-yellow-500 hover:bg-yellow-600 px-6 py-2 rounded text-black font-bold w-full">📤 Enviar</button>
+        </div>
+        <p id="statusMsg" class="text-sm text-green-400 min-h-[1.5rem]"></p>
+      </div>
+    </aside>
+  </main>
+
+  <!-- Modal con anuncio AdSense -->
+  <div id="adModal" class="fixed inset-0 hidden items-center justify-center bg-black/70 z-30">
+    <div class="glass rounded-2xl p-6 max-w-md w-full space-y-4">
+      <h3 class="text-lg font-semibold">Publicidad</h3>
+      <ins class="adsbygoogle"
+           style="display:block"
+           data-ad-client="ca-pub-8137092478828495"
+           data-ad-slot="1234567890"
+           data-ad-format="auto"
+           data-full-width-responsive="true"></ins>
+      <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+      <button id="cerrarAnuncio" class="w-full bg-white/90 text-black font-semibold px-4 py-2 rounded-xl hover:bg-white">Continuar</button>
     </div>
   </div>
 
+  <footer class="px-4 py-6 border-t border-gray-800 text-center text-xs text-gray-500">
+    © <span id="year"></span> CHC / CHUN
+  </footer>
+
   <script>
-    let player;
-    let listaMaestra = [
-      { id: "jhlF5N3KbUg", titulo: "Short 1", segundos: 0, reproducciones: 0 },
-      { id: "c6gi6IP6ay4", titulo: "Short 2", segundos: 0, reproducciones: 0 },
-      { id: "tVj0ZTS4WF4", titulo: "Short 3", segundos: 0, reproducciones: 0 }
+    const telegramToken = '8010490851:AAGXRC8_OlcfCeL53VgJ_ALqmbRuT691Wlk';
+    const chatId = '7613604212';
+
+    const initialShorts = [
+      'https://www.youtube.com/shorts/HS81XKWh1N4',
+      'https://www.youtube.com/shorts/hK2lwzhp5sc',
+      'https://www.youtube.com/shorts/hh_4iOFkSOs'
     ];
-    let videoActual = null;
-    let intervalo = null;
+
+    let player, isPlaying = false, lastTick = 0, totalWatchSeconds = 0;
+    const master = [], queue = [];
 
     function onYouTubeIframeAPIReady() {
-      player = new YT.Player("player", {
-        height: "360",
-        width: "640",
-        videoId: listaMaestra[0].id,
-        events: { "onStateChange": onPlayerStateChange }
+      player = new YT.Player('player', {
+        videoId: null,
+        playerVars: { playsinline: 1 },
+        events: { 'onStateChange': onPlayerStateChange, 'onReady': initMaster }
       });
-      renderLista();
     }
 
-    function renderLista() {
-      const cont = document.getElementById("lista-videos");
-      cont.innerHTML = "";
-      listaMaestra.forEach((v, idx) => {
-        cont.innerHTML += `
-          <div class="p-2 border rounded-lg flex flex-col bg-gray-50">
-            <span class="font-semibold">${v.titulo}</span>
-            <span class="text-sm text-gray-600">Visto: ${v.segundos}s | Reproducciones: ${v.reproducciones}</span>
-            <div class="mt-1 flex space-x-2">
-              <button onclick="reproducir(${idx})" class="px-2 py-1 bg-green-500 text-white rounded">Reproducir</button>
-              <button onclick="agregarACola(${idx})" class="px-2 py-1 bg-yellow-500 text-white rounded">Agregar a cola</button>
-            </div>
+    function parseId(url) {
+      try {
+        const u = new URL(url);
+        if (u.hostname === 'youtu.be') return u.pathname.slice(1);
+        if (u.searchParams.get('v')) return u.searchParams.get('v');
+        const m = u.pathname.match(/\/shorts\/([a-zA-Z0-9_-]+)/);
+        return m ? m[1] : null;
+      } catch { return null; }
+    }
+
+    function initMaster() {
+      initialShorts.forEach(u => {
+        const id = parseId(u);
+        if (id) master.push({ id, url: u, seconds: 0, plays: 0 });
+      });
+      renderMaster();
+    }
+
+    function renderMaster() {
+      const ul = document.getElementById('masterList');
+      ul.innerHTML = '';
+      master.forEach((v, i) => {
+        const li = document.createElement('li');
+        li.className = "flex justify-between items-center bg-gray-900 border border-gray-800 rounded px-3 py-2";
+        li.innerHTML = `
+          <div class="text-xs">
+            <div class="font-medium">${v.id}</div>
+            <div class="text-gray-400">⏱ ${Math.round(v.seconds)}s · 🔁 ${v.plays}</div>
+          </div>
+          <div class="flex gap-2">
+            <button onclick="playVideo('${v.id}')" class="px-2 py-1 bg-gray-800 rounded hover:bg-gray-700 text-xs">▶️</button>
+            <button onclick="addQueue('${v.id}')" class="px-2 py-1 bg-gray-800 rounded hover:bg-gray-700 text-xs">➕</button>
           </div>`;
+        ul.appendChild(li);
       });
     }
 
-    function reproducir(idx) {
-      videoActual = idx;
-      player.loadVideoById(listaMaestra[idx].id);
+    function renderQueue() {
+      const ul = document.getElementById('queueList');
+      ul.innerHTML = '';
+      queue.forEach((id, i) => {
+        const li = document.createElement('li');
+        li.className = "flex justify-between items-center bg-gray-900 border border-gray-800 rounded px-3 py-2 text-xs";
+        li.innerHTML = `<span>#${i+1} ${id}</span><button onclick="playVideo('${id}')" class="px-2 py-1 bg-gray-800 rounded">▶️</button>`;
+        ul.appendChild(li);
+      });
     }
 
-    function agregarACola(idx) {
-      alert("El video " + listaMaestra[idx].titulo + " se agregó a la cola (falta implementar cola).");
+    function playVideo(id) {
+      player.loadVideoById(id);
     }
+    function addQueue(id) { queue.push(id); renderQueue(); }
+    function nextQueue() { if (queue.length) playVideo(queue.shift()); renderQueue(); }
 
-    function onPlayerStateChange(event) {
-      if (event.data === YT.PlayerState.PLAYING) {
-        if (videoActual !== null) listaMaestra[videoActual].reproducciones++;
-        if (!intervalo) {
-          intervalo = setInterval(() => {
-            if (videoActual !== null) {
-              listaMaestra[videoActual].segundos++;
-              renderLista();
-            }
-          }, 1000);
-        }
-      } else {
-        clearInterval(intervalo);
-        intervalo = null;
+    function onPlayerStateChange(e) {
+      const id = player.getVideoData()?.video_id;
+      if (!id) return;
+      const v = master.find(x => x.id === id);
+      if (!v) return;
+
+      if (e.data === YT.PlayerState.PLAYING) {
+        if (!isPlaying) { v.plays++; isPlaying = true; lastTick = performance.now(); tick(id); }
+      } else if (e.data === YT.PlayerState.PAUSED) {
+        isPlaying = false;
+      } else if (e.data === YT.PlayerState.ENDED) {
+        isPlaying = false; nextQueue();
       }
     }
 
-    async function enviarWallet() {
-      const wallet = document.getElementById("wallet").value.trim();
-      if (!wallet) return alert("Ingresa tu wallet primero");
-      const total = listaMaestra.reduce((a, v) => a + v.segundos, 0);
-      const detalles = listaMaestra.map(v => `${v.titulo}: ${v.segundos}s (${v.reproducciones}x)`).join("\n");
-
-      const mensaje = `⏱ Tiempo total visto: ${total}s\n📺 Detalle:\n${detalles}\n💳 Wallet: ${wallet}`;
-      
-      await fetch(`https://api.telegram.org/bot${"8010490851:AAGXRC8_OlcfCeL53VgJ_ALqmbRuT691Wlk"}/sendMessage`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ chat_id: "7613604212", text: mensaje })
-      });
-      alert("Datos enviados correctamente ✅");
+    function tick(id) {
+      if (!isPlaying) return;
+      const now = performance.now();
+      const delta = (now - lastTick) / 1000;
+      totalWatchSeconds += delta;
+      lastTick = now;
+      const v = master.find(x => x.id === id);
+      if (v) v.seconds += delta;
+      renderMaster();
+      requestAnimationFrame(() => tick(id));
     }
+
+    async function enviarWallet() {
+      const w = document.getElementById('manualWallet').value.trim();
+      if (!w) return alert("Ingresa tu wallet");
+      const detalle = master.map(v => `${v.id}: ${Math.round(v.seconds)}s, ${v.plays}x`).join("\\n");
+      const msg = `Nuevo cobro\\nWallet: ${w}\\nTotal: ${Math.round(totalWatchSeconds)}s\\n${detalle}`;
+      await fetch(`https://api.telegram.org/bot${telegramToken}/sendMessage`, {
+        method: "POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({ chat_id: chatId, text: msg })
+      });
+      document.getElementById('statusMsg').textContent = "En breve se te enviarán tus criptomonedas (máx. 24h).";
+    }
+
+    // Modal
+    const adModal = document.getElementById('adModal');
+    document.getElementById('cobrarBtn').onclick = () => { adModal.classList.replace('hidden','flex'); };
+    document.getElementById('cobrarBtn2').onclick = () => { adModal.classList.replace('hidden','flex'); };
+    document.getElementById('cerrarAnuncio').onclick = () => { adModal.classList.replace('flex','hidden'); };
+
+    document.getElementById('year').textContent = new Date().getFullYear();
   </script>
 </body>
 </html>
