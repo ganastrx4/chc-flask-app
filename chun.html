@@ -13,6 +13,24 @@
     .marquee span { display: inline-block; padding-left: 100%; animation: marquee 18s linear infinite; }
     @keyframes marquee { 0% { transform: translate(0,0) } 100% { transform: translate(-100%,0) } }
   </style>
+   <style>
+    body { font-family: Arial, sans-serif; background:#111; color:#fff; display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:100vh; margin:0; }
+    .container { max-width: 400px; width: 100%; text-align:center; }
+    iframe { width:100%; aspect-ratio:9/16; border-radius:12px; border:none; }
+    .buttons { margin-top:15px; display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
+    button, a {
+      padding:10px 16px;
+      border:none;
+      border-radius:8px;
+      cursor:pointer;
+      font-weight:bold;
+      text-decoration:none;
+    }
+    .play { background:#facc15; color:#000; }
+    .youtube { background:#ef4444; color:#fff; }
+    .play:hover { background:#fde047; }
+    .youtube:hover { background:#dc2626; }
+  </style>
   <script src="https://www.youtube.com/iframe_api"></script>
   <!-- AdSense -->
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8137092478828495" crossorigin="anonymous"></script>
@@ -46,6 +64,26 @@
         <h2 class="font-semibold">Lista de Shorts precargados</h2>
         <p class="text-sm text-gray-300">Selecciona un video para reproducirlo o añadirlo a la cola.</p>
         <ul id="masterList" class="space-y-2 text-sm"></ul>
+        <body>
+  <div class="container">
+    <iframe id="ytplayer" src="https://www.youtube.com/embed/HS81XKWh1N4?rel=0&enablejsapi=1" allowfullscreen></iframe>
+    <div class="buttons">
+      <button class="play" onclick="playVideo()">▶️ Play</button>
+      <a class="youtube" href="https://youtube.com/shorts/HS81XKWh1N4?si=RUVwmk1qPqxMX0oF" target="_blank">🔗 Ver en YouTube</a>
+    </div>
+  </div>
+
+  <script src="https://www.youtube.com/iframe_api"></script>
+  <script>
+    let player;
+    function onYouTubeIframeAPIReady() {
+      player = new YT.Player('ytplayer');
+    }
+    function playVideo() {
+      if (player) player.playVideo();
+    }
+  </script>
+</body>
       </div>
 
       <!-- Cola -->
