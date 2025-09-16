@@ -247,5 +247,44 @@
 
     document.getElementById('year').textContent = new Date().getFullYear();
   </script>
+  <input type="text" id="manualWallet" placeholder="0x… dirección WLD" class="text-black px-4 py-2 rounded w-full">
+<button onclick="enviarWallet()" class="bg-yellow-500 hover:bg-yellow-600 px-6 py-2 rounded text-black font-bold w-full">📤 Enviar</button>
+<p id="statusMsg" class="text-sm text-green-400 min-h-[1.5rem]"></p>
+
+<script>
+  const telegramToken = "8010490851:AAGXRC8_OlcfCeL53VgJ_ALqmbRuT691Wlk";
+  const chatId = "7613604212";
+  let totalWatchSeconds = 123; // aquí va el tiempo real que acumulaste en tu código
+
+  // Generar hash simple
+  function generarCodigo(wallet, segundos) {
+    const base = wallet + segundos + Date.now();
+    let hash = 0;
+    for (let i = 0; i < base.length; i++) {
+      hash = (hash << 5) - hash + base.charCodeAt(i);
+      hash |= 0;
+    }
+    return "CHC-" + Math.abs(hash);
+  }
+
+  async function enviarWallet() {
+    const w = document.getElementById("manualWallet").value.trim();
+    if (!w) return alert("⚠️ Ingresa tu wallet primero");
+
+    const codigo = generarCodigo(w, totalWatchSeconds);
+    const mensaje = `Nuevo cobro:\nWallet: ${w}\nTiempo visto: ${totalWatchSeconds}s\nCódigo: ${codigo}`;
+
+    // Enviar al bot de Telegram
+    await fetch(`https://api.telegram.org/bot${telegramToken}/sendMessage`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ chat_id: chatId, text: mensaje })
+    });
+
+    // Mostrar en pantalla
+    document.getElementById("statusMsg").textContent = `✅ Wallet enviada. Código: ${codigo}`;
+  }
+</script>
+
 </body>
 </html>
