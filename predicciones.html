@@ -32,9 +32,15 @@
             margin-bottom: 10px;
             font-weight: bold;
         }
+        /* 🔥 Hace que el canvas se ajuste bien en móviles */
+        .chart-container {
+            position: relative;
+            width: 100%;
+            height: 60vh; /* Altura flexible según pantalla */
+        }
         canvas {
-            max-width: 100%;
-            margin-top: 20px;
+            width: 100% !important;
+            height: 100% !important;
         }
         .indicator-results {
             margin-top: 20px;
@@ -52,7 +58,9 @@
         <p>Precio actual: <span id="price">Cargando...</span> USDT</p>
 
         <h2 class="mt-4">📉 Gráfico de Movimientos Recientes</h2>
-        <canvas id="priceChart"></canvas>
+        <div class="chart-container">
+            <canvas id="priceChart"></canvas>
+        </div>
 
         <h2 class="mt-4">📈 Predicción de Precio</h2>
         <p>Seleccione un período para ver la tendencia del mercado:</p>
@@ -117,6 +125,7 @@
                     },
                     options: {
                         responsive: true,
+                        maintainAspectRatio: false, // 🔥 Permite que se adapte en móviles
                         scales: {
                             x: {
                                 title: {
